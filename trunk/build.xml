@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="mobile-media-share" default="war" basedir=".">
+	<property environment="env" />
+	<property name="gwt.sdk" location="${env.GWT_HOME}" />
+	<path id="project.class.path">
+		<pathelement location="war/WEB-INF/classes" />
+		<pathelement location="${gwt.sdk}/gwt-user.jar" />
+		<fileset dir="war/WEB-INF/lib" includes="**/*.jar" />
+	</path>
+	<target name="javac" description="Compile java source to bytecode">
+		<mkdir dir="war/WEB-INF/classes" />
+		<javac srcdir="src" includes="**" encoding="UTF-8" destdir="war/WEB-INF/classes" source="1.6" target="1.6" debug="true" debuglevel="lines,vars,source" includeantruntime="false">
+			<classpath refid="project.class.path" />
+		</javac>
+		<copy todir="war/WEB-INF/classes">
+			<fileset dir="src" excludes="**/*.java" />
+		</copy>
+	</target>
+	<target name="gwtc" depends="javac" description="GWT compile to JavaScript (production mode)">
+		<java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
+			<classpath>
+				<pathelement location="src" />
+				<path refid="project.class.path" />
+				<pathelement location="${gwt.sdk}/gwt-dev.jar" />
+				<pathelement location="${gwt.sdk}/validation-api-1.0.0.GA-sources.jar" />
+			</classpath>
+			<arg value="-strict" />
+			<arg line="-logLevel INFO" />
+			<arg line="-style DETAILED" />
+			<arg value="-draftCompile" /> <!-- do not optimize -->
+			<arg line="-localWorkers 8" /> <!-- use 8 cores for compiling -->
+			<arg value="gr.uoa.di.std08169.mobile.media.share.MobileMediaShare" />
+		</java>
+	</target>
+	<target name="war" depends="gwtc" description="Create a war file">
+		<zip destfile="${ant.project.name}.war" basedir="war" />
+	</target>
+	<target name="clean" description="Cleans this project">
+		<delete file="${ant.project.name}.war" failonerror="false" />
+		<delete dir="war/mobileMediaShare" failonerror="false" />
+		<delete dir="war/WEB-INF/classes" failonerror="false" />
+	</target>
+</project>
+
