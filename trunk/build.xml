@@ -31,7 +31,9 @@
 			<arg line="-style DETAILED" />
 			<arg value="-draftCompile" /> <!-- do not optimize -->
 			<arg line="-localWorkers 8" /> <!-- use 8 cores for compiling -->
-			<arg value="gr.uoa.di.std08169.mobile.media.share.MobileMediaShare" />
+			<!-- Poio module xreiazetai compile -->
+			<arg value="gr.uoa.di.std08169.mobile.media.share.Login" />
+			<arg value="gr.uoa.di.std08169.mobile.media.share.NewUser" />
 		</java>
 	</target>
 	<target name="war" depends="gwtc" description="Create a war file">
@@ -40,7 +42,8 @@
 	<target name="clean" description="Cleans this project">
 		<delete file="${ant.project.name}.war" failonerror="false" />
 		<delete dir="gwt-unitCache" failonerror="false" />
-		<delete dir="war/mobileMediaShare" failonerror="false" />
+		<delete dir="war/login" failonerror="false" />  <!-- to out tou module -->
+		<delete dir="war/newUser" failonerror="false" />  <!-- to out tou module -->
 		<delete dir="war/WEB-INF/classes" failonerror="false" />
 		<delete dir="war/WEB-INF/deploy" failonerror="false" />
 	</target>
