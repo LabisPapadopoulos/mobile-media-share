@@ -9,6 +9,7 @@
 	</path>
 	<target name="javac" description="Compile java source to bytecode">
 		<mkdir dir="war/WEB-INF/classes" />
+		<!-- 1o compile (javac) -->
 		<javac srcdir="src" includes="**" encoding="UTF-8" destdir="war/WEB-INF/classes" source="1.6" target="1.6" debug="true" debuglevel="lines,vars,source" includeantruntime="false">
 			<classpath refid="project.class.path" />
 		</javac>
@@ -17,6 +18,7 @@
 		</copy>
 	</target>
 	<target name="gwtc" depends="javac" description="GWT compile to JavaScript (production mode)">
+		<!-- 2o compile (gwt compiler) -->
 		<java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
 			<classpath>
 				<pathelement location="src" />
@@ -37,8 +39,10 @@
 	</target>
 	<target name="clean" description="Cleans this project">
 		<delete file="${ant.project.name}.war" failonerror="false" />
+		<delete dir="gwt-unitCache" failonerror="false" />
 		<delete dir="war/mobileMediaShare" failonerror="false" />
 		<delete dir="war/WEB-INF/classes" failonerror="false" />
+		<delete dir="war/WEB-INF/deploy" failonerror="false" />
 	</target>
 </project>
 
