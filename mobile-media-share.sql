@@ -21,8 +21,8 @@ DROP TABLE IF EXISTS Users;
 CREATE TABLE Users (
 	email VARCHAR(32) NOT NULL PRIMARY KEY,
 	password VARCHAR(32) NOT NULL,
-	photo VARCHAR(32),
-	name VARCHAR(32)
+	name VARCHAR(32),
+	photo VARCHAR(32)
 );
 
 -- Pinakas Fotografiwn, videos...
