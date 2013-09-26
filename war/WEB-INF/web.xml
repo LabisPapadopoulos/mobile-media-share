@@ -1,6 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5" xmlns="http://java.sun.com/xml/ns/javaee">
 	<display-name>Mobile Media Share</display-name>
+	<context-param> <!-- Gia to spring tis efarmoghs -->
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/applicationContext.xml</param-value>
+	</context-param>
+	<listener> 
+	<!-- Xekinaei to spring me vash to arxeio pou vrisketai stin metavlhth perivallontos contextConfigLocation-->
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	<!-- userService servlet pou einai tupou UserServiceImpl 
+	(to UserServiceImpl ulopoiei to UserService) -->
+	<servlet>
+		<servlet-name>userService</servlet-name>
+		<servlet-class>gr.uoa.di.std08169.mobile.media.share.server.UserServiceImpl</servlet-class>
+	</servlet>
+	<!-- Akouei stin dieuthinsh /userService -->
+	<servlet-mapping>
+		<servlet-name>userService</servlet-name>
+		<url-pattern>/userService</url-pattern>
+	</servlet-mapping>
 	<welcome-file-list>
 		<welcome-file>mobileMediaShare.html</welcome-file>
 	</welcome-file-list>
