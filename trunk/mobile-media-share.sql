@@ -20,7 +20,7 @@ DROP TABLE IF EXISTS Users;
 
 CREATE TABLE Users (
 	email VARCHAR(32) NOT NULL PRIMARY KEY,
-	password VARCHAR(32) NOT NULL,
+	password CHAR(32) NOT NULL,
 	name VARCHAR(32),
 	photo VARCHAR(32)
 );

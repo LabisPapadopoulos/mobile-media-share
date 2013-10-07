@@ -22,5 +22,9 @@
 
 	dataSource.close();
 	-->
+	<bean id="userService" class="gr.uoa.di.std08169.mobile.media.share.server.UserServiceImpl" scope="singleton">
+	    <!-- Epeidh exei setter dataSource kai tha parei bean me id to ref (etoimo dataSource) -->
+		<property name="dataSource" ref="dataSource" />
+	</bean>
 </beans>
 

@@ -10,4 +10,5 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface UserService extends RemoteService {
 	//Prosthikh user an den uparxei
 	public boolean addUser(final String email, final String password) throws UserServiceException;
+	public boolean isValidUser(final String email, final String password) throws UserServiceException;
 }

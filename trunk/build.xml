@@ -33,6 +33,7 @@
 			<arg line="-localWorkers 8" /> <!-- use 8 cores for compiling -->
 			<!-- Poio module xreiazetai compile -->
 			<arg value="gr.uoa.di.std08169.mobile.media.share.Login" />
+			<arg value="gr.uoa.di.std08169.mobile.media.share.Map" />
 			<arg value="gr.uoa.di.std08169.mobile.media.share.NewUser" />
 		</java>
 	</target>
@@ -43,6 +44,7 @@
 		<delete file="${ant.project.name}.war" failonerror="false" />
 		<delete dir="gwt-unitCache" failonerror="false" />
 		<delete dir="war/login" failonerror="false" />  <!-- to out tou module -->
+		<delete dir="war/map" failonerror="false" />  <!-- to out tou module -->
 		<delete dir="war/newUser" failonerror="false" />  <!-- to out tou module -->
 		<delete dir="war/WEB-INF/classes" failonerror="false" />
 		<delete dir="war/WEB-INF/deploy" failonerror="false" />

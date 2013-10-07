@@ -1,0 +1,7 @@
+add apache dbcp
+validate user emails via messages
+i18n
+urls as messages
+redirect login
+every page check session info
+
