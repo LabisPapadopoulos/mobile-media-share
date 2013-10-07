@@ -11,4 +11,5 @@ public interface UserServiceAsync {
 	//Einai void giati den epistrefoun kati tin stigmh pou kalountai, tha
 	//epistrepsoun me to AsyncCallback argotera
 	public void addUser(final String email, final String password, final AsyncCallback<Boolean> callback);
+	public void isValidUser(final String email, final String password, final AsyncCallback<Boolean> callback);
 }

@@ -7,7 +7,11 @@ sudo apt-get install tomcat7-admin
 
 3. Edit /var/lib/tomcat7/conf/tomcat-users.xml to add users
 
-4. Install GWT from http://www.gwtproject.org/
+4. Created keystore and edited /var/lib/tomcat7/conf/server.xml to enable SSL.
+	$ sudo keytool -genkeypair -keystore /var/lib/tomcat7/conf/.keystore 
 
-5. Set environment variable GWT_HOME
+5. Install GWT from http://www.gwtproject.org/
 
+6. Set environment variable GWT_HOME
+
+7. 
