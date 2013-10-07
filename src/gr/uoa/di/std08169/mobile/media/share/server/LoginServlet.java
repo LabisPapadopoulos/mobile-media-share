@@ -4,6 +4,7 @@ import gr.uoa.di.std08169.mobile.media.share.client.services.UserService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.UserServiceException;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,6 +22,8 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 //Login Servlet
 public class LoginServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	private static final String LOGIN_URL = "./login.html?locale=%s&url=%s";
+	private static final String UTF_8 = "UTF-8"; 
 	private static final Logger LOGGER = Logger.getLogger(LoginServlet.class.getName()); 
 
 	private UserService userService;
@@ -66,6 +69,8 @@ public class LoginServlet extends HttpServlet {
 		try {
 			String email = null;
 			String password = null;
+			String locale = null;
+			String url = null;
 			for (FileItem fileItem : new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request)) {
 				//an einai pedio formas kai oxi arxeia
 				if (fileItem.isFormField() && fileItem.getFieldName().equals("email")) {
@@ -73,9 +78,15 @@ public class LoginServlet extends HttpServlet {
 					email = fileItem.getString();
 					//diagrafh apo ton disko
 					fileItem.delete();
-				} else if(fileItem.isFormField() && fileItem.getFieldName().equals("password")) {
+				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("password")) {
 					//vrethike to password
 					password = fileItem.getString();
+					fileItem.delete();
+				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("locale")) {
+					locale = fileItem.getString();
+					fileItem.delete();
+				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("url")) {
+					url = fileItem.getString();
 					fileItem.delete();
 				}
 			}
@@ -94,10 +105,11 @@ public class LoginServlet extends HttpServlet {
 					//apothikeush tou xrhsth sto session pou einai ston server
 					request.getSession().setAttribute("email", email);
 					LOGGER.log(Level.INFO, "User " + email + " logged in successfully");
-					response.sendRedirect("./map.html");
+					response.sendRedirect(url);
 				} else {
 					LOGGER.log(Level.INFO, "User " + email + " entered invalid credentials");
-					response.sendRedirect("./login.html");
+					response.sendRedirect(String.format(LOGIN_URL, URLEncoder.encode(locale, UTF_8),
+							URLEncoder.encode(url, UTF_8)));
 				}
 			} catch (final UserServiceException e) {
 				LOGGER.log(Level.WARNING, "Error validating user " + email);
