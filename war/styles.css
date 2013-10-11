@@ -1,0 +1,82 @@
+body {
+	margin-right: auto;
+	margin-left: auto;
+	background-color: grey;
+	border: 1px solid;
+}
+
+div.logo {
+	clear: both;
+}
+
+div.menu {
+	clear: both;
+}
+
+a.map, a.list, a.newPhoto, a.newVideo, a.upload, a.myAccount, a.logout {
+	background-clip: padding-box;
+	background-position: left center;
+	background-repeat: no-repeat;
+	background-size: contain;
+	border: 1px solid grey;
+	border-radius: 5px;
+	padding: 8px;
+	padding-left: 40px;
+	padding-right: 8px;
+}
+
+a.map {
+	background-image: url('./images/map.svg');
+}
+
+a.list {
+	background-image: url('./images/list.svg');
+}
+
+a.newPhoto {
+	background-image: url('./images/newPhoto.svg');
+}
+
+a.newVideo {
+	background-image: url('./images/newVideo.svg');
+}
+
+a.upload {
+	background-image: url('./images/upload.svg');
+}
+a.myAccount {
+	background-image: url('./images/myAccount.svg');
+}
+a.logout {
+	background-image: url('./images/logout.svg');
+}
+
+img.logo {
+	float: left;
+	height: 128px;
+	width: 128px;
+}
+
+h1 {
+	float: right;
+}
+
+
+
+
+
+
+p{
+	text-align: center;
+	font-size: 18px;
+}
+.table {
+	width: 250px;
+	background-color: white;
+	color: black;
+	padding: 1px;
+	border-spacing: 3px;
+}
+.foto {
+	text-align: center;
+}
