@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"> <!-- Template tou GWT (namespace) -->
+	<div><!-- header -->
+	    <div class="header">
+			<div class="logo" >
+			    <!-- ui:field gia na vrisketai apo to gwt -->
+				<img ui:field="logo" src="./images/logo.png" class="logo" />
+				<h1 ui:field="title"></h1>
+			</div>
+			<div class="menu">
+			    <a ui:field="mapLink" class="map">
+			        <!-- inline keimeno xwris allagh grammhs -->
+			        <span ui:field="map"></span>
+			    </a>
+			    <a ui:field="listLink" class="list">
+			        <span ui:field="list"></span>
+			    </a>
+   			    <a ui:field="newPhotoLink" class="newPhoto">
+			        <span ui:field="newPhoto"></span>
+			    </a>
+   			    <a ui:field="newVideoLink" class="newVideo">
+			        <span ui:field="newVideo"></span>
+			    </a>
+   			    <a ui:field="uploadLink" class="upload">
+			        <span ui:field="upload"></span>
+			    </a>
+			    <a ui:field="myAccountLink" class="myAccount">
+			        <span ui:field="myAccount"></span>
+			    </a>
+			    <a ui:field="logoutLink" class="logout">
+			        <span ui:field="logout"></span>
+			    </a>
+			</div>
+		</div>
+	</div>
+</ui:UiBinder>

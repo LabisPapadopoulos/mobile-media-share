@@ -4,6 +4,7 @@ import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstan
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -60,6 +61,8 @@ public class Map implements EntryPoint, RequestCallback {
 					//kwdikopoieitai to url map epeidh pernaei san parametros (meta apo ?)
 					URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.map(
 							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
-		RootPanel.get().add(new Label(MOBILE_MEDIA_SHARE_CONSTANTS.placeMapHere()));
+		//Apo to DOM prosthetei komvo (to header me olous tous upokomvous pou exei mesa)
+		Document.get().getBody().appendChild(Header.newHeader());
+		RootPanel.get().add(new Label(MOBILE_MEDIA_SHARE_CONSTANTS.map()));
 	}
 }

@@ -2,6 +2,7 @@ package gr.uoa.di.std08169.mobile.media.share.client.html;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -11,7 +12,7 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -114,13 +115,16 @@ public class NewUser implements ClickHandler, EntryPoint, KeyUpHandler {
 	
 	@Override
 	public void onModuleLoad() {
-		RootPanel.get().add(new Label(MOBILE_MEDIA_SHARE_CONSTANTS.email()));
+		Document.get().getBody().appendChild(Header.newHeader());
+		RootPanel.get().add(new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.email()));
 		RootPanel.get().add(email);
-		RootPanel.get().add(new Label(MOBILE_MEDIA_SHARE_CONSTANTS.password()));
+		Document.get().getBody().appendChild(Document.get().createBRElement()); //<br />
+		RootPanel.get().add(new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.password()));
 		RootPanel.get().add(password);
-		RootPanel.get().add(new Label(MOBILE_MEDIA_SHARE_CONSTANTS.confirmPassword()));
+		Document.get().getBody().appendChild(Document.get().createBRElement()); //<br />
+		RootPanel.get().add(new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.confirmPassword()));
 		RootPanel.get().add(password2);
-		RootPanel.get().add(new Label());
+		Document.get().getBody().appendChild(Document.get().createBRElement()); //<br />
 		RootPanel.get().add(ok);
 		RootPanel.get().add(reset);
 		RootPanel.get().add(cancel);
