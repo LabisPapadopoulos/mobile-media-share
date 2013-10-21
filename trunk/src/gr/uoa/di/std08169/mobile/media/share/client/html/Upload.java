@@ -22,8 +22,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.NamedFrame;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -34,6 +33,9 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 			GWT.create(MobileMediaShareConstants.class);
 	private static final MobileMediaShareUrls MOBILE_MEDIA_SHARE_URLS = 
 			GWT.create(MobileMediaShareUrls.class);
+	private static final int TOP_STEP = 30;
+	private static final int LEFT_OFFSET = 450;
+	private static final int LEFT_STEP = 100;
 	
 	private final FormPanel form;
 	private final FileUpload file;
@@ -48,27 +50,38 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 		form.setMethod(FormPanel.METHOD_POST);
 		form.setEncoding(FormPanel.ENCODING_MULTIPART);
 		form.setAction("./upload");
+		int i = 0;
 		file = new FileUpload();
 		file.setName("file");
 		//enhmerwnei otan allaxei h timh tou
 		file.addChangeHandler(this);
+		file.getElement().addClassName("field");
+		file.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
 		title = new TextBox();
 		title.setName("title");
 		title.addKeyUpHandler(this);
+		title.getElement().addClassName("field");
+		title.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
 		publik = new CheckBox();
 		publik.setName("public");
+		publik.getElement().addClassName("field");
+		publik.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
+		// anamesa sto publik kai sto ok tha bei allo field to opoio tha kanei
+		i++;
+		int j = 0;
 		ok = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.ok());
 		ok.addClickHandler(this);
 		ok.setEnabled(false);
+		ok.getElement().setAttribute("style", "top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 		reset = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.reset());
 		reset.addClickHandler(this);
+		reset.getElement().setAttribute("style", "top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 	}
 	
 	@Override
 	public void onClick(final ClickEvent clickEvent) {
-		Window.alert("on click");
 		if (clickEvent.getSource() == ok) {
-			
+			form.submit();
 		} else if (clickEvent.getSource() == reset) {
 			//kanei reset tin forma kai ara katharizei to file
 			form.reset();
@@ -80,7 +93,6 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 
 	@Override
 	public void onChange(final ChangeEvent _) {
-		Window.alert("on change");
 														//to onoma tou arxeiou na mhn einai keno
 		ok.setEnabled((file.getFilename() != null) && (!file.getFilename().trim().isEmpty()) &&
 				(!title.getValue().trim().isEmpty()));		
@@ -88,7 +100,6 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 
 	@Override
 	public void onError(final Request _, final Throwable __) {
-		Window.alert("on error");
 		Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.login(
 				//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
 				URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
@@ -99,14 +110,12 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 
 	@Override
 	public void onKeyUp(final KeyUpEvent _) {
-		Window.alert("on key up");
 		ok.setEnabled((file.getFilename() != null) && (!file.getFilename().trim().isEmpty()) &&
 				(!title.getValue().trim().isEmpty()));		
 	}
 
 	@Override
 	public void onModuleLoad() {
-		Window.alert("on module load");
 		try {
 			//RequestBuilder gia na kanoume ena GET request sto servlet login gia na paroume
 			//to session mas. RequestCallback (this) einai auto pou tha parei tin apantish asunxrona
@@ -126,7 +135,6 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 	//molis phre epituxws tin apantish
 	@Override
 	public void onResponseReceived(final Request request, final Response response) {
-		Window.alert("on response received (status: " + response.getStatusCode() + ", text: " + response.getText() + ")");
 		//an den einai logged in o xrhsths
 		if ((response.getStatusCode() != 200) || (response.getText().isEmpty()))
 			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.login(
@@ -134,21 +142,36 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
 					//kwdikopoieitai to url map epeidh pernaei san parametros (meta apo ?)
 					URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.upload(
-							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
+							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));	
+		Document.get().getBody().addClassName("bodyClass");
 		//Apo to DOM prosthetei komvo (to header me olous tous upokomvous pou exei mesa)
 		Document.get().getBody().appendChild(Header.newHeader());
-		
 		final FlowPanel flowPanel = new FlowPanel();
-		flowPanel.add(new Label("File"));
+		int i = 0;
+		final InlineLabel fileLabel = new InlineLabel("File");
+		fileLabel.getElement().addClassName("label");
+		fileLabel.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
+		flowPanel.add(fileLabel);
 		flowPanel.add(file);
-		flowPanel.add(new Label("Title"));
+		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
+		final InlineLabel titleLabel = new InlineLabel("Title");
+		titleLabel.getElement().addClassName("label");
+		titleLabel.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
+		flowPanel.add(titleLabel);
 		flowPanel.add(title);
-		flowPanel.add(new Label("Public"));
+		flowPanel.getElement().appendChild(Document.get().createBRElement());
+		final InlineLabel publicLabel = new InlineLabel("Public");
+		publicLabel.getElement().addClassName("label");
+		publicLabel.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
+		flowPanel.add(publicLabel);
 		flowPanel.add(publik);
-		flowPanel.add(new Label("Latitude/Longitude"));
+		flowPanel.getElement().appendChild(Document.get().createBRElement());
+		final InlineLabel latitudeLongitudeLabel = new InlineLabel("Latitude/Longitude");
+		latitudeLongitudeLabel.getElement().addClassName("label");
+		latitudeLongitudeLabel.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
+		flowPanel.add(latitudeLongitudeLabel);
 		flowPanel.add(ok);
 		flowPanel.add(reset);
-		
 		form.add(flowPanel); //giati h forma pairnei ena pragma
 		RootPanel.get().add(form);
 	}

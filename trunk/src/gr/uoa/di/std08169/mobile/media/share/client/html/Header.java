@@ -14,11 +14,9 @@ import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Window;
 
-public class Header /*implements EventListener*/ {
+public class Header {
 	//Interface: gia na boresoume na to xrhsimopoihsmoume me GWT create
 	//UiBinder: klassh gia na psareuei templates.
 	//1o Orisma: Ti einai to template mou (div, eikona)
@@ -125,35 +123,20 @@ public class Header /*implements EventListener*/ {
 		logoutLink.setTitle(MOBILE_MEDIA_SHARE_CONSTANTS.logout());
 		logout.setInnerText(MOBILE_MEDIA_SHARE_CONSTANTS.logout());
 		
-		
 		//Gia kathe diathesimo locale (apo to MobileMediaShare.gwt.xml)
 		for (String locale : LocaleInfo.getAvailableLocaleNames()) {
 			if (!locale.equals("default")) {
 				final AnchorElement localeAnchor = Document.get().createAnchorElement();
 				localeAnchor.setHref(Window.Location.createUrlBuilder().setParameter("locale", locale).buildString());
 				localeAnchor.setTitle(LocaleInfo.getLocaleNativeDisplayName(locale));
-				
+				localeAnchor.setClassName("locale");
 				final ImageElement localeImage = Document.get().createImageElement();
 				localeImage.setSrc(MOBILE_MEDIA_SHARE_URLS.localeImage(locale));
 									//Emfanizei to locale sti glwssa tou
 				localeImage.setAlt(LocaleInfo.getLocaleNativeDisplayName(locale));
-				localeAnchor.appendChild(localeImage);
-				
+				localeAnchor.appendChild(localeImage);				
 				header.appendChild(localeAnchor);
-//				locales.put(localeImage, locale);
-//				//Poia event tha stelnei sto logo me onClick
-//				Event.sinkEvents(localeImage, Event.ONCLICK);
-//				//Ti tha kanei otan ginei to event (tha trexei tin onBrowserEvent)
-//				Event.setEventListener(localeImage, this);
 			}
 		}
 	}
-
-//	@Override
-//	public void onBrowserEvent(final Event event) {
-//		//Redirect sto url pou prokuptei apo to trexon url, an allaxtei to locale me auto pou prepei
-//		Window.Location.assign(Window.Location.createUrlBuilder().setParameter("locale",
-//				//getEventTarget: se poio element egine epanw to click (localeImage)
-//				locales.get(event.getEventTarget())).buildString());
-//	}
 }

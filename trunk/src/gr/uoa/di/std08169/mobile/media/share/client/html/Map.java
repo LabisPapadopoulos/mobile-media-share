@@ -61,6 +61,7 @@ public class Map implements EntryPoint, RequestCallback {
 					//kwdikopoieitai to url map epeidh pernaei san parametros (meta apo ?)
 					URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.map(
 							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
+		Document.get().getBody().addClassName("bodyClass");
 		//Apo to DOM prosthetei komvo (to header me olous tous upokomvous pou exei mesa)
 		Document.get().getBody().appendChild(Header.newHeader());
 		RootPanel.get().add(new Label(MOBILE_MEDIA_SHARE_CONSTANTS.map()));
