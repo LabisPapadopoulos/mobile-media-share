@@ -1,7 +1,6 @@
 package gr.uoa.di.std08169.mobile.media.share.client.html;
 
 import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants;
-
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
@@ -16,7 +15,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Hidden;
-import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.NamedFrame;
 import com.google.gwt.user.client.ui.PasswordTextBox;
@@ -91,10 +89,12 @@ public class Login implements ClickHandler, EntryPoint, KeyUpHandler {
 	
 	@Override
 	public void onModuleLoad() { //molis fortwthei to module (h javascript), molis to zhthsei kapoia selida
+		Document.get().getBody().addClassName("bodyClass");
 		Document.get().getBody().appendChild(Header.newHeader());
 		//Travaei olh tin selida: RootPanel.get()
 		//InlineLabel gia na fainetai stin idia grammh
 		final FlowPanel flowPanel = new FlowPanel();
+		flowPanel.getElement().addClassName("login");
 		flowPanel.add(new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.email()));
 		flowPanel.add(email);
 		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />

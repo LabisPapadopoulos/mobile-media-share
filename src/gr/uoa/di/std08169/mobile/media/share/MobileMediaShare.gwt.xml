@@ -10,5 +10,7 @@
 	<set-property-fallback name="locale" value="en" /> <!-- Default glwssa English -->
 	<source path="client" />
 	<source path="shared" />
+	<!-- include to css s' oles tis selides pou tha fortwsoun auto to module -->
+	<stylesheet src="../styles.css" />
 </module>
 

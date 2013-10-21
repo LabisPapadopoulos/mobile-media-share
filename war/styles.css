@@ -1,14 +1,50 @@
-body {
-	margin-right: auto;
-	margin-left: auto;
-	background-color: grey;
-	border: 1px solid;
+html {
+	background-color: white;
 }
 
+body.bodyClass {
+	padding-top: 10px;
+	padding-right: 20px;
+	padding-bottom: 10px;
+	padding-left: 20px;
+	//background-color: rgb(225, 231, 238);
+	background-color: whitesmoke;
+	margin-right: auto;
+	margin-left: auto;
+	width: 900px;
+	min-height: 400px;
+	border: 1px solid black;
+	border-radius: 15px;
+/*	-moz-border-radius: 15px;*/
+	box-shadow: 3px 3px 3px black;
+/*	-moz-box-shadow: 3px 3px 3px black;
+	-webkit-box-shadow: 3px 3px 3px black;*/
+}
+
+/* header */
+div.header {
+	text-align: center;
+}
+
+/* logo */
 div.logo {
 	clear: both;
 }
 
+img.logo {
+	float: left;
+	height: 128px;
+	width: 128px;
+	margin-bottom: 20px;
+	margin-left: 40px;
+}
+
+h1 {
+	float: right;
+	margin-right: 70px;
+}
+
+/* menu */
 div.menu {
 	clear: both;
 }
@@ -20,9 +56,14 @@ a.map, a.list, a.newPhoto, a.newVideo, a.upload, a.myAccount, a.logout {
 	background-size: contain;
 	border: 1px solid grey;
 	border-radius: 5px;
+	margin: 1px;
 	padding: 8px;
-	padding-left: 40px;
+	padding-left: 35px;
 	padding-right: 8px;
+}
+
+a.map:hover, a.list:hover, a.newPhoto:hover, a.newVideo:hover, a.upload:hover, a.myAccount:hover, a.logout:hover {
+	background-color: #dee7f0;
 }
 
 a.map {
@@ -51,15 +92,42 @@ a.logout {
 	background-image: url('./images/logout.svg');
 }
 
-img.logo {
-	float: left;
-	height: 128px;
-	width: 128px;
+/* language select */
+a.locale {
+	float: right;
+	margin: 5px;
+	position: relative;
+	top: -100px;
 }
 
-h1 {
-	float: right;
+form {
+	clear: both;
+	text-align: center;
+	padding-top: 20px;
+	position: relative;
 }
+
+span.label {
+	position: absolute;
+	right: 50%;
+}
+
+input.field, span.field {
+	position: absolute;
+	left: 50%;
+}
+
+form button {
+	position: absolute;
+	width: 90px;
+}
+
+
+
+
+
+
+
 
 
 

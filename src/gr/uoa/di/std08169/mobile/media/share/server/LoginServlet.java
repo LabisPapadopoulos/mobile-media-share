@@ -47,7 +47,7 @@ public class LoginServlet extends HttpServlet {
 	@Override
 	public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
 		//gia na parsaristei to string tis apantishs se html
-		response.setContentType("text/html");
+ 		response.setContentType("text/html");
 		final String email = (String) request.getSession().getAttribute("email");
 		if(email != null)
 			response.getWriter().println(email);
