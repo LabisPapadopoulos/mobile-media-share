@@ -30,6 +30,9 @@ public class Login implements ClickHandler, EntryPoint, KeyUpHandler {
 			GWT.create(MobileMediaShareConstants.class);
 	private static final MobileMediaShareUrls MOBILE_MEDIA_SHARE_URLS =
 			GWT.create(MobileMediaShareUrls.class);
+	private static final int TOP_STEP = 30;
+	private static final int LEFT_OFFSET = 340;
+	private static final int LEFT_STEP = 100;
 	
 	//Ta textBoxes/buttons pou xreiazomaste gia tin arxikh login othonh
 	private final FormPanel form;
@@ -49,20 +52,29 @@ public class Login implements ClickHandler, EntryPoint, KeyUpHandler {
 		//ekei tha einai kai oi parametroi anti gia to url
 		form.setEncoding(FormPanel.ENCODING_MULTIPART);
 		//url gia to servlet login 
-		form.setAction("./login");
+		form.setAction("./loginServlet");
+		int i = 0;
 		email = new TextBox();
 		email.setName("email");
+		email.getElement().addClassName("field");
+		email.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
 		email.addKeyUpHandler(this);
 		password = new PasswordTextBox();
 		password.setName("password");
+		password.getElement().addClassName("field");
+		password.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
 		password.addKeyUpHandler(this);
+		int j = 0;
 		//string login apo to interface
 		login = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.login());
+		login.getElement().setAttribute("style", "top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 		login.addClickHandler(this);
 		login.setEnabled(false);
 		newUser = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.newUser());
+		newUser.getElement().setAttribute("style", "top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 		newUser.addClickHandler(this);
 		forgotPassword = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.forgotPassword_());
+		forgotPassword.getElement().setAttribute("style", "top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 		forgotPassword.addClickHandler(this);
 	}
 	
@@ -91,18 +103,26 @@ public class Login implements ClickHandler, EntryPoint, KeyUpHandler {
 	public void onModuleLoad() { //molis fortwthei to module (h javascript), molis to zhthsei kapoia selida
 		Document.get().getBody().addClassName("bodyClass");
 		Document.get().getBody().appendChild(Header.newHeader());
+		int i = 0;
 		//Travaei olh tin selida: RootPanel.get()
 		//InlineLabel gia na fainetai stin idia grammh
 		final FlowPanel flowPanel = new FlowPanel();
-		flowPanel.getElement().addClassName("login");
-		flowPanel.add(new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.email()));
+//		flowPanel.getElement().addClassName("login");
+		final InlineLabel emailLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.email());
+		emailLabel.getElement().addClassName("label");
+		emailLabel.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
+		flowPanel.add(emailLabel);
 		flowPanel.add(email);
 		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
-		flowPanel.add(new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.password()));
+		final InlineLabel passwordLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.password());
+		passwordLabel.getElement().addClassName("label");
+		passwordLabel.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
+		flowPanel.add(passwordLabel);
 		flowPanel.add(password);
 		flowPanel.getElement().appendChild(Document.get().createBRElement());
 		flowPanel.add(login);
 		flowPanel.add(newUser);
+		flowPanel.getElement().appendChild(Document.get().createBRElement());
 		flowPanel.add(forgotPassword);
 		//Ta locale, url pernountai sto body tis formas, opote den xreiazetai url encode
 		flowPanel.add(new Hidden("locale", LocaleInfo.getCurrentLocale().getLocaleName()));

@@ -27,7 +27,7 @@ public class Map implements EntryPoint, RequestCallback {
 		try {
 			//RequestBuilder gia na kanoume ena GET request sto servlet login gia na paroume
 			//to session mas. RequestCallback (this) einai auto pou tha parei tin apantish asunxrona
-			new RequestBuilder(RequestBuilder.GET, "./login").sendRequest(null, this);
+			new RequestBuilder(RequestBuilder.GET, "./loginServlet").sendRequest(null, this);
 		} catch (final RequestException _) {
 			//otidhpote paei strava, xana gurnaei stin login
 			//url pou theloume na mas paei

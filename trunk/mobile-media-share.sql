@@ -27,16 +27,17 @@ CREATE TABLE Users (
 
 -- Pinakas Fotografiwn, videos...
 CREATE TABLE Media (
-	id VARCHAR(32) NOT NULL,
+	id VARCHAR(32) NOT NULL PRIMARY KEY,
 	type VARCHAR(32) NOT NULL,
 	title VARCHAR(32) NOT NULL,
 	latitude DECIMAL(9, 6) NOT NULL,
 	longitude DECIMAL(9, 6) NOT NULL,
-	time TIMESTAMP NOT NULL, -- pote dhmiourghthike
+	created TIMESTAMP NOT NULL, -- pote dhmiourghthike
+	edited TIMESTAMP NOT NULL, -- pote allaxe
 	"user" VARCHAR(32) NOT NULL,
 	public BOOLEAN NOT NULL, -- 'h public 'h private
 	size INT NOT NULL,
-	duration INT, -- diarkeia gia video/hxo
+	duration INT NOT NULL, -- diarkeia gia video/hxo
 	FOREIGN KEY ("user") REFERENCES Users(email) ON UPDATE CASCADE ON DELETE CASCADE
 );
 

@@ -11,7 +11,7 @@ body.bodyClass {
 	background-color: whitesmoke;
 	margin-right: auto;
 	margin-left: auto;
-	width: 900px;
+	width: 850px;
 	min-height: 400px;
 	border: 1px solid black;
 	border-radius: 15px;
@@ -41,7 +41,7 @@ img.logo {
 
 h1 {
 	float: right;
-	margin-right: 70px;
+	margin-right: 10px;
 }
 
 /* menu */
@@ -122,7 +122,12 @@ form button {
 	width: 90px;
 }
 
-
+.newUser {
+	clear: both;
+	text-align: center;
+	padding-top: 20px;
+	position: relative;
+}
 
 
 
