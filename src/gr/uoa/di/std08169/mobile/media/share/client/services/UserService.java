@@ -8,7 +8,11 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 //h efarmogh.
 @RemoteServiceRelativePath("../userService") //S' auto to link tha vrisketai to remote service
 public interface UserService extends RemoteService {
+	// getUsers
+	// getUser
+	public boolean isValidUser(final String email, final String password) throws UserServiceException;
 	//Prosthikh user an den uparxei
 	public boolean addUser(final String email, final String password) throws UserServiceException;
-	public boolean isValidUser(final String email, final String password) throws UserServiceException;
+	// editUser
+	// deleteUser
 }

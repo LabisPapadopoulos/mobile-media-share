@@ -34,7 +34,7 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 	private static final MobileMediaShareUrls MOBILE_MEDIA_SHARE_URLS = 
 			GWT.create(MobileMediaShareUrls.class);
 	private static final int TOP_STEP = 30;
-	private static final int LEFT_OFFSET = 450;
+	private static final int LEFT_OFFSET = 425;
 	private static final int LEFT_STEP = 100;
 	
 	private final FormPanel form;
@@ -49,7 +49,7 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 		form = new FormPanel();
 		form.setMethod(FormPanel.METHOD_POST);
 		form.setEncoding(FormPanel.ENCODING_MULTIPART);
-		form.setAction("./upload");
+		form.setAction("./uploadServlet");
 		int i = 0;
 		file = new FileUpload();
 		file.setName("file");
@@ -119,7 +119,7 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 		try {
 			//RequestBuilder gia na kanoume ena GET request sto servlet login gia na paroume
 			//to session mas. RequestCallback (this) einai auto pou tha parei tin apantish asunxrona
-			new RequestBuilder(RequestBuilder.GET, "./login").sendRequest(null, this);
+			new RequestBuilder(RequestBuilder.GET, "./loginServlet").sendRequest(null, this);
 		} catch (final RequestException _) {
 			//otidhpote paei strava, xana gurnaei stin login
 			//url pou theloume na mas paei
