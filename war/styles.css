@@ -1,5 +1,7 @@
 html {
 	background-color: white;
+	background-image: url('./images/body-bg.png');
+	background-repeat:repeat;
 }
 
 body.bodyClass {

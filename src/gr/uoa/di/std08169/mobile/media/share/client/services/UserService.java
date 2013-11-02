@@ -1,5 +1,7 @@
 package gr.uoa.di.std08169.mobile.media.share.client.services;
 
+import gr.uoa.di.std08169.mobile.media.share.shared.User;
+
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
@@ -9,9 +11,16 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("../userService") //S' auto to link tha vrisketai to remote service
 public interface UserService extends RemoteService {
 	// getUsers
-	// getUser
+	public User getUser(final String email) throws UserServiceException;
 	public boolean isValidUser(final String email, final String password) throws UserServiceException;
-	//Prosthikh user an den uparxei
+	
+	/**
+	 * Add user if does not exist.
+	 * @param email the email of the user
+	 * @param password the password of the user
+	 * @return true if user was added, false if user already exists
+	 * @throws UserServiceException if any errors occur
+	 */
 	public boolean addUser(final String email, final String password) throws UserServiceException;
 	// editUser
 	// deleteUser

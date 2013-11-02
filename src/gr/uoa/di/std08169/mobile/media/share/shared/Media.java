@@ -17,7 +17,6 @@ public class Media {
 	private final int duration;
 	private final User user;
 	private final Date created;
-	//Metadedomena
 	private Date edited;
 	private String title;
 	private BigDecimal latitude;
