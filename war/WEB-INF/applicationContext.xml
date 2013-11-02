@@ -22,9 +22,6 @@
 
 	dataSource.close();
 	-->
-	<bean id="maxFileSize" class="java.lang.Integer" scope="singleton">
-		<constructor-arg value="${max.file.size}" />
-	</bean>
 	<bean id="mediaDir" class="java.io.File" scope="singleton">
 		<constructor-arg value="${media.dir}" />
 	</bean>

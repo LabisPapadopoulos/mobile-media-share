@@ -59,7 +59,7 @@ public class LoginServlet extends HttpServlet {
 	public void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
 		//Elegxos an to request einai multipart form data
 		if (!ServletFileUpload.isMultipartContent(request)) {
-			LOGGER.log(Level.WARNING, "Request content type is not multipart/form-data");
+			LOGGER.warning("Request content type is not multipart/form-data");
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request content type is not multipart/form-data"); //400 Bad Request
 			return;
 		}
@@ -91,12 +91,12 @@ public class LoginServlet extends HttpServlet {
 				}
 			}
 			if (email == null) {
-				LOGGER.log(Level.WARNING, "No email specified");
+				LOGGER.warning("No email specified");
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No email specified"); //400 Bad Request
 				return;
 			}
 			if (password == null) {
-				LOGGER.log(Level.WARNING, "No password specified");
+				LOGGER.warning("No password specified");
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No password specified"); //400 Bad Request
 				return;
 			}
@@ -104,19 +104,19 @@ public class LoginServlet extends HttpServlet {
 				if (userService.isValidUser(email, password)) {
 					//apothikeush tou xrhsth sto session pou einai ston server
 					request.getSession().setAttribute("email", email);
-					LOGGER.log(Level.INFO, "User " + email + " logged in successfully");
+					LOGGER.info("User " + email + " logged in successfully");
 					response.sendRedirect(url);
 				} else {
-					LOGGER.log(Level.INFO, "User " + email + " entered invalid credentials");
+					LOGGER.info("User " + email + " entered invalid credentials");
 					response.sendRedirect(String.format(LOGIN_URL, URLEncoder.encode(locale, UTF_8),
 							URLEncoder.encode(url, UTF_8)));
 				}
 			} catch (final UserServiceException e) {
-				LOGGER.log(Level.WARNING, "Error validating user " + email);
+				LOGGER.log(Level.WARNING, "Error validating user " + email, e);
 				throw new ServletException("Error validating user " + email, e); //Epistrefei 500 ston client
 			}
 		} catch (final FileUploadException e) {
-			LOGGER.log(Level.WARNING, "Error parsing request");
+			LOGGER.log(Level.WARNING, "Error parsing request", e);
 			throw new ServletException("Error parsing request", e); //Epistrefei 500 ston client
 		}
 	}

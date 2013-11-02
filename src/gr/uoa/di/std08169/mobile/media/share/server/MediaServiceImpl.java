@@ -44,6 +44,7 @@ public class MediaServiceImpl implements MediaService {
 					addMedia.setBigDecimal(10, media.getLongitude());
 					addMedia.setBoolean(11, media.isPublic());
 					addMedia.executeUpdate();
+					LOGGER.info("Added media " + media.getId());
 				} finally {
 					addMedia.close();
 				}

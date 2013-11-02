@@ -13,10 +13,10 @@ CREATE DATABASE "mobile-media-share" OWNER "mobile-media-share";
 -- Pinakes
 
 -- Drop ton Media prwta epeidh exei foreign key ston Users
-DROP TABLE IF EXISTS Media;
+DROP TABLE IF EXISTS Media CASCADE;
 
 -- Pinakas Eggegramenwn xrhstwn
-DROP TABLE IF EXISTS Users;
+DROP TABLE IF EXISTS Users CASCADE;
 
 CREATE TABLE Users (
 	email VARCHAR(128) NOT NULL PRIMARY KEY,
