@@ -18,6 +18,10 @@
 		<servlet-name>uploadServlet</servlet-name>
 		<servlet-class>gr.uoa.di.std08169.mobile.media.share.server.UploadServlet</servlet-class>
 	</servlet>
+	<servlet>
+		<servlet-name>mediaService</servlet-name> <!-- einai tou GWT -->
+		<servlet-class>gr.uoa.di.std08169.mobile.media.share.server.MediaServiceServlet</servlet-class>
+	</servlet>
 	<!-- userService servlet pou einai tupou UserServiceImpl 
 	(to UserServiceImpl ulopoiei to UserService) -->
 	<servlet>
@@ -34,6 +38,10 @@
 	    <url-pattern>/uploadServlet</url-pattern>
 	</servlet-mapping>
 	<!-- Akouei stin dieuthinsh /userService -->
+	<servlet-mapping>
+		<servlet-name>mediaService</servlet-name>
+		<url-pattern>/mediaService</url-pattern>
+	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>userService</servlet-name>
 		<url-pattern>/userService</url-pattern>

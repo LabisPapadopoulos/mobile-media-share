@@ -26,7 +26,7 @@ public class LoginServlet extends HttpServlet {
 	private static final String UTF_8 = "UTF-8"; 
 	private static final Logger LOGGER = Logger.getLogger(LoginServlet.class.getName()); 
 
-	private UserService userService;
+	private UserService userService; //Java Bean
 	
 	//init gia to servlet
 	@Override

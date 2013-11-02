@@ -7,5 +7,11 @@ public class UserServiceException extends Exception {
 	//logos tou exception
 	public UserServiceException(final String message, final Throwable cause) {
 		super(message, cause);
+		if (message == null)
+			throw new IllegalArgumentException(UserServiceException.class.getName() + " message can not be null");
+		if (message.isEmpty())
+			throw new IllegalArgumentException(UserServiceException.class.getName() + " message can not be empty");
+		if (cause == null)
+			throw new IllegalArgumentException(UserServiceException.class.getName() + " cause can not be null");
 	}
 }

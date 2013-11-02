@@ -4,6 +4,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import gr.uoa.di.std08169.mobile.media.share.client.services.UserService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.UserServiceException;
+import gr.uoa.di.std08169.mobile.media.share.shared.User;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -12,6 +13,8 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 //* implements UserService: gia na sumperiferetai san userService
 //GWT servlet
 public class UserServiceServlet extends RemoteServiceServlet implements UserService {
+	private static final long serialVersionUID = 1L;
+
 	private UserService userService;
 
 	//init gia to servlet
@@ -29,13 +32,17 @@ public class UserServiceServlet extends RemoteServiceServlet implements UserServ
 	}
 	
 	@Override
-	public boolean addUser(final String email, final String password) throws UserServiceException {
-		return userService.addUser(email, password);
+	public User getUser(final String email) throws UserServiceException {
+		return userService.getUser(email);
 	}
-
+	
 	@Override
 	public boolean isValidUser(final String email, final String password) throws UserServiceException {
 		return userService.isValidUser(email, password);
 	}
-
+	
+	@Override
+	public boolean addUser(final String email, final String password) throws UserServiceException {
+		return userService.addUser(email, password);
+	}
 }
