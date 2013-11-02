@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -29,13 +30,14 @@ import gr.uoa.di.std08169.mobile.media.share.shared.Media;
 import gr.uoa.di.std08169.mobile.media.share.shared.User;
 
 public class UploadServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-	private static final Logger LOGGER = Logger.getLogger(UploadServlet.class.getName());
-	private static final int BUFFER_SIZE = 1024;
-	//tmp directory me to opoio exei xekinhsei h JVM kai ekei tha dexetai o tomcat ta arxeia pou anevazoun oi xrhstes
 	private static final File TMP_DIR = new File(System.getProperty("java.io.tmpdir"));
+	private static final int BUFFER_SIZE = 1024;
+	private static final long serialVersionUID = 1L;
+	private static final String MAP_URL = "./map.html?locale=%s";
+	private static final String UTF_8 = "UTF-8";
+	private static final Logger LOGGER = Logger.getLogger(UploadServlet.class.getName());
+	//tmp directory me to opoio exei xekinhsei h JVM kai ekei tha dexetai o tomcat ta arxeia pou anevazoun oi xrhstes
 
-	private int maxFileSize;
 	//Pou tha apothikeutei monima to arxeio
 	private File mediaDir;
 	private MediaService mediaService; //Java Bean
@@ -43,8 +45,6 @@ public class UploadServlet extends HttpServlet {
 	
 	@Override
 	public void init() {
-		maxFileSize  = (Integer) WebApplicationContextUtils.getWebApplicationContext(getServletContext()).
-				getBean("maxFileSize", Integer.class);
 		mediaDir = (File) WebApplicationContextUtils.getWebApplicationContext(getServletContext()).
 					getBean("mediaDir", File.class);
 		mediaService = (MediaService) WebApplicationContextUtils.getWebApplicationContext(getServletContext()).
@@ -56,19 +56,19 @@ public class UploadServlet extends HttpServlet {
 	@Override
 	public void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
 		if ((String) request.getSession().getAttribute("email") == null) {
-			LOGGER.log(Level.WARNING, "Authentication required");
+			LOGGER.warning("Authentication required");
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication required"); //401 Unauthorized
 			return;
 		}
 		try {
 			final User user = userService.getUser((String) request.getSession().getAttribute("email"));
 			if (user == null) {
-				LOGGER.log(Level.WARNING, "Access denied");
+				LOGGER.warning("Access denied");
 				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
 				return;
 			}
 			if (!ServletFileUpload.isMultipartContent(request)) {
-				LOGGER.log(Level.WARNING, "Request content type is not multipart/form-data");
+				LOGGER.warning("Request content type is not multipart/form-data");
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request content type is not multipart/form-data"); //400 Bad Request
 				return;
 			}
@@ -86,7 +86,9 @@ public class UploadServlet extends HttpServlet {
 			BigDecimal latitude = null;
 			BigDecimal longitude = null;
 			boolean publik = false;
-			for (FileItem fileItem : new ServletFileUpload(new DiskFileItemFactory(maxFileSize, TMP_DIR)).parseRequest(request)) {
+			String locale = null;
+			//Diathetei mnhmh gia metafora arxeiou mexri kai BUFFER_SIZE bytes. Apo ekei kai panw xrhsimopoiei disko.
+			for (FileItem fileItem : new ServletFileUpload(new DiskFileItemFactory(BUFFER_SIZE, TMP_DIR)).parseRequest(request)) {
 				//an einai arxeio
 				if ((!fileItem.isFormField()) && fileItem.getFieldName().equals("file")) {
 					//vrethike ena arxeio
@@ -125,6 +127,9 @@ public class UploadServlet extends HttpServlet {
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("public")) {
 					publik = "on".equals(fileItem.getString());
 					fileItem.delete();
+				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("locale")) {
+					locale = fileItem.getString();
+					fileItem.delete();
 				}
 			}
 			latitude = new BigDecimal(0);
@@ -133,30 +138,32 @@ public class UploadServlet extends HttpServlet {
 			
 			//Den anevase o xrhsths arxeio
 			if ((id == null) || (type == null) || (size == 0)) {
-				LOGGER.log(Level.WARNING, "No file specified");
+				LOGGER.warning("No file specified");
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No file specified"); //400 Bad Request
 				return;	
 			}
 			if (title == null) {
-				LOGGER.log(Level.WARNING, "No title specified");
+				LOGGER.warning("No title specified");
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No title specified"); //400 Bad Request
 				return;
 			}
 			if((latitude == null) || (longitude == null)) {
-				LOGGER.log(Level.WARNING, "No location specified");
+				LOGGER.warning("No location specified");
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No location specified"); //400 Bad Request
 				return;
 			}
 			mediaService.addMedia(new Media(id, type, size, duration, user, created, edited, title, latitude,
-					longitude, publik));			
+					longitude, publik));
+			LOGGER.info("User " + user.getEmail() + " uploaded media " + id);
+			response.sendRedirect(String.format(MAP_URL, URLEncoder.encode(locale, UTF_8)));
 		} catch (final FileUploadException e) {
-			LOGGER.log(Level.WARNING, "Error parsing request");
+			LOGGER.log(Level.WARNING, "Error parsing request", e);
 			throw new ServletException("Error parsing request", e); //Epistrefei 500 ston client
 		} catch (final MediaServiceException e) {
-			LOGGER.log(Level.WARNING, "Error executing request");
+			LOGGER.log(Level.WARNING, "Error executing request", e);
 			throw new ServletException("Error executing request", e); //Epistrefei 500 ston client
 		} catch (final UserServiceException e) {
-			LOGGER.log(Level.WARNING, "Access denied");
+			LOGGER.log(Level.WARNING, "Access denied", e);
 			response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
 		}
 	}

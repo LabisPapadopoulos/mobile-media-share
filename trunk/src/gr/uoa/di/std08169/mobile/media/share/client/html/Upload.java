@@ -22,6 +22,8 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.Hidden;
+import com.google.gwt.user.client.ui.NamedFrame;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -46,7 +48,8 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 	private final Button reset;
 	
 	public Upload() {
-		form = new FormPanel();
+		//gia na min anoixei kainourio parathuro
+		form = new FormPanel(new NamedFrame("_self"));
 		form.setMethod(FormPanel.METHOD_POST);
 		form.setEncoding(FormPanel.ENCODING_MULTIPART);
 		form.setAction("./uploadServlet");
@@ -170,6 +173,7 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 		latitudeLongitudeLabel.getElement().addClassName("label");
 		latitudeLongitudeLabel.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
 		flowPanel.add(latitudeLongitudeLabel);
+		flowPanel.add(new Hidden("locale", LocaleInfo.getCurrentLocale().getLocaleName()));
 		flowPanel.add(ok);
 		flowPanel.add(reset);
 		form.add(flowPanel); //giati h forma pairnei ena pragma

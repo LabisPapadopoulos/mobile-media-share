@@ -42,7 +42,9 @@ public class UserServiceImpl implements UserService {
 					preparedStatement.setString(1, email);
 					final ResultSet resultSet = preparedStatement.executeQuery();
 					try {
-						return resultSet.next() ? new User(email, resultSet.getString("name"), resultSet.getString("photo")) : null;
+						final User user = resultSet.next() ? new User(email, resultSet.getString("name"), resultSet.getString("photo")) : null;
+						LOGGER.info((user == null) ? ("User " + email + " not found") : ("Retrieved user " + email));
+						return user;
 					} finally {
 						resultSet.close();
 					}
@@ -70,7 +72,7 @@ public class UserServiceImpl implements UserService {
 					final ResultSet resultSet = preparedStatement.executeQuery();
 					try {
 						final int count = resultSet.next() ? resultSet.getInt("count") : 0;
-						LOGGER.log(Level.INFO, "User " + email + " is " + ((count > 0) ? "valid" : "invalid"));
+						LOGGER.info("User " + email + " is " + ((count > 0) ? "valid" : "invalid"));
 						return (count > 0);
 					} finally {
 						resultSet.close();
@@ -97,7 +99,7 @@ public class UserServiceImpl implements UserService {
 					preparedStatement.setString(1, email);
 					preparedStatement.setString(2, password);
 					final int rows = preparedStatement.executeUpdate();
-					LOGGER.log(Level.INFO, ((rows > 0) ? ("Added user " + email) : ("User " + email + " already exists")));
+					LOGGER.info(((rows > 0) ? ("Added user " + email) : ("User " + email + " already exists")));
 					return rows > 0;
 				} finally {
 					//kleinei to preparedStatement dedomenou oti uparxei hdh
