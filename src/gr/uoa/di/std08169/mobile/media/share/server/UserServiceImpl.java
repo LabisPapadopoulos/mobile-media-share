@@ -55,8 +55,8 @@ public class UserServiceImpl implements UserService {
 				connection.close();
 			}
 		} catch (final SQLException e) {
-			LOGGER.log(Level.WARNING, "Error retrieving user", e);
-			throw new UserServiceException("Error retrieving user", e);
+			LOGGER.log(Level.WARNING, "Error retrieving user " + email, e);
+			throw new UserServiceException("Error retrieving user " + email, e);
 		}
 	}
 	

@@ -44,7 +44,7 @@ public class MediaServiceImpl implements MediaService {
 					addMedia.setBigDecimal(10, media.getLongitude());
 					addMedia.setBoolean(11, media.isPublic());
 					addMedia.executeUpdate();
-					LOGGER.info("Added media " + media.getId());
+					LOGGER.info("Added media " + media);
 				} finally {
 					addMedia.close();
 				}
@@ -52,8 +52,8 @@ public class MediaServiceImpl implements MediaService {
 				connection.close();
 			}
 		} catch (final SQLException e) {
-			LOGGER.log(Level.WARNING, "Error adding media", e);
-			throw new MediaServiceException("Error adding media", e);
+			LOGGER.log(Level.WARNING, "Error adding media " + media, e);
+			throw new MediaServiceException("Error adding media " + media, e);
 		}
 	}
 }
