@@ -1,6 +1,3 @@
 validate user emails via messages
 every page check session info
-equals
-hashcode
-toString
 

@@ -33,4 +33,19 @@ public class User {
 	public String getPhoto() {
 		return photo;
 	}
+	
+	@Override
+	public boolean equals(final Object object) {
+		return (object instanceof User) ? email.equals(((User) object).email) : false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return email.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return email;
+	}
 }
