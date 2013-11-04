@@ -43,6 +43,10 @@ public class UploadServlet extends HttpServlet {
 	private MediaService mediaService; //Java Bean
 	private UserService userService;
 	
+	/**
+	 * Arxikopoiei ta java beans me xrhsh Spring
+	 * Einai dunaton na peiraxtoun exwterika mesw enos property file.
+	 */
 	@Override
 	public void init() {
 		mediaDir = (File) WebApplicationContextUtils.getWebApplicationContext(getServletContext()).
@@ -53,6 +57,9 @@ public class UploadServlet extends HttpServlet {
 				getBean("userService", UserServiceImpl.class);
 	}
 	
+	/**
+	 * Anevazei ena arxeio kai kanei redirect sto map.html
+	 */
 	@Override
 	public void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
 		if ((String) request.getSession().getAttribute("email") == null) {
@@ -132,7 +139,7 @@ public class UploadServlet extends HttpServlet {
 					fileItem.delete();
 				}
 			}
-			latitude = new BigDecimal(0);
+			latitude = new BigDecimal(0); // TODO
 			longitude = new BigDecimal(0);
 			
 			
@@ -154,7 +161,7 @@ public class UploadServlet extends HttpServlet {
 			}
 			mediaService.addMedia(new Media(id, type, size, duration, user, created, edited, title, latitude,
 					longitude, publik));
-			LOGGER.info("User " + user.getEmail() + " uploaded media " + id);
+			LOGGER.info("User " + user + " uploaded media " + id);
 			response.sendRedirect(String.format(MAP_URL, URLEncoder.encode(locale, UTF_8)));
 		} catch (final FileUploadException e) {
 			LOGGER.log(Level.WARNING, "Error parsing request", e);

@@ -44,17 +44,26 @@ public class LoginServlet extends HttpServlet {
 	
 	//Tin doGet tha tin kaloun oles oi othones ektos apo tin login gia na doun an o xrhsths einai
 	//'hdh sundedemenos. H apantish tha einai to email tou xrhsth 'h tipota an den einai sundedemenos
+	/**
+	 * Epistrefei ton trexon logarismeno xrhsth
+	 */
 	@Override
 	public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
 		//gia na parsaristei to string tis apantishs se html
  		response.setContentType("text/html");
 		final String email = (String) request.getSession().getAttribute("email");
-		if(email != null)
+		if(email != null) {
 			response.getWriter().println(email);
+			LOGGER.info("Current user is " + email);
+		} else
+			LOGGER.info("User has not yet logged in");
 		//teleiwse h apantish
 		response.getWriter().close();
 	}
 	
+	/**
+	 * Log in users.
+	 */
 	@Override
 	public void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
 		//Elegxos an to request einai multipart form data
