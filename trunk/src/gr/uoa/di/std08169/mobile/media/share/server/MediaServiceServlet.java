@@ -1,5 +1,7 @@
 package gr.uoa.di.std08169.mobile.media.share.server;
 
+import java.util.Date;
+
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -7,6 +9,9 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import gr.uoa.di.std08169.mobile.media.share.client.services.MediaService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.MediaServiceException;
 import gr.uoa.di.std08169.mobile.media.share.shared.Media;
+import gr.uoa.di.std08169.mobile.media.share.shared.MediaResult;
+import gr.uoa.di.std08169.mobile.media.share.shared.MediaType;
+import gr.uoa.di.std08169.mobile.media.share.shared.User;
 
 //* extends RemoteServiceServlet: gia na borei na kaleitai mesw diktuou 
 //(Gia na ulopoihthei to UserServiceAsync)
@@ -16,6 +21,7 @@ public class MediaServiceServlet extends RemoteServiceServlet implements MediaSe
 	private static final long serialVersionUID = 1L;
 
 	private MediaService mediaService;
+	
 
 	//init gia to servlet
 	@Override
@@ -30,10 +36,19 @@ public class MediaServiceServlet extends RemoteServiceServlet implements MediaSe
 		mediaService = (MediaService) WebApplicationContextUtils.
 				getWebApplicationContext(getServletContext()).getBean("mediaService", MediaServiceImpl.class);
 	}
+	
+	@Override
+	public MediaResult getMedia(final String title, final MediaType type, final User user,
+			final Date createdFrom, final Date createdTo, final Date editedFrom, final Date editedTo,
+			final Boolean publik, final Integer start, final Integer length, final String orderField,
+			final boolean ascending) throws MediaServiceException {
+		return mediaService.getMedia(title, type, user, createdFrom, createdTo, editedFrom, editedTo, 
+				publik, start, length, orderField, ascending);
+	}
+
 
 	@Override
 	public void addMedia(final Media media) throws MediaServiceException {
 		mediaService.addMedia(media);
-	}
-	
+	}	
 }
