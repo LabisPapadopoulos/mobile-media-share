@@ -11,7 +11,6 @@ import gr.uoa.di.std08169.mobile.media.share.client.services.MediaServiceExcepti
 import gr.uoa.di.std08169.mobile.media.share.shared.Media;
 import gr.uoa.di.std08169.mobile.media.share.shared.MediaResult;
 import gr.uoa.di.std08169.mobile.media.share.shared.MediaType;
-import gr.uoa.di.std08169.mobile.media.share.shared.User;
 
 //* extends RemoteServiceServlet: gia na borei na kaleitai mesw diktuou 
 //(Gia na ulopoihthei to UserServiceAsync)
@@ -38,7 +37,7 @@ public class MediaServiceServlet extends RemoteServiceServlet implements MediaSe
 	}
 	
 	@Override
-	public MediaResult getMedia(final String title, final MediaType type, final User user,
+	public MediaResult getMedia(final String title, final MediaType type, final String user,
 			final Date createdFrom, final Date createdTo, final Date editedFrom, final Date editedTo,
 			final Boolean publik, final Integer start, final Integer length, final String orderField,
 			final boolean ascending) throws MediaServiceException {

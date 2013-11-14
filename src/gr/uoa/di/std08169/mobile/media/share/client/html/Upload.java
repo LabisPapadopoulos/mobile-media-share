@@ -151,25 +151,26 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 		Document.get().getBody().appendChild(Header.newHeader());
 		final FlowPanel flowPanel = new FlowPanel();
 		int i = 0;
-		final InlineLabel fileLabel = new InlineLabel("File");
+		final InlineLabel fileLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.file());
 		fileLabel.getElement().addClassName("label");
 		fileLabel.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
 		flowPanel.add(fileLabel);
 		flowPanel.add(file);
 		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
-		final InlineLabel titleLabel = new InlineLabel("Title");
+		final InlineLabel titleLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.title());
 		titleLabel.getElement().addClassName("label");
 		titleLabel.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
 		flowPanel.add(titleLabel);
 		flowPanel.add(title);
 		flowPanel.getElement().appendChild(Document.get().createBRElement());
-		final InlineLabel publicLabel = new InlineLabel("Public");
+		final InlineLabel publicLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.publik());
 		publicLabel.getElement().addClassName("label");
 		publicLabel.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
 		flowPanel.add(publicLabel);
 		flowPanel.add(publik);
 		flowPanel.getElement().appendChild(Document.get().createBRElement());
-		final InlineLabel latitudeLongitudeLabel = new InlineLabel("Latitude/Longitude");
+		final InlineLabel latitudeLongitudeLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.latitude() + 
+				"/" + MOBILE_MEDIA_SHARE_CONSTANTS.longitude());
 		latitudeLongitudeLabel.getElement().addClassName("label");
 		latitudeLongitudeLabel.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
 		flowPanel.add(latitudeLongitudeLabel);

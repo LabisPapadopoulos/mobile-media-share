@@ -8,7 +8,7 @@ import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 public class User_CustomFieldSerializer extends CustomFieldSerializer<User> {
 
 	public static void deserialize(final SerializationStreamReader reader, final User user) throws SerializationException {
-		throw new SerializationException(User.class.getName() + " can not be deserialized");
+//		throw new SerializationException(User.class.getName() + " can not be deserialized");
 	}
 	
 	public static User instantiate(final SerializationStreamReader reader) throws SerializationException {
@@ -26,7 +26,7 @@ public class User_CustomFieldSerializer extends CustomFieldSerializer<User> {
 
 	@Override
 	public void deserializeInstance(final SerializationStreamReader reader, final User user) throws SerializationException {
-		throw new SerializationException(User.class.getName() + " can not be deserialized");
+//		throw new SerializationException(User.class.getName() + " can not be deserialized");
 	}
 	
 	@Override

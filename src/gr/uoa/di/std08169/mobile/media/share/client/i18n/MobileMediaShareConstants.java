@@ -43,9 +43,15 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("Email")
 	public String email();
+	
+	@DefaultStringValue("File")
+	public String file();
 
 	@DefaultStringValue("Forgot Password?")
 	public String forgotPassword_(); //logw periergou xarakthra (?)
+	
+	@DefaultStringValue("Latitude")
+	public String latitude();
 	
 	@DefaultStringValue("List")
 	public String list();
@@ -55,6 +61,9 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("Logout")
 	public String logout();
+	
+	@DefaultStringValue("Longitude")
+	public String longitude();
 	
 	@DefaultStringValue("Map")
 	public String map();

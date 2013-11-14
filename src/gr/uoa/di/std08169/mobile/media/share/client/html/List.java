@@ -10,7 +10,6 @@ import gr.uoa.di.std08169.mobile.media.share.client.services.MediaServiceAsync;
 import gr.uoa.di.std08169.mobile.media.share.shared.Media;
 import gr.uoa.di.std08169.mobile.media.share.shared.MediaResult;
 import gr.uoa.di.std08169.mobile.media.share.shared.MediaType;
-import gr.uoa.di.std08169.mobile.media.share.shared.User;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -61,6 +60,9 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	private static final int MIN_PAGE_SIZE = 10;
 	private static final int MAX_PAGE_SIZE = 100;
 	private static final int PAGE_SIZE_STEP = 10;
+//	private final String type;
+//	private final long size;
+//	private final int duration;
 //	private final User user;
 //	private final Date created;
 //	private Date edited;
@@ -92,49 +94,45 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 			return Integer.toString(media.getDuration());
 		}
 	};
-//	
-//	private static final TextColumn TYPE = new TextColumn<Media>() {
-//		@Override
-//		public String getValue(final Media media) {
-//			return media.getType();
-//		}
-//	};
-//	private static final TextColumn TYPE = new TextColumn<Media>() {
-//		@Override
-//		public String getValue(final Media media) {
-//			return media.getType();
-//		}
-//	};
-//	private static final TextColumn TYPE = new TextColumn<Media>() {
-//		@Override
-//		public String getValue(final Media media) {
-//			return media.getType();
-//		}
-//	};
-//	private static final TextColumn TYPE = new TextColumn<Media>() {
-//		@Override
-//		public String getValue(final Media media) {
-//			return media.getType();
-//		}
-//	};
-//	private static final TextColumn TYPE = new TextColumn<Media>() {
-//		@Override
-//		public String getValue(final Media media) {
-//			return media.getType();
-//		}
-//	};
-//	private static final TextColumn TYPE = new TextColumn<Media>() {
-//		@Override
-//		public String getValue(final Media media) {
-//			return media.getType();
-//		}
-//	};
-//	private static final TextColumn TYPE = new TextColumn<Media>() {
-//		@Override
-//		public String getValue(final Media media) {
-//			return media.getType();
-//		}
-//	};
+//TODO {
+	private static final TextColumn<Media> USER = new TextColumn<Media>() {
+		@Override
+		public String getValue(final Media media) {
+			return media.getUser().getName();
+		}
+	};
+	private static final TextColumn<Media> CREATED = new TextColumn<Media>() { //Date created
+		@Override
+		public String getValue(final Media media) {
+			return media.getCreated().toString();
+		}
+	};
+	private static final TextColumn<Media> EDITED = new TextColumn<Media>() { //Date edited
+		@Override
+		public String getValue(final Media media) {
+			return media.getEdited().toString();
+		}
+	};
+	private static final TextColumn<Media> LATITUDE = new TextColumn<Media>() { //BigDecimal latitude
+		@Override
+		public String getValue(final Media media) {
+			return media.getLatitude().toString();
+		}
+	};
+	private static final TextColumn<Media> LONGITUDE = new TextColumn<Media>() { //BigDecimal longitude
+		@Override
+		public String getValue(final Media media) {
+			return media.getLongitude().toString();
+		}
+	};
+	private static final TextColumn<Media> PUBLIC = new TextColumn<Media>() { //boolean publik
+		@Override
+		public String getValue(final Media media) {
+			return String.valueOf(media.isPublic());
+		}
+	};
+//} TODO
+
 	//static block gia tis sthles gia prosthkh idiothtwn
 	static {
 		TITLE.setDataStoreName("title");
@@ -150,10 +148,32 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		DURATION.setSortable(true);
 		DURATION.setDefaultSortAscending(true);
 		//TODO
+//		private final User user;
+		USER.setDataStoreName("user name");
+		USER.setSortable(true);
+		USER.setDefaultSortAscending(true);
+//		private final Date created;
+		CREATED.setDataStoreName("created");
+		CREATED.setSortable(true);
+		CREATED.setDefaultSortAscending(true);
+//		private Date edited;
+		EDITED.setDataStoreName("edited");
+		EDITED.setSortable(true);
+		EDITED.setDefaultSortAscending(true);
+//		private BigDecimal latitude;
+		LATITUDE.setDataStoreName("latitude");
+		LATITUDE.setSortable(true);
+		LATITUDE.setDefaultSortAscending(true);
+//		private BigDecimal longitude;
+		LONGITUDE.setDataStoreName("longitude");
+		LONGITUDE.setSortable(true);
+		LONGITUDE.setDefaultSortAscending(true);
+//		private boolean publik;
+		PUBLIC.setDataStoreName("public");
+		PUBLIC.setSortable(true);
+		PUBLIC.setDefaultSortAscending(true);
 	}
-	
 
-	
 	//Search
 	private final TextBox title;
 	private final ListBox type; //dropdown
@@ -230,6 +250,19 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		mediaTable.addColumn(SIZE, MOBILE_MEDIA_SHARE_CONSTANTS.size());
 		mediaTable.addColumn(DURATION, MOBILE_MEDIA_SHARE_CONSTANTS.duration());
 		//TODO sthles
+//		private final User user;
+//		private final Date created;
+//		private Date edited;
+//		private String title;
+//		private BigDecimal latitude;
+//		private BigDecimal longitude;
+//		private boolean publik;
+		mediaTable.addColumn(USER, MOBILE_MEDIA_SHARE_CONSTANTS.user());
+		mediaTable.addColumn(CREATED, MOBILE_MEDIA_SHARE_CONSTANTS.createdFrom()); //createdFrom/To
+		mediaTable.addColumn(EDITED, MOBILE_MEDIA_SHARE_CONSTANTS.editedFrom()); //editedFrom/To
+		mediaTable.addColumn(LATITUDE, MOBILE_MEDIA_SHARE_CONSTANTS.latitude());
+		mediaTable.addColumn(LONGITUDE, MOBILE_MEDIA_SHARE_CONSTANTS.longitude());
+		mediaTable.addColumn(PUBLIC, MOBILE_MEDIA_SHARE_CONSTANTS.publik());
 		mediaTable.getColumnSortList().setLimit(1); //1 sthlh thn fora tha einai taxinomhmenh
 		//by default taxinomhse kata titlo (leitourgei san stoiva - taxinomei panda tin teleutaia sthlh)
 		mediaTable.getColumnSortList().push(TITLE);
@@ -248,13 +281,11 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	@Override
 	public void onClick(final ClickEvent clickEvent) { // clicking on download, edit or delete
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void onKeyUp(final KeyUpEvent keyUpEvent) { // typing into title or user
 		onRangeChanged(mediaTable); // TODO for user
-		
 	}
 	
 	@Override
@@ -294,7 +325,7 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		//MediaType epeidh einai ENUM me ena string epistrefetai ena instance
 		final MediaType type = this.type.getValue(this.type.getSelectedIndex()).isEmpty() ? null :
 				MediaType.valueOf(this.type.getValue(this.type.getSelectedIndex()));
-		final User user = null;
+		final String user = null;
 		final Date createdFrom = this.createdFrom.getValue();
 		final Date createdTo = this.createdTo.getValue();
 		final Date editedFrom = this.editedFrom.getValue();
@@ -308,8 +339,8 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 			mediaTable.getColumnSortList().get(0).getColumn().getDataStoreName();
 		final boolean ascending = (mediaTable.getColumnSortList().size() == 0) ? false : 
 			mediaTable.getColumnSortList().get(0).isAscending();
-		MEDIA_SERVICE.getMedia(title, type, user, createdFrom, createdTo, editedFrom, editedTo, publik, start, length, orderField, ascending,
-				new AsyncCallback<MediaResult>() {
+		MEDIA_SERVICE.getMedia(title, type, user, createdFrom, createdTo, editedFrom, editedTo, publik,
+				start, length, orderField, ascending, new AsyncCallback<MediaResult>() {
 			@Override
 			public void onFailure(final Throwable throwable) {//se front-end ston browser
 				//Afou egine Failure, bainei adeia Lista apo Media
@@ -317,6 +348,9 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 				updateRowCount(0, false);
 				selectionModel.clear();
 				onSelection(null);
+				Window.alert("Failure: " + throwable.getMessage());
+				Window.alert("Cause: "+ throwable.getCause());
+				throw new RuntimeException(throwable);
 			}
 
 			@Override
@@ -326,9 +360,11 @@ for (Media media : result.getMedia())
 Window.alert(media.getTitle());
 				//deixnei ta kainouria dedomena pou efere h onRangeChanged
 				updateRowData(start, result.getMedia()); //h selida pou efere
-				updateRowCount(result.getTotal(), true); //ananewnei sumfwna me tis sunolikes grammes pou sigoura gnwrizei ton arithmo (true)
+				//ananewnei sumfwna me tis sunolikes grammes pou sigoura gnwrizei ton arithmo (true)
+				updateRowCount(result.getTotal(), true);
 				selectionModel.clear(); //katharizei tin highlight grammh tou xrhsth
-				onSelectionChange(null); //kanei disable ta download, edit kai delete afou den einai kamia grammh epilegmenh
+				//kanei disable ta download, edit kai delete afou den einai kamia grammh epilegmenh
+				onSelectionChange(null);
 			}
 		});
 	}
@@ -339,7 +375,7 @@ Window.alert(media.getTitle());
 	}
 	
 	@Override
-	public void onSelectionChange(final SelectionChangeEvent selectionChangeEvent) { // selecting a row
+	public void onSelectionChange(final SelectionChangeEvent selectionChangeEvent) { // selecting a row		
 		//analoga me to epilegmeno pou edwse o xrhsths (se mia grammh)
 		final Media media = selectionModel.getSelectedObject();
 		//enable ta download, edit kai delete
