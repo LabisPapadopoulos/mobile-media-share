@@ -12,7 +12,7 @@ public class MediaResult_CustomFieldSerializer extends CustomFieldSerializer<Med
 	private Media_CustomFieldSerializer mediaSerializer = new Media_CustomFieldSerializer();
 	
 	public static void deserialize(final SerializationStreamReader reader, final MediaResult result) throws SerializationException {
-		throw new SerializationException(MediaResult.class.getName() + " can not be deserialized");
+//		throw new SerializationException(MediaResult.class.getName() + " can not be deserialized");
 	}
 	
 	public static MediaResult instantiate(final SerializationStreamReader reader) throws SerializationException {
@@ -33,7 +33,7 @@ public class MediaResult_CustomFieldSerializer extends CustomFieldSerializer<Med
 
 	@Override
 	public void deserializeInstance(final SerializationStreamReader reader, final MediaResult result) throws SerializationException {
-		throw new SerializationException(MediaResult.class.getName() + " can not be deserialized");
+//		throw new SerializationException(MediaResult.class.getName() + " can not be deserialized");
 	}
 	
 	@Override
