@@ -22,9 +22,7 @@ public class UserServiceException_CustomFieldSerializer extends CustomFieldSeria
 	 * @param exception
 	 * @throws SerializationException
 	 */
-	public static void deserialize(final SerializationStreamReader reader, final UserServiceException exception) throws SerializationException {
-		throw new SerializationException(UserServiceException.class.getName() + " can not be deserialized");
-	}
+	public static void deserialize(final SerializationStreamReader reader, final UserServiceException exception) throws SerializationException {}
 	
 	/**
 	 * Ftiaxnei ena gemato antikeimeno (ena UserServiceException)
@@ -51,9 +49,7 @@ public class UserServiceException_CustomFieldSerializer extends CustomFieldSeria
 	}
 
 	@Override
-	public void deserializeInstance(final SerializationStreamReader reader, final UserServiceException exception) throws SerializationException {
-		throw new SerializationException(UserServiceException.class.getName() + " can not be deserialized");
-	}
+	public void deserializeInstance(final SerializationStreamReader reader, final UserServiceException exception) throws SerializationException {}
 	
 	/**
 	 * Odhgeia pros to GWT gia na xerei na kalei tin instantiate kai oxi tin deserialize (gi' auto uparxei mesa kai to SerializationException)

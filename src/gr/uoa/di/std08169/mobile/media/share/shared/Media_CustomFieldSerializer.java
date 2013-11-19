@@ -11,9 +11,7 @@ import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 public class Media_CustomFieldSerializer extends CustomFieldSerializer<Media> {
 	private User_CustomFieldSerializer userSerializer = new User_CustomFieldSerializer();
 	
-	public static void deserialize(final SerializationStreamReader reader, final Media media) throws SerializationException {
-//		throw new SerializationException(Media.class.getName() + " can not be deserialized");
-	}
+	public static void deserialize(final SerializationStreamReader reader, final Media media) throws SerializationException {}
 	
 	public static Media instantiate(final SerializationStreamReader reader) throws SerializationException {
 		//Ta thelei me tin seira o reader gia na mhn paralhfthei kapoio stoixeio
@@ -24,11 +22,8 @@ public class Media_CustomFieldSerializer extends CustomFieldSerializer<Media> {
 		//Xrhsh allou CustomFieldSerializer gia na diavasei tupo User
 		final User user = User_CustomFieldSerializer.instantiate(reader);
 		//Diavazei to long pou antistoixei se timestamp kai gurnaei se Date
-//		final Date created = new Date(reader.readLong()); TODO
-//		reader.readLong();
-		final Date created = new Date();
-//		reader.readLong();
-		final Date edited = new Date();
+		final Date created = new Date(reader.readLong());
+		final Date edited = new Date(reader.readLong());
 		final String title = reader.readString();
 		final String latitude = reader.readString();
 		final String longitude = reader.readString();
@@ -42,8 +37,8 @@ public class Media_CustomFieldSerializer extends CustomFieldSerializer<Media> {
 		writer.writeLong(media.getSize());
 		writer.writeInt(media.getDuration());
 		User_CustomFieldSerializer.serialize(writer, media.getUser());
-//		writer.writeLong(media.getCreated().getTime());
-//		writer.writeLong(media.getEdited().getTime());
+		writer.writeLong(media.getCreated().getTime());
+		writer.writeLong(media.getEdited().getTime());
 		writer.writeString(media.getTitle());
 		writer.writeString(media.getLatitude().toString());
 		writer.writeString(media.getLongitude().toString());
@@ -51,9 +46,7 @@ public class Media_CustomFieldSerializer extends CustomFieldSerializer<Media> {
 	}
 
 	@Override
-	public void deserializeInstance(final SerializationStreamReader reader, final Media media) throws SerializationException {
-//		throw new SerializationException(Media.class.getName() + " can not be deserialized");
-	}
+	public void deserializeInstance(final SerializationStreamReader reader, final Media media) throws SerializationException {}
 	
 	@Override
 	public boolean hasCustomInstantiateInstance() {
@@ -70,13 +63,13 @@ public class Media_CustomFieldSerializer extends CustomFieldSerializer<Media> {
 		//Xrhsh allou CustomFieldSerializer gia na diavasei tupo User
 		final User user = userSerializer.instantiateInstance(reader);
 		//Diavazei to long pou antistoixei se timestamp kai gurnaei se Date
-		final Date created = new Date(/*reader.readLong() TODO */);
-		final Date edited = new Date(/*reader.readLong() TODO */);
+		final Date created = new Date(reader.readLong());
+		final Date edited = new Date(reader.readLong());
 		final String title = reader.readString();
 		final String latitude = reader.readString();
 		final String longitude = reader.readString();
 		final boolean publik = reader.readBoolean();
-		return new Media(id, type, size, duration, user, created, edited, title, new BigDecimal(latitude), new BigDecimal(longitude), publik);		
+		return new Media(id, type, size, duration, user, created, edited, title, new BigDecimal(latitude), new BigDecimal(longitude), publik);
 	}
 
 	@Override
@@ -86,8 +79,8 @@ public class Media_CustomFieldSerializer extends CustomFieldSerializer<Media> {
 		writer.writeLong(media.getSize());
 		writer.writeInt(media.getDuration());
 		userSerializer.serializeInstance(writer, media.getUser());
-//		writer.writeLong(media.getCreated().getTime());
-//		writer.writeLong(media.getEdited().getTime());
+		writer.writeLong(media.getCreated().getTime());
+		writer.writeLong(media.getEdited().getTime());
 		writer.writeString(media.getTitle());
 		writer.writeString(media.getLatitude().toString());
 		writer.writeString(media.getLongitude().toString());

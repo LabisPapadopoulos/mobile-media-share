@@ -7,9 +7,7 @@ import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 
 public class User_CustomFieldSerializer extends CustomFieldSerializer<User> {
 
-	public static void deserialize(final SerializationStreamReader reader, final User user) throws SerializationException {
-//		throw new SerializationException(User.class.getName() + " can not be deserialized");
-	}
+	public static void deserialize(final SerializationStreamReader reader, final User user) throws SerializationException {}
 	
 	public static User instantiate(final SerializationStreamReader reader) throws SerializationException {
 		final String email = reader.readString();
@@ -21,13 +19,11 @@ public class User_CustomFieldSerializer extends CustomFieldSerializer<User> {
 	public static void serialize(final SerializationStreamWriter writer, final User user) throws SerializationException {
 		writer.writeString(user.getEmail());
 		writer.writeString((user.getName() == null) ? "" : user.getName());
-		writer.writeObject((user.getPhoto() == null) ? "" : user.getPhoto());
+		writer.writeString((user.getPhoto() == null) ? "" : user.getPhoto());
 	}
 
 	@Override
-	public void deserializeInstance(final SerializationStreamReader reader, final User user) throws SerializationException {
-//		throw new SerializationException(User.class.getName() + " can not be deserialized");
-	}
+	public void deserializeInstance(final SerializationStreamReader reader, final User user) throws SerializationException {}
 	
 	@Override
 	public boolean hasCustomInstantiateInstance() {
@@ -46,6 +42,6 @@ public class User_CustomFieldSerializer extends CustomFieldSerializer<User> {
 	public void serializeInstance(final SerializationStreamWriter writer, final User user) throws SerializationException {
 		writer.writeString(user.getEmail());
 		writer.writeString((user.getName() == null) ? "" : user.getName());
-		writer.writeObject((user.getPhoto() == null) ? "" : user.getPhoto());
+		writer.writeString((user.getPhoto() == null) ? "" : user.getPhoto());
 	}
 }
