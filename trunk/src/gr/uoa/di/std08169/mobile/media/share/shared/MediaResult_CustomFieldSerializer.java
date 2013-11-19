@@ -1,6 +1,8 @@
 package gr.uoa.di.std08169.mobile.media.share.shared;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
@@ -11,9 +13,7 @@ import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 public class MediaResult_CustomFieldSerializer extends CustomFieldSerializer<MediaResult> {
 	private Media_CustomFieldSerializer mediaSerializer = new Media_CustomFieldSerializer();
 	
-	public static void deserialize(final SerializationStreamReader reader, final MediaResult result) throws SerializationException {
-//		throw new SerializationException(MediaResult.class.getName() + " can not be deserialized");
-	}
+	public static void deserialize(final SerializationStreamReader reader, final MediaResult result) throws SerializationException {}
 	
 	public static MediaResult instantiate(final SerializationStreamReader reader) throws SerializationException {
 		final int size = reader.readInt();
@@ -32,9 +32,7 @@ public class MediaResult_CustomFieldSerializer extends CustomFieldSerializer<Med
 	}
 
 	@Override
-	public void deserializeInstance(final SerializationStreamReader reader, final MediaResult result) throws SerializationException {
-//		throw new SerializationException(MediaResult.class.getName() + " can not be deserialized");
-	}
+	public void deserializeInstance(final SerializationStreamReader reader, final MediaResult result) throws SerializationException {}
 	
 	@Override
 	public boolean hasCustomInstantiateInstance() {

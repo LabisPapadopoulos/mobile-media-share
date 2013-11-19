@@ -22,9 +22,7 @@ public class MediaServiceException_CustomFieldSerializer extends CustomFieldSeri
 	 * @param exception
 	 * @throws SerializationException
 	 */
-	public static void deserialize(final SerializationStreamReader reader, final MediaServiceException exception) throws SerializationException {
-		throw new SerializationException(MediaServiceException.class.getName() + " can not be deserialized");
-	}
+	public static void deserialize(final SerializationStreamReader reader, final MediaServiceException exception) throws SerializationException {}
 	
 	/**
 	 * Ftiaxnei ena gemato antikeimeno (ena MediaServiceException)
@@ -51,9 +49,7 @@ public class MediaServiceException_CustomFieldSerializer extends CustomFieldSeri
 	}
 
 	@Override
-	public void deserializeInstance(final SerializationStreamReader reader, final MediaServiceException exception) throws SerializationException {
-		throw new SerializationException(MediaServiceException.class.getName() + " can not be deserialized");
-	}
+	public void deserializeInstance(final SerializationStreamReader reader, final MediaServiceException exception) throws SerializationException {}
 	
 	/**
 	 * Odhgeia pros to GWT gia na xerei na kalei tin instantiate kai oxi tin deserialize (gi' auto uparxei mesa kai to SerializationException)
