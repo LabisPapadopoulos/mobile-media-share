@@ -10,6 +10,12 @@ public interface MobileMediaShareMessages extends Messages {
 	@DefaultMessage("Error creating user: {0}")
 	public String errorCreatingUser(final String message);
 	
+	@DefaultMessage("Error retrieving media: {0}")
+	public String errorRetrievingMedia(final String message);
+	
 	@DefaultMessage("User {0} already exists")
 	public String userAlreadyExists(final String email);
+	
+	@DefaultMessage("{0} ({1}@...)")
+	public String userFormat(final String name, final String email);
 }

@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,9 +14,14 @@ import javax.sql.DataSource;
 import gr.uoa.di.std08169.mobile.media.share.client.services.UserService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.UserServiceException;
 import gr.uoa.di.std08169.mobile.media.share.shared.User;
+import gr.uoa.di.std08169.mobile.media.share.shared.UserResult;
 
 //UserDao
 public class UserServiceImpl implements UserService {
+	private static final String GET_USERS = "SELECT email, name, photo " +
+											"FROM Users " +
+											"WHERE (email LIKE ('%' || ? || '%')) OR (name LIKE ('%' || ? || '%')) " +
+											"LIMIT ?;";
 	//apothikeush stin vash me MD5 gia logous asfaleias
 	private static final String GET_USER = "SELECT name, photo " +
 											"FROM Users " +
@@ -30,6 +37,38 @@ public class UserServiceImpl implements UserService {
 	
 	public void setDataSource(final DataSource dataSource) {
 		this.dataSource = dataSource;
+	}
+	
+	@Override
+	public UserResult getUsers(final String query, final int limit) throws UserServiceException {
+		try {
+			final Connection connection = dataSource.getConnection();
+			try {
+				final PreparedStatement preparedStatement = connection.prepareStatement(GET_USERS);
+				try {
+					preparedStatement.setString(1, query);
+					preparedStatement.setString(2, query);
+					preparedStatement.setInt(3, limit);
+					final ResultSet resultSet = preparedStatement.executeQuery();
+					try {
+						final List<User> users = new ArrayList<User>();
+						while (resultSet.next())
+							users.add(new User(resultSet.getString("email"), resultSet.getString("name"), resultSet.getString("photo")));
+						LOGGER.info("Retrieved " + users.size() + " users (query: " + query + ", limit: " + limit + ")");
+						return new UserResult(users, users.size());
+					} finally {
+						resultSet.close();
+					}
+				} finally {
+					preparedStatement.close();
+				}
+			} finally {
+				connection.close();
+			}
+		} catch (final SQLException e) {
+			LOGGER.log(Level.WARNING, "Error retrieving users (query: " + query + ", limit: " + limit + ")", e);
+			throw new UserServiceException("Error retrieving users (query: " + query + ", limit: " + limit + ")", e);
+		}
 	}
 	
 	@Override

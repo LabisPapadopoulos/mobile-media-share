@@ -1,8 +1,6 @@
 package gr.uoa.di.std08169.mobile.media.share.shared;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
