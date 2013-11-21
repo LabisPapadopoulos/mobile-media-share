@@ -7,6 +7,8 @@ import com.google.gwt.i18n.client.LocalizableResource;
 //ftiaxnei mono tou to GWT ulopoihsh.
 @LocalizableResource.DefaultLocale("en") //oti akolouthei einai agglika
 public interface MobileMediaShareConstants extends Constants {
+	@DefaultStringValue("<anonymous>")
+	public String _anonymous_();
 	
 	@DefaultStringValue("Any Type")
 	public String anyType();
@@ -16,6 +18,9 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("Confirm Password")
 	public String confirmPassword();
+	
+	@DefaultStringValue("Created")
+	public String created();
 	
 	@DefaultStringValue("Created From")
 	public String createdFrom();
@@ -34,6 +39,9 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("Edit")
 	public String edit();
+	
+	@DefaultStringValue("Edited")
+	public String edited();
 	
 	@DefaultStringValue("Edited From")
 	public String editedFrom();
@@ -106,6 +114,17 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("Size")
 	public String size();
+	
+	//# -> psifio, an einai 0 den to deixnei
+	//0 -> an einai 0, tha to deixei
+	@DefaultStringValue("0.### B")
+	public String sizeBytesFormat();
+	
+	@DefaultStringValue("0.### KB")
+	public String sizeKilobytesFormat();
+	
+	@DefaultStringValue("0.### MB")
+	public String sizeMegabytesFormat();
 	
 	@DefaultStringValue("Title")
 	public String title();

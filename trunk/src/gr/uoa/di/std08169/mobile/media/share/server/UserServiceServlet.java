@@ -5,6 +5,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import gr.uoa.di.std08169.mobile.media.share.client.services.UserService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.UserServiceException;
 import gr.uoa.di.std08169.mobile.media.share.shared.User;
+import gr.uoa.di.std08169.mobile.media.share.shared.UserResult;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -29,6 +30,11 @@ public class UserServiceServlet extends RemoteServiceServlet implements UserServ
 		//(to opoio to userService mhlaei me tin bash).
 		userService = (UserService) WebApplicationContextUtils.
 				getWebApplicationContext(getServletContext()).getBean("userService", UserServiceImpl.class);
+	}
+	
+	@Override
+	public UserResult getUsers(final String query, final int limit) throws UserServiceException {
+		return userService.getUsers(query, limit);
 	}
 	
 	@Override

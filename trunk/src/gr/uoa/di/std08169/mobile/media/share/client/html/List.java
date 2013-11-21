@@ -5,8 +5,10 @@ import java.util.Date;
 
 import gr.uoa.di.std08169.mobile.media.share.client.i18n.MediaTypeConstants;
 import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants;
+import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessages;
 import gr.uoa.di.std08169.mobile.media.share.client.services.MediaService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.MediaServiceAsync;
+import gr.uoa.di.std08169.mobile.media.share.client.services.UserOracle;
 import gr.uoa.di.std08169.mobile.media.share.shared.Media;
 import gr.uoa.di.std08169.mobile.media.share.shared.MediaResult;
 import gr.uoa.di.std08169.mobile.media.share.shared.MediaType;
@@ -24,6 +26,14 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.URL;
+import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.HasKeyboardPagingPolicy;
@@ -33,7 +43,6 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -47,29 +56,33 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 //AsyncDataProvider<Media>: fernei dedomena (Media)  
-public class List extends AsyncDataProvider<Media> implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHandler, SelectionChangeEvent.Handler, SelectionHandler<SuggestOracle.Suggestion>, ValueChangeHandler<Date> {
+public class List extends AsyncDataProvider<Media> implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHandler, RequestCallback, 
+		SelectionChangeEvent.Handler, SelectionHandler<SuggestOracle.Suggestion>, ValueChangeHandler<Date> {
 	private static final MobileMediaShareConstants MOBILE_MEDIA_SHARE_CONSTANTS =
 			//kanei automath ulopoihsh to GWT tou interface
 			GWT.create(MobileMediaShareConstants.class);
 	private static final MediaTypeConstants MEDIA_TYPE_CONSTANTS =
 			//kanei automath ulopoihsh to GWT tou interface
 			GWT.create(MediaTypeConstants.class);
+	private static final MobileMediaShareUrls MOBILE_MEDIA_SHARE_URLS = 
+			GWT.create(MobileMediaShareUrls.class);
+	private static final MobileMediaShareMessages MOBILE_MEDIA_SHARE_MESSAGES =
+			GWT.create(MobileMediaShareMessages.class);
 	//Media Service se front-end
 	private static final MediaServiceAsync MEDIA_SERVICE =
 			GWT.create(MediaService.class);
+	
+	private static final NumberFormat SIZE_BYTES_FORMAT = 
+			NumberFormat.getFormat(MOBILE_MEDIA_SHARE_CONSTANTS.sizeBytesFormat());
+	private static final NumberFormat SIZE_KILOBYTES_FORMAT = 
+			NumberFormat.getFormat(MOBILE_MEDIA_SHARE_CONSTANTS.sizeKilobytesFormat());
+	private static final NumberFormat SIZE_MEGABYTES_FORMAT = 
+			NumberFormat.getFormat(MOBILE_MEDIA_SHARE_CONSTANTS.sizeMegabytesFormat());
+	
 	private static final int MIN_PAGE_SIZE = 10;
 	private static final int MAX_PAGE_SIZE = 100;
 	private static final int PAGE_SIZE_STEP = 10;
-//	private final String type;
-//	private final long size;
-//	private final int duration;
-//	private final User user;
-//	private final Date created;
-//	private Date edited;
-//	private String title;
-//	private BigDecimal latitude;
-//	private BigDecimal longitude;
-//	private boolean publik;
+	
 	private static final TextColumn<Media> TITLE = new TextColumn<Media>() {
 		@Override
 		public String getValue(final Media media) {
@@ -79,13 +92,20 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	private static final TextColumn<Media> TYPE = new TextColumn<Media>() {
 		@Override
 		public String getValue(final Media media) {
-			return media.getType();
+			return (MediaType.getMediaType(media.getType()) == null) ? "" : 
+				MEDIA_TYPE_CONSTANTS.getString(MediaType.getMediaType(media.getType()).name());
 		}
 	};
 	private static final TextColumn<Media> SIZE = new TextColumn<Media>() {
 		@Override
 		public String getValue(final Media media) {
-			return Long.toString(media.getSize());
+			//megathos arxeiou (B, KB, MB)
+			if (media.getSize() < 1024l)
+				return SIZE_BYTES_FORMAT.format(media.getSize());
+			else if (media.getSize() < 1024l * 1024l)
+				return SIZE_KILOBYTES_FORMAT.format(media.getSize() / 1024.0f);
+			else
+				return SIZE_MEGABYTES_FORMAT.format(media.getSize() / 1024.0f / 1024.0f);
 		}
 	};
 	private static final TextColumn<Media> DURATION = new TextColumn<Media>() {
@@ -94,11 +114,13 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 			return Integer.toString(media.getDuration());
 		}
 	};
-//TODO {
 	private static final TextColumn<Media> USER = new TextColumn<Media>() {
 		@Override
 		public String getValue(final Media media) {
-			return media.getUser().getName();
+			return MOBILE_MEDIA_SHARE_MESSAGES.userFormat(
+					(media.getUser().getName() == null) ? MOBILE_MEDIA_SHARE_CONSTANTS._anonymous_() :
+						media.getUser().getName(), media.getUser().getEmail().substring(0,
+								media.getUser().getEmail().indexOf('@')));
 		}
 	};
 	private static final TextColumn<Media> CREATED = new TextColumn<Media>() { //Date created
@@ -128,10 +150,9 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	private static final TextColumn<Media> PUBLIC = new TextColumn<Media>() { //boolean publik
 		@Override
 		public String getValue(final Media media) {
-			return String.valueOf(media.isPublic());
+			return media.isPublic() ? MOBILE_MEDIA_SHARE_CONSTANTS.publik() : MOBILE_MEDIA_SHARE_CONSTANTS._private();
 		}
 	};
-//} TODO
 
 	//static block gia tis sthles gia prosthkh idiothtwn
 	static {
@@ -147,28 +168,21 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		DURATION.setDataStoreName("duration");
 		DURATION.setSortable(true);
 		DURATION.setDefaultSortAscending(true);
-		//TODO
-//		private final User user;
-		USER.setDataStoreName("user name");
+		USER.setDataStoreName("\"user\"");
 		USER.setSortable(true);
 		USER.setDefaultSortAscending(true);
-//		private final Date created;
 		CREATED.setDataStoreName("created");
 		CREATED.setSortable(true);
 		CREATED.setDefaultSortAscending(true);
-//		private Date edited;
 		EDITED.setDataStoreName("edited");
 		EDITED.setSortable(true);
 		EDITED.setDefaultSortAscending(true);
-//		private BigDecimal latitude;
 		LATITUDE.setDataStoreName("latitude");
 		LATITUDE.setSortable(true);
 		LATITUDE.setDefaultSortAscending(true);
-//		private BigDecimal longitude;
 		LONGITUDE.setDataStoreName("longitude");
 		LONGITUDE.setSortable(true);
 		LONGITUDE.setDefaultSortAscending(true);
-//		private boolean publik;
 		PUBLIC.setDataStoreName("public");
 		PUBLIC.setSortable(true);
 		PUBLIC.setDefaultSortAscending(true);
@@ -182,7 +196,7 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	private final DatePicker createdTo;
 	private final DatePicker editedFrom;
 	private final DatePicker editedTo;
-	private final CheckBox publik;
+	private final ListBox publik;
 	private final ListBox pageSize;
 	private final Button download;
 	private final Button edit;
@@ -201,7 +215,7 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		for (MediaType mediaType : MediaType.values())
 			type.addItem(MEDIA_TYPE_CONSTANTS.getString(mediaType.name()), mediaType.name());
 		type.addChangeHandler(this); //otan tou allaxei timh
-		user = new SuggestBox(); //TODO
+		user = new SuggestBox(new UserOracle());
 		user.addKeyUpHandler(this);
 		user.addSelectionHandler(this); //otan epilexei kati apo ta proteinomena
 		createdFrom = new DatePicker();
@@ -212,13 +226,11 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		editedFrom.addValueChangeHandler(this);
 		editedTo = new DatePicker();
 		editedTo.addValueChangeHandler(this);
-		publik = new CheckBox();
-		publik.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-			@Override
-			public void onValueChange(final ValueChangeEvent<Boolean> _) { // o xrhsths allaxe thn timh tou publik
-				onRangeChanged(mediaTable);
-			}
-		});
+		publik = new ListBox();
+		publik.addItem(MOBILE_MEDIA_SHARE_CONSTANTS.anyType(), "");
+		publik.addItem(MOBILE_MEDIA_SHARE_CONSTANTS.publik(), Boolean.TRUE.toString());
+		publik.addItem(MOBILE_MEDIA_SHARE_CONSTANTS._private(), Boolean.FALSE.toString());
+		publik.addChangeHandler(this);
 		pageSize = new ListBox();
 		for(int i = MIN_PAGE_SIZE; i <= MAX_PAGE_SIZE; i += PAGE_SIZE_STEP)
 			pageSize.addItem(Integer.toString(i), Integer.toString(i));
@@ -249,17 +261,9 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		mediaTable.addColumn(TYPE, MOBILE_MEDIA_SHARE_CONSTANTS.type());
 		mediaTable.addColumn(SIZE, MOBILE_MEDIA_SHARE_CONSTANTS.size());
 		mediaTable.addColumn(DURATION, MOBILE_MEDIA_SHARE_CONSTANTS.duration());
-		//TODO sthles
-//		private final User user;
-//		private final Date created;
-//		private Date edited;
-//		private String title;
-//		private BigDecimal latitude;
-//		private BigDecimal longitude;
-//		private boolean publik;
 		mediaTable.addColumn(USER, MOBILE_MEDIA_SHARE_CONSTANTS.user());
-		mediaTable.addColumn(CREATED, MOBILE_MEDIA_SHARE_CONSTANTS.createdFrom()); //createdFrom/To
-		mediaTable.addColumn(EDITED, MOBILE_MEDIA_SHARE_CONSTANTS.editedFrom()); //editedFrom/To
+		mediaTable.addColumn(CREATED, MOBILE_MEDIA_SHARE_CONSTANTS.created()); //createdFrom/To
+		mediaTable.addColumn(EDITED, MOBILE_MEDIA_SHARE_CONSTANTS.edited()); //editedFrom/To
 		mediaTable.addColumn(LATITUDE, MOBILE_MEDIA_SHARE_CONSTANTS.latitude());
 		mediaTable.addColumn(LONGITUDE, MOBILE_MEDIA_SHARE_CONSTANTS.longitude());
 		mediaTable.addColumn(PUBLIC, MOBILE_MEDIA_SHARE_CONSTANTS.publik());
@@ -283,6 +287,17 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		// TODO Auto-generated method stub
 	}
 
+	//Apo interface RequestCallback
+	@Override
+	public void onError(final Request request, final Throwable throwable) {
+		Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.login(
+				//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
+				URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
+				//kwdikopoieitai to url map epeidh pernaei san parametros (meta apo ?)
+				URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.list(
+						URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
+	}
+
 	@Override
 	public void onKeyUp(final KeyUpEvent keyUpEvent) { // typing into title or user
 		onRangeChanged(mediaTable); // TODO for user
@@ -290,6 +305,82 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	
 	@Override
 	public void onModuleLoad() { // set up HTML
+		try {
+			//RequestBuilder gia na kanoume ena GET request sto servlet login gia na paroume
+			//to session mas. RequestCallback (this) einai auto pou tha parei tin apantish asunxrona
+			new RequestBuilder(RequestBuilder.GET, "./loginServlet").sendRequest(null, this);
+		} catch (final RequestException _) {
+			//otidhpote paei strava, xana gurnaei stin login
+			//url pou theloume na mas paei
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.login(
+					//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
+					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
+					//kwdikopoieitai to url map epeidh pernaei san parametros (meta apo ?)
+					//an petuxei to login paei sto list html
+					URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.list(
+							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
+		}
+	}
+	
+	//AsyncDataProvider<Media> fernei dedomena.
+	//Kaleitai otan xreiazetai na erthoun nea dedomena (p.x SortHandler, ChangeHandler)
+	@Override
+	protected void onRangeChanged(final HasData<Media> hasData) { // update list rows
+		final String title = this.title.getValue().trim().isEmpty() ? null : this.title.getValue().trim();
+		//MediaType epeidh einai ENUM me ena string epistrefetai ena instance
+		final MediaType type = this.type.getValue(this.type.getSelectedIndex()).isEmpty() ? null :
+				MediaType.valueOf(this.type.getValue(this.type.getSelectedIndex()));
+		final String user = null;
+		final Date createdFrom = this.createdFrom.getValue();
+		final Date createdTo = this.createdTo.getValue();
+		final Date editedFrom = this.editedFrom.getValue();
+		final Date editedTo =  this.editedTo.getValue();
+		final Boolean publik = this.publik.getValue(this.publik.getSelectedIndex()).isEmpty() ? null : Boolean.valueOf(this.publik.getValue(this.publik.getSelectedIndex()));
+		pager.setPageSize(Integer.valueOf(pageSize.getValue(pageSize.getSelectedIndex())));
+		final int start = pager.getPageStart();
+		final int length = pager.getPageSize();
+		//Sortarisma ws pros to 1o stoixeio tis listas (an uparxei) opws legetai mesa sthn vash (getDataStoreName)
+		final String orderField = (mediaTable.getColumnSortList().size() == 0) ? null : 
+			mediaTable.getColumnSortList().get(0).getColumn().getDataStoreName();
+		final boolean ascending = (mediaTable.getColumnSortList().size() == 0) ? false : 
+			mediaTable.getColumnSortList().get(0).isAscending();
+		MEDIA_SERVICE.getMedia(title, type, user, createdFrom, createdTo, editedFrom, editedTo, publik,
+				start, length, orderField, ascending, new AsyncCallback<MediaResult>() {
+			@Override
+			public void onFailure(final Throwable throwable) {//se front-end ston browser
+				//Afou egine Failure, bainei adeia Lista apo Media
+				updateRowData(0, Collections.<Media>emptyList());
+				updateRowCount(0, false);
+				selectionModel.clear();
+				onSelection(null);
+				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingMedia(throwable.getMessage()));
+				throw new RuntimeException(throwable);
+			}
+
+			@Override
+			public void onSuccess(final MediaResult result) {
+				//deixnei ta kainouria dedomena pou efere h onRangeChanged
+				updateRowData(start, result.getMedia()); //h selida pou efere
+				//ananewnei sumfwna me tis sunolikes grammes pou sigoura gnwrizei ton arithmo (true)
+				updateRowCount(result.getTotal(), true);
+				selectionModel.clear(); //katharizei tin highlight grammh tou xrhsth
+				//kanei disable ta download, edit kai delete afou den einai kamia grammh epilegmenh
+				onSelectionChange(null);
+			}
+		});
+	}
+	
+	//Apo interface RequestCallback
+	@Override
+	public void onResponseReceived(final Request request, final Response response) {
+		//an den einai logged in o xrhsths
+		if ((response.getStatusCode() != 200) || (response.getText().isEmpty()))
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.login(
+					//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
+					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
+					//kwdikopoieitai to url map epeidh pernaei san parametros (meta apo ?)
+					URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.list(
+							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
 		Document.get().getBody().addClassName("bodyClass");
 		Document.get().getBody().appendChild(Header.newHeader());
 		RootPanel.get().add(new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.title()));
@@ -310,63 +401,12 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		RootPanel.get().add(publik);
 		RootPanel.get().add(new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.pageSize()));
 		RootPanel.get().add(pageSize);
+		Document.get().getBody().appendChild(Document.get().createBRElement());
 		RootPanel.get().add(download);
 		RootPanel.get().add(edit);
 		RootPanel.get().add(delete);
 		RootPanel.get().add(pager);
-		RootPanel.get().add(mediaTable);
-	}
-	
-	//AsyncDataProvider<Media> fernei dedomena.
-	//Kaleitai otan xreiazetai na erthoun nea dedomena (p.x SortHandler, ChangeHandler)
-	@Override
-	protected void onRangeChanged(final HasData<Media> hasData) { // update list rows
-		final String title = this.title.getValue().trim().isEmpty() ? null : this.title.getValue().trim();
-		//MediaType epeidh einai ENUM me ena string epistrefetai ena instance
-		final MediaType type = this.type.getValue(this.type.getSelectedIndex()).isEmpty() ? null :
-				MediaType.valueOf(this.type.getValue(this.type.getSelectedIndex()));
-		final String user = null;
-		final Date createdFrom = this.createdFrom.getValue();
-		final Date createdTo = this.createdTo.getValue();
-		final Date editedFrom = this.editedFrom.getValue();
-		final Date editedTo =  this.editedTo.getValue();
-		final boolean publik = this.publik.getValue();
-		pager.setPageSize(Integer.valueOf(pageSize.getValue(pageSize.getSelectedIndex())));
-		final int start = pager.getPageStart();
-		final int length = pager.getPageSize();
-		//Sortarisma ws pros to 1o stoixeio tis listas (an uparxei) opws legetai mesa sthn vash (getDataStoreName)
-		final String orderField = (mediaTable.getColumnSortList().size() == 0) ? null : 
-			mediaTable.getColumnSortList().get(0).getColumn().getDataStoreName();
-		final boolean ascending = (mediaTable.getColumnSortList().size() == 0) ? false : 
-			mediaTable.getColumnSortList().get(0).isAscending();
-		MEDIA_SERVICE.getMedia(title, type, user, createdFrom, createdTo, editedFrom, editedTo, publik,
-				start, length, orderField, ascending, new AsyncCallback<MediaResult>() {
-			@Override
-			public void onFailure(final Throwable throwable) {//se front-end ston browser
-				//Afou egine Failure, bainei adeia Lista apo Media
-				updateRowData(0, Collections.<Media>emptyList());
-				updateRowCount(0, false);
-				selectionModel.clear();
-				onSelection(null);
-				Window.alert("Failure: " + throwable.getMessage());
-				Window.alert("Cause: "+ throwable.getCause());
-				throw new RuntimeException(throwable);
-			}
-
-			@Override
-			public void onSuccess(final MediaResult result) {
-Window.alert("Found " + result + " media");
-for (Media media : result.getMedia())
-Window.alert(media.getTitle());
-				//deixnei ta kainouria dedomena pou efere h onRangeChanged
-				updateRowData(start, result.getMedia()); //h selida pou efere
-				//ananewnei sumfwna me tis sunolikes grammes pou sigoura gnwrizei ton arithmo (true)
-				updateRowCount(result.getTotal(), true);
-				selectionModel.clear(); //katharizei tin highlight grammh tou xrhsth
-				//kanei disable ta download, edit kai delete afou den einai kamia grammh epilegmenh
-				onSelectionChange(null);
-			}
-		});
+		RootPanel.get().add(mediaTable);		
 	}
 	
 	@Override

@@ -1,5 +1,5 @@
 -- ------------------------------------------------------------------
--- Ta kanei o diaxeirisths xrhsths postgres (psql san postgres)
+-- Ta kanei o diaxeirisths xrhsths postgres (psql san postgres xwris na exei mpei se sygkekrimmenh vash)
 
 DROP DATABASE IF EXISTS "mobile-media-share";
 -- Xrhsths mobile-media-share
@@ -7,11 +7,23 @@ DROP USER "mobile-media-share";
 CREATE USER "mobile-media-share" WITH PASSWORD 'medi@sh@re';
 -- Bash mobile-media-share
 CREATE DATABASE "mobile-media-share" OWNER "mobile-media-share";
+
+-- Ta kanei o diaxeirisths xrhsths postgres (psql san postgres all afou mpei se sygkekrimmenh vash)
+DROP FUNCTION IF EXISTS match(TEXT, TEXT);
+CREATE FUNCTION match(string TEXT, term TEXT) RETURNS BOOLEAN IMMUTABLE STRICT LANGUAGE PLPerlU AS $$
+	use Unicode::Normalize;
+	$text = NFD($_[0]);
+	$text =~ s/\p{InCombiningDiacriticalMarks}+//g;
+	$term = NFD($_[1]);
+	$term =~ s/\p{InCombiningDiacriticalMarks}+//g;
+	return ((index(uc($text), uc($term)) != -1)  || (index(lc($text), lc($term)) != -1)) ? 1 : 0;
+$$;
+
 -- -------------------------------------------------------------------
 
 -- psql -h localhost -U 'mobile-media-share' -W (ta kanei o xrhsths mobile-media-share)
--- Pinakes
 
+-- Pinakes
 -- Drop ton Media prwta epeidh exei foreign key ston Users
 DROP TABLE IF EXISTS Media CASCADE;
 

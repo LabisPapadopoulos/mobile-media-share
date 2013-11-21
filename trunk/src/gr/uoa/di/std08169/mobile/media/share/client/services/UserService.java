@@ -1,9 +1,10 @@
 package gr.uoa.di.std08169.mobile.media.share.client.services;
 
-import gr.uoa.di.std08169.mobile.media.share.shared.User;
-
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+
+import gr.uoa.di.std08169.mobile.media.share.shared.User;
+import gr.uoa.di.std08169.mobile.media.share.shared.UserResult;
 
 //RemoteService: Epeidh o client tha ulopoihthei se javascript kai to back-end se java
 //To userService einai ena servlet pou orizetai sto web.xml kai xekinaei me to pou xekinaei
@@ -11,6 +12,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("../userService") //S' auto to link tha vrisketai to remote service
 public interface UserService extends RemoteService {
 	// getUsers
+	public UserResult getUsers(final String query, final int limit) throws UserServiceException;
 	public User getUser(final String email) throws UserServiceException;
 	public boolean isValidUser(final String email, final String password) throws UserServiceException;
 	
