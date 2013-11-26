@@ -42,7 +42,7 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 	private final FormPanel form;
 	private final FileUpload file;
 	private final TextBox title;
-//	private final GoogleMap map; //[Latitude, Longitude]
+//	private final GoogleMap map; //TODO [Latitude, Longitude]
 	private final CheckBox publik;
 	private final Button ok;
 	private final Button reset;

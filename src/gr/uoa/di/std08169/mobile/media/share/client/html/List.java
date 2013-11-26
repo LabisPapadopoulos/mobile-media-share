@@ -9,9 +9,11 @@ import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessage
 import gr.uoa.di.std08169.mobile.media.share.client.services.MediaService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.MediaServiceAsync;
 import gr.uoa.di.std08169.mobile.media.share.client.services.UserOracle;
+import gr.uoa.di.std08169.mobile.media.share.client.services.UserSuggestion;
 import gr.uoa.di.std08169.mobile.media.share.shared.Media;
 import gr.uoa.di.std08169.mobile.media.share.shared.MediaResult;
 import gr.uoa.di.std08169.mobile.media.share.shared.MediaType;
+import gr.uoa.di.std08169.mobile.media.share.shared.User;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -204,6 +206,7 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	private final SimplePager pager; //Gia pagination
 	private final SingleSelectionModel<Media> selectionModel; //gia highlight kai epilogh grammhs
 	private final CellTable<Media> mediaTable; //Pinakas gia emfanish twn Media
+	private User selectedUser;
 	
 	public List() {
 		title = new TextBox();
@@ -274,22 +277,47 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		pager.setDisplay(mediaTable);
 		//O AsyncDataProvider tha vazei dedomena stin lista
 		addDataDisplay(mediaTable);
+		selectedUser = null;
 	}
 
 	//Gia allagh ston typo h sto megethos selidas apo ton xrhsth
 	@Override
-	public void onChange(final ChangeEvent changeEvent) {
-		onRangeChanged(mediaTable);
+	public void onChange(final ChangeEvent _) {
+		onRangeChanged(null);
 	}
 	
 	@Override
 	public void onClick(final ClickEvent clickEvent) { // clicking on download, edit or delete
-		// TODO Auto-generated method stub
+		if (clickEvent.getSource() == download)
+			//Anoigei neo tab pou tha trexei tin doGet gia na katevei to arxeio
+			Window.open(MOBILE_MEDIA_SHARE_URLS.download(URL.encodeQueryString(selectionModel.getSelectedObject().getId())), "_blank", "");
+		else if (clickEvent.getSource() == edit) {
+			
+		} /* else if ((clickEvent.getSource() == delete) && // TODO
+				Window.confirm(MOBILE_MEDIA_SHARE_CONSTANTS.areYouSureYouWantToDeleteThisMedia())) {
+			// delete file
+			MEDIA_SERVICE.deleteMedia(selectionModel.getSelectedObject().getId(), new AsyncCallback<Void>() {
+				@Override
+				public void onFailure(final Throwable throwable) {
+					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorDeletingMedia(throwable.getMessage()));
+				}
+				
+				@Override
+				public void onSuccess(final Void _) {
+					//katharizei to highlight tou pinaka
+					selectionModel.clear();
+					//apenergopoiountai ta koubia (download, edit, delete)
+					onSelectionChange(null);
+					//fernei nea dedomena ston pinaka
+					onRangeChanged(null);
+				}
+			});
+		}*/
 	}
 
 	//Apo interface RequestCallback
 	@Override
-	public void onError(final Request request, final Throwable throwable) {
+	public void onError(final Request _, final Throwable throwable) {
 		Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.login(
 				//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
 				URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
@@ -300,7 +328,17 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 
 	@Override
 	public void onKeyUp(final KeyUpEvent keyUpEvent) { // typing into title or user
-		onRangeChanged(mediaTable); // TODO for user
+		//an ta dedomena tou text box den tairiazoun me ton epilegmeno xrhsth,
+		//o epilegmenos xrhsths ginetai null
+		//new UserSuggestion(selectedUser).getReplacementString(): to proteinomeno gia ton selectedUser, 
+		//tha prepei na einai grammeno an einai epilegmenos o selectedUser
+		//user.getValue(): to grammeno sto suggest box
+		if ((keyUpEvent.getSource() == user) && //paththike plhktro sto suggest box
+				(selectedUser != null) && //uphrxe dialegmenos xrhsths
+				//h timh tou suggest box de symfwnei me to dialegmeno xrhsth
+				(!new UserSuggestion(selectedUser).getReplacementString().equals(user.getValue())))
+			selectedUser = null; // dialexe ton kanena
+		onRangeChanged(null);
 	}
 	
 	@Override
@@ -325,17 +363,17 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	//AsyncDataProvider<Media> fernei dedomena.
 	//Kaleitai otan xreiazetai na erthoun nea dedomena (p.x SortHandler, ChangeHandler)
 	@Override
-	protected void onRangeChanged(final HasData<Media> hasData) { // update list rows
+	protected void onRangeChanged(final HasData<Media> _) { // update list rows
 		final String title = this.title.getValue().trim().isEmpty() ? null : this.title.getValue().trim();
 		//MediaType epeidh einai ENUM me ena string epistrefetai ena instance
 		final MediaType type = this.type.getValue(this.type.getSelectedIndex()).isEmpty() ? null :
 				MediaType.valueOf(this.type.getValue(this.type.getSelectedIndex()));
-		final String user = null;
 		final Date createdFrom = this.createdFrom.getValue();
 		final Date createdTo = this.createdTo.getValue();
 		final Date editedFrom = this.editedFrom.getValue();
 		final Date editedTo =  this.editedTo.getValue();
-		final Boolean publik = this.publik.getValue(this.publik.getSelectedIndex()).isEmpty() ? null : Boolean.valueOf(this.publik.getValue(this.publik.getSelectedIndex()));
+		final Boolean publik = this.publik.getValue(this.publik.getSelectedIndex()).isEmpty() ? null : 
+			Boolean.valueOf(this.publik.getValue(this.publik.getSelectedIndex()));
 		pager.setPageSize(Integer.valueOf(pageSize.getValue(pageSize.getSelectedIndex())));
 		final int start = pager.getPageStart();
 		final int length = pager.getPageSize();
@@ -344,8 +382,9 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 			mediaTable.getColumnSortList().get(0).getColumn().getDataStoreName();
 		final boolean ascending = (mediaTable.getColumnSortList().size() == 0) ? false : 
 			mediaTable.getColumnSortList().get(0).isAscending();
-		MEDIA_SERVICE.getMedia(title, type, user, createdFrom, createdTo, editedFrom, editedTo, publik,
-				start, length, orderField, ascending, new AsyncCallback<MediaResult>() {
+		MEDIA_SERVICE.getMedia(title, type, (selectedUser == null) ? null : selectedUser.getEmail(),
+				createdFrom, createdTo, editedFrom, editedTo, publik, start, length, orderField, ascending, 
+				new AsyncCallback<MediaResult>() {
 			@Override
 			public void onFailure(final Throwable throwable) {//se front-end ston browser
 				//Afou egine Failure, bainei adeia Lista apo Media
@@ -409,13 +448,16 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		RootPanel.get().add(mediaTable);		
 	}
 	
+	//Otan dialegei o xrhsths sugkekrimenh protash
 	@Override
 	public void onSelection(final SelectionEvent<SuggestOracle.Suggestion> selectionEvent) { // selecting a user
-		// TODO Auto-generated method stub
+		selectedUser = (selectionEvent.getSelectedItem() instanceof UserSuggestion) ? 
+				((UserSuggestion) selectionEvent.getSelectedItem()).getUser() : null;
+		onRangeChanged(null); //fernei dedomena gi' auton (epilegmeno) ton xrhsth
 	}
 	
 	@Override
-	public void onSelectionChange(final SelectionChangeEvent selectionChangeEvent) { // selecting a row		
+	public void onSelectionChange(final SelectionChangeEvent _) { // selecting a row		
 		//analoga me to epilegmeno pou edwse o xrhsths (se mia grammh)
 		final Media media = selectionModel.getSelectedObject();
 		//enable ta download, edit kai delete
@@ -425,7 +467,7 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	}
 
 	@Override
-	public void onValueChange(final ValueChangeEvent<Date> valueChangeEvent) { // changing created from, created to, edited from or edited to values
-		onRangeChanged(mediaTable);
+	public void onValueChange(final ValueChangeEvent<Date> _) { // changing created from, created to, edited from or edited to values
+		onRangeChanged(null);
 	}
 }

@@ -3,6 +3,9 @@ package gr.uoa.di.std08169.mobile.media.share.client.html;
 import com.google.gwt.i18n.client.Messages;
 
 public interface MobileMediaShareUrls extends Messages {
+	@DefaultMessage("./uploadServlet?id={0}")
+	public String download(final String id);
+	
 	@DefaultMessage("./images/locales/{0}.png")
 	public String localeImage(final String locale);
 

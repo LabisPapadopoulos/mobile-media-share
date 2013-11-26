@@ -19,4 +19,5 @@ public interface MediaServiceAsync {
 			final Integer start, final Integer length, final String orderField, final boolean ascending,
 			final AsyncCallback<MediaResult> callback);
 	public void addMedia(final Media media, final AsyncCallback<Void> callback);
+	public void deleteMedia(final String id, final AsyncCallback<Void> callback);
 }

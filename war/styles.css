@@ -13,7 +13,8 @@ body.bodyClass {
 	background-color: whitesmoke;
 	margin-right: auto;
 	margin-left: auto;
-	width: 850px;
+	/*width: 850px;*/
+	width: 950px;
 	min-height: 400px;
 	border: 1px solid black;
 	border-radius: 15px;
