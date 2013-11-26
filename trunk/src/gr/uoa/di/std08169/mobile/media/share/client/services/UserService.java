@@ -24,6 +24,6 @@ public interface UserService extends RemoteService {
 	 * @throws UserServiceException if any errors occur
 	 */
 	public boolean addUser(final String email, final String password) throws UserServiceException;
-	// editUser
-	// deleteUser
+	//TODO editUser
+	//TODO deleteUser
 }

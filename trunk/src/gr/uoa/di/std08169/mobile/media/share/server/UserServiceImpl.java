@@ -20,7 +20,7 @@ import gr.uoa.di.std08169.mobile.media.share.shared.UserResult;
 public class UserServiceImpl implements UserService {
 	private static final String GET_USERS = "SELECT email, name, photo " +
 											"FROM Users " +
-											"WHERE (email LIKE ('%' || ? || '%')) OR (name LIKE ('%' || ? || '%')) " +
+											"WHERE match(email, ?) OR match(name, ?) " +
 											"LIMIT ?;";
 	//apothikeush stin vash me MD5 gia logous asfaleias
 	private static final String GET_USER = "SELECT name, photo " +

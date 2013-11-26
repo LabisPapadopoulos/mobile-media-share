@@ -6,6 +6,9 @@ import com.google.gwt.i18n.client.Messages;
 //Messages: Gia mhnumata me parametrous 
 @LocalizableResource.DefaultLocale("en")
 public interface MobileMediaShareMessages extends Messages {
+	@DefaultMessage("{0}@...")
+	public String emailFormat(final String email);
+	
 	//{0} to prwto orisma (message)
 	@DefaultMessage("Error creating user: {0}")
 	public String errorCreatingUser(final String message);

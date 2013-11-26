@@ -12,10 +12,15 @@ public class UserSuggestion implements SuggestOracle.Suggestion {
 			GWT.create(MobileMediaShareMessages.class);
 	private static final MobileMediaShareConstants MOBILE_MEDIA_SHARE_CONSTANTS = 
 			GWT.create(MobileMediaShareConstants.class);
+	private static final char EMAIL_DELIMITER = '@';
 	private final User user;
 	
 	public UserSuggestion(final User user) {
 		this.user = user;
+	}
+	
+	public User getUser() {
+		return user;
 	}
 	
 	//Methodoi gia emfanish xrhstwn
@@ -25,13 +30,13 @@ public class UserSuggestion implements SuggestOracle.Suggestion {
 		// Labis (labis@...)
 		return MOBILE_MEDIA_SHARE_MESSAGES.userFormat(
 				(user.getName() == null) ? MOBILE_MEDIA_SHARE_CONSTANTS._anonymous_() : user.getName(), 
-				user.getEmail().substring(0, user.getEmail().indexOf('@')));
+				user.getEmail().substring(0, user.getEmail().indexOf(EMAIL_DELIMITER)));
 	}
 
 	//ti tha deixnei ston xrhsth afou dialexei (panw sto suggestBox)
 	@Override
 	public String getReplacementString() {
-		return user.getEmail();
+		return MOBILE_MEDIA_SHARE_MESSAGES.emailFormat(user.getEmail().substring(0, user.getEmail().indexOf(EMAIL_DELIMITER)));
 	}
 
 }

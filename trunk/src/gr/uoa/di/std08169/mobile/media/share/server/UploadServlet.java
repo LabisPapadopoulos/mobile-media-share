@@ -1,6 +1,7 @@
 package gr.uoa.di.std08169.mobile.media.share.server;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +28,7 @@ import gr.uoa.di.std08169.mobile.media.share.client.services.MediaServiceExcepti
 import gr.uoa.di.std08169.mobile.media.share.client.services.UserService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.UserServiceException;
 import gr.uoa.di.std08169.mobile.media.share.shared.Media;
+import gr.uoa.di.std08169.mobile.media.share.shared.MediaType;
 import gr.uoa.di.std08169.mobile.media.share.shared.User;
 
 public class UploadServlet extends HttpServlet {
@@ -55,6 +57,53 @@ public class UploadServlet extends HttpServlet {
 				getBean("mediaService", MediaServiceImpl.class);
 		userService = (UserService) WebApplicationContextUtils.getWebApplicationContext(getServletContext()).
 				getBean("userService", UserServiceImpl.class);
+	}
+	
+	/**
+	 * Katevazei ena arxeio
+	 */
+	@Override
+	public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
+		//elenxos oti uparxei email sto session
+		if ((String) request.getSession().getAttribute("email") == null) {
+			LOGGER.warning("Authentication required");
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication required"); //401 Unauthorized
+			return;
+		}
+		try {
+			//elenxos oti o xrhsths einai gnwstos (oti uparxei stin vash)  
+			final User user = userService.getUser((String) request.getSession().getAttribute("email"));
+			if (user == null) {
+				LOGGER.warning("Access denied");
+				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
+				return;
+			}
+			final String id = request.getParameter("id");
+			if (id == null) {
+				LOGGER.warning("Bad request");
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request"); //400 Bad request
+				return;
+			}
+//			final Media media = mediaService.getMedia(id); TODO
+//			response.setContentType(media.getType());
+			response.setHeader("Content-disposition", "attachment; filename=media"/* + media.getTitle()*/);
+			//Vriskei to arxeio me sugkekrimeno id
+			final File file = new File(mediaDir, id);
+			final FileInputStream input = new FileInputStream(file);
+			try {
+				final byte[] buffer = new byte[BUFFER_SIZE];
+				int read = 0;
+				while((read = input.read(buffer)) > 0)
+					//stelnei to arxeio ston xrhsth
+					response.getOutputStream().write(buffer, 0, read);								
+			} finally {
+				input.close();
+				response.getOutputStream().close();
+			}				
+		} catch (final UserServiceException e) {
+			LOGGER.log(Level.WARNING, "Access denied", e);
+			response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
+		}
 	}
 	
 	/**

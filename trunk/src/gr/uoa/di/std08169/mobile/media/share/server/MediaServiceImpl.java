@@ -27,9 +27,9 @@ public class MediaServiceImpl implements MediaService {
 											"WHERE TRUE%s%s%s%s%s%s%s%s%s " +
 											"LIMIT ? OFFSET ?;";
 	//concat string se postgres -> ||
-	private static final String TITLE_FILTER = " AND title LIKE ('%' || ? || '%')";
+	private static final String TITLE_FILTER = " AND match(title, ?)"; //match: sunartish stin postgres
 	private static final String TYPE_FILTER = " AND type LIKE (? || '%')"; //Typos kai meta otidhpote (%)
-	private static final String USER_FILTER = " AND user = ?";
+	private static final String USER_FILTER = " AND \"user\" = ?";
 	private static final String CREATED_FROM_FILTER = " AND created >= ?";
 	private static final String CREATED_TO_FILTER = " AND created <= ?";
 	private static final String EDITED_FROM_FILTER = " AND edited >= ?";
@@ -46,6 +46,8 @@ public class MediaServiceImpl implements MediaService {
 	private static final String ADD_MEDIA = "INSERT INTO Media (id, type, size, duration, \"user\", " +
 											"created, edited, title, latitude, longitude, public) " +
 											"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+	private static final String DELETE_MEDIA = "DELETE FROM Media " +
+												"WHERE id = ?;";
 	private static final Logger LOGGER = Logger.getLogger(MediaServiceImpl.class.getName());
 	
 	private DataSource dataSource;
@@ -200,6 +202,28 @@ public class MediaServiceImpl implements MediaService {
 		} catch (final SQLException e) {
 			LOGGER.log(Level.WARNING, "Error adding media " + media, e);
 			throw new MediaServiceException("Error adding media " + media, e);
+		}
+	}
+	
+	@Override
+	public void deleteMedia(final String id) throws MediaServiceException {
+		try {
+			final Connection connection = dataSource.getConnection();
+			try {
+				final PreparedStatement deleteMedia = connection.prepareStatement(DELETE_MEDIA);
+				try {
+					deleteMedia.setString(1, id);
+					deleteMedia.executeUpdate();
+					LOGGER.info("Deleted media " + id);
+				} finally {
+					deleteMedia.close();
+				}
+			} finally {
+				connection.close();
+			}
+		} catch (final SQLException e) {
+			LOGGER.log(Level.WARNING, "Error deleting media " + id, e);
+			throw new MediaServiceException("Error deleting media " + id, e);
 		}
 	}
 }
