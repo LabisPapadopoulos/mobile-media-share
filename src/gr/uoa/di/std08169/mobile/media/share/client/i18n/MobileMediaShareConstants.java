@@ -28,6 +28,12 @@ public interface MobileMediaShareConstants extends Constants {
 	@DefaultStringValue("Created To")
 	public String createdTo();
 	
+	@DefaultStringValue("MM/dd/yyyy")
+	public String dateFormat();
+	
+	@DefaultStringValue("MM/dd/yyyy hh:mm:ss a")
+	public String dateTimeFormat();
+	
 	@DefaultStringValue("Delete")
 	public String delete();
 	

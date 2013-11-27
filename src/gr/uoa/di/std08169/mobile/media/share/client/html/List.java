@@ -1,5 +1,6 @@
 package gr.uoa.di.std08169.mobile.media.share.client.html;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 
@@ -34,6 +35,7 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -45,13 +47,14 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.datepicker.client.DatePicker;
+import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -73,25 +76,27 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	//Media Service se front-end
 	private static final MediaServiceAsync MEDIA_SERVICE =
 			GWT.create(MediaService.class);
-	
+	private static final DateTimeFormat DATE_FORMAT =
+			DateTimeFormat.getFormat(MOBILE_MEDIA_SHARE_CONSTANTS.dateFormat());
+	private static final DateTimeFormat DATE_TIME_FORMAT =
+			DateTimeFormat.getFormat(MOBILE_MEDIA_SHARE_CONSTANTS.dateTimeFormat());	
 	private static final NumberFormat SIZE_BYTES_FORMAT = 
 			NumberFormat.getFormat(MOBILE_MEDIA_SHARE_CONSTANTS.sizeBytesFormat());
 	private static final NumberFormat SIZE_KILOBYTES_FORMAT = 
 			NumberFormat.getFormat(MOBILE_MEDIA_SHARE_CONSTANTS.sizeKilobytesFormat());
 	private static final NumberFormat SIZE_MEGABYTES_FORMAT = 
 			NumberFormat.getFormat(MOBILE_MEDIA_SHARE_CONSTANTS.sizeMegabytesFormat());
-	
 	private static final int MIN_PAGE_SIZE = 10;
 	private static final int MAX_PAGE_SIZE = 100;
 	private static final int PAGE_SIZE_STEP = 10;
-	
-	private static final TextColumn<Media> TITLE = new TextColumn<Media>() {
+	private static final BigDecimal DEGREES_BASE = new BigDecimal(60);
+	private static final TextColumn<Media> TITLE = new TextColumn<Media>() { // TODO
 		@Override
 		public String getValue(final Media media) {
 			return media.getTitle();
 		}
 	};
-	private static final TextColumn<Media> TYPE = new TextColumn<Media>() {
+	private static final TextColumn<Media> TYPE = new TextColumn<Media>() { // TODO
 		@Override
 		public String getValue(final Media media) {
 			return (MediaType.getMediaType(media.getType()) == null) ? "" : 
@@ -110,7 +115,7 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 				return SIZE_MEGABYTES_FORMAT.format(media.getSize() / 1024.0f / 1024.0f);
 		}
 	};
-	private static final TextColumn<Media> DURATION = new TextColumn<Media>() {
+	private static final TextColumn<Media> DURATION = new TextColumn<Media>() { // TODO
 		@Override
 		public String getValue(final Media media) {
 			return Integer.toString(media.getDuration());
@@ -128,28 +133,50 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	private static final TextColumn<Media> CREATED = new TextColumn<Media>() { //Date created
 		@Override
 		public String getValue(final Media media) {
-			return media.getCreated().toString();
+			return DATE_TIME_FORMAT.format(media.getCreated());
 		}
 	};
 	private static final TextColumn<Media> EDITED = new TextColumn<Media>() { //Date edited
 		@Override
 		public String getValue(final Media media) {
-			return media.getEdited().toString();
+			return DATE_TIME_FORMAT.format(media.getEdited());
 		}
 	};
 	private static final TextColumn<Media> LATITUDE = new TextColumn<Media>() { //BigDecimal latitude
 		@Override
 		public String getValue(final Media media) {
-			return media.getLatitude().toString();
+			// 1 moira = 60 prwta lepta
+			// 1 prwto lepto = 60 deutera
+			// to divideAndRemainder kanei tin diairesh kai epistefei:
+			// temp1[0]: phliko
+			// temp1[1]: upoloipo
+			final BigDecimal[] temp1 = media.getLatitude().multiply(DEGREES_BASE).multiply(DEGREES_BASE).divideAndRemainder(DEGREES_BASE);
+			final int seconds = temp1[1].intValue();
+			final BigDecimal[] temp2 = temp1[0].divideAndRemainder(DEGREES_BASE);
+			final int minutes = temp2[1].intValue();
+			final int degrees = temp2[0].intValue();
+			//an einai arnhtiko-> einai notia, alliws voreia
+			return (media.getLatitude().compareTo(BigDecimal.ZERO) < 0) ?
+					MOBILE_MEDIA_SHARE_MESSAGES.latitudeFormatSouth(degrees, minutes, seconds) :
+					MOBILE_MEDIA_SHARE_MESSAGES.latitudeFormatNorth(degrees, minutes, seconds);
 		}
 	};
 	private static final TextColumn<Media> LONGITUDE = new TextColumn<Media>() { //BigDecimal longitude
 		@Override
 		public String getValue(final Media media) {
-			return media.getLongitude().toString();
+			
+			final BigDecimal[] temp1 = media.getLongitude().multiply(DEGREES_BASE).multiply(DEGREES_BASE).divideAndRemainder(DEGREES_BASE);
+			final int seconds = temp1[1].intValue();
+			final BigDecimal[] temp2 = temp1[0].divideAndRemainder(DEGREES_BASE);
+			final int minutes = temp2[1].intValue();
+			final int degrees = temp2[0].intValue();
+			//an einai arnhtiko-> einai notia, alliws voreia
+			return (media.getLongitude().compareTo(BigDecimal.ZERO) < 0) ?
+					MOBILE_MEDIA_SHARE_MESSAGES.longitudeFormatWest(degrees, minutes, seconds) :
+					MOBILE_MEDIA_SHARE_MESSAGES.longitudeFormatEast(degrees, minutes, seconds);
 		}
 	};
-	private static final TextColumn<Media> PUBLIC = new TextColumn<Media>() { //boolean publik
+	private static final TextColumn<Media> PUBLIC = new TextColumn<Media>() { //boolean publik //TODO
 		@Override
 		public String getValue(final Media media) {
 			return media.isPublic() ? MOBILE_MEDIA_SHARE_CONSTANTS.publik() : MOBILE_MEDIA_SHARE_CONSTANTS._private();
@@ -194,10 +221,10 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	private final TextBox title;
 	private final ListBox type; //dropdown
 	private final SuggestBox user;
-	private final DatePicker createdFrom;
-	private final DatePicker createdTo;
-	private final DatePicker editedFrom;
-	private final DatePicker editedTo;
+	private final DateBox createdFrom;
+	private final DateBox createdTo;
+	private final DateBox editedFrom;
+	private final DateBox editedTo;
 	private final ListBox publik;
 	private final ListBox pageSize;
 	private final Button download;
@@ -221,14 +248,29 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		user = new SuggestBox(new UserOracle());
 		user.addKeyUpHandler(this);
 		user.addSelectionHandler(this); //otan epilexei kati apo ta proteinomena
-		createdFrom = new DatePicker();
+		final DateBox.Format dateBoxFormat = new DateBox.DefaultFormat(DATE_FORMAT);
+		createdFrom = new DateBox();
+		createdFrom.setFormat(dateBoxFormat);
+		//epistrefei null gia times pou den katalavainei
+		createdFrom.setFireNullValues(true);
 		createdFrom.addValueChangeHandler(this); //otan tha allaxei timh
-		createdTo = new DatePicker();
-		createdTo.addValueChangeHandler(this);
-		editedFrom = new DatePicker();
-		editedFrom.addValueChangeHandler(this);
-		editedTo = new DatePicker();
-		editedTo.addValueChangeHandler(this);
+		//me kathe allagh tou textBox, enhmerwnetai o pinakas
+		createdFrom.getTextBox().addKeyUpHandler(this);
+		createdTo = new DateBox();
+		createdTo.setFormat(dateBoxFormat);
+		createdTo.setFireNullValues(true);
+		createdTo.addValueChangeHandler(this); //otan tha allaxei timh
+		createdTo.getTextBox().addKeyUpHandler(this);
+		editedFrom = new DateBox();
+		editedFrom.setFormat(dateBoxFormat);
+		editedFrom.setFireNullValues(true);
+		editedFrom.addValueChangeHandler(this); //otan tha allaxei timh
+		editedFrom.getTextBox().addKeyUpHandler(this);
+		editedTo = new DateBox();
+		editedTo.setFormat(dateBoxFormat);
+		editedTo.setFireNullValues(true);
+		editedTo.addValueChangeHandler(this); //otan tha allaxei timh
+		editedTo.getTextBox().addKeyUpHandler(this);
 		publik = new ListBox();
 		publik.addItem(MOBILE_MEDIA_SHARE_CONSTANTS.anyType(), "");
 		publik.addItem(MOBILE_MEDIA_SHARE_CONSTANTS.publik(), Boolean.TRUE.toString());
@@ -422,30 +464,50 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
 		Document.get().getBody().addClassName("bodyClass");
 		Document.get().getBody().appendChild(Header.newHeader());
-		RootPanel.get().add(new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.title()));
-		RootPanel.get().add(title);
-		RootPanel.get().add(new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.type()));
-		RootPanel.get().add(type);
-		RootPanel.get().add(new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.user()));
-		RootPanel.get().add(user);
-		RootPanel.get().add(new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.createdFrom()));
-		RootPanel.get().add(createdFrom);
-		RootPanel.get().add(new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.createdTo()));
-		RootPanel.get().add(createdTo);
-		RootPanel.get().add(new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.editedFrom()));
-		RootPanel.get().add(editedFrom);
-		RootPanel.get().add(new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.editedTo()));
-		RootPanel.get().add(editedTo);
-		RootPanel.get().add(new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.publik()));
-		RootPanel.get().add(publik);
-		RootPanel.get().add(new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.pageSize()));
-		RootPanel.get().add(pageSize);
-		Document.get().getBody().appendChild(Document.get().createBRElement());
-		RootPanel.get().add(download);
-		RootPanel.get().add(edit);
-		RootPanel.get().add(delete);
-		RootPanel.get().add(pager);
-		RootPanel.get().add(mediaTable);		
+		final FlowPanel flowPanel = new FlowPanel();
+		flowPanel.getElement().addClassName("search-filter");
+		final InlineLabel titleLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.title());
+		flowPanel.add(titleLabel);
+		flowPanel.add(title);
+		final InlineLabel userLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.user()); 
+		flowPanel.add(userLabel);
+		flowPanel.add(user);
+		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
+		final InlineLabel createdFromLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.createdFrom()); 
+		flowPanel.add(createdFromLabel);
+		flowPanel.add(createdFrom);
+		final InlineLabel createdToLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.createdTo()); 
+		flowPanel.add(createdToLabel);
+		flowPanel.add(createdTo);
+		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
+		final InlineLabel editedFromLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.editedFrom()); 
+		flowPanel.add(editedFromLabel);
+		flowPanel.add(editedFrom);
+		final InlineLabel editedToLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.editedTo()); 
+		flowPanel.add(editedToLabel);
+		flowPanel.add(editedTo);
+		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
+		final InlineLabel typeLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.type()); 
+		flowPanel.add(typeLabel);
+		flowPanel.add(type);
+		final InlineLabel publicLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.publik()); 
+		flowPanel.add(publicLabel);
+		flowPanel.add(publik);
+		final InlineLabel pageSizeLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.pageSize());
+		flowPanel.add(pageSizeLabel);
+		flowPanel.add(pageSize);
+		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
+		flowPanel.add(download);
+		flowPanel.add(edit);
+		flowPanel.add(delete);
+		flowPanel.add(pager);
+		RootPanel.get().add(flowPanel);
+		RootPanel.get().add(mediaTable);
+		
+		
+//		Document.get().getBody().
+		//emailLabel.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
+//		Document.get().getBody().setAttribute("style", "width: " + mediaTable.getOffsetWidth() + "px;");
 	}
 	
 	//Otan dialegei o xrhsths sugkekrimenh protash

@@ -16,6 +16,18 @@ public interface MobileMediaShareMessages extends Messages {
 	@DefaultMessage("Error retrieving media: {0}")
 	public String errorRetrievingMedia(final String message);
 	
+	@DefaultMessage("{0}° {1}′ {2}″ N")
+	public String latitudeFormatNorth(final int degrees, final int minutes, final int seconds);
+
+	@DefaultMessage("{0}° {1}′ {2}″ S")
+	public String latitudeFormatSouth(final int degrees, final int minutes, final int seconds);
+	
+	@DefaultMessage("{0}° {1}′ {2}″ E")
+	public String longitudeFormatEast(final int degrees, final int minutes, final int seconds);
+	
+	@DefaultMessage("{0}° {1}′ {2}″ W")
+	public String longitudeFormatWest(final int degrees, final int minutes, final int seconds);
+	
 	@DefaultMessage("User {0} already exists")
 	public String userAlreadyExists(final String email);
 	
