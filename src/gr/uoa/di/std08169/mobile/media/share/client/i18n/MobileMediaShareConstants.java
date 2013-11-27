@@ -13,6 +13,9 @@ public interface MobileMediaShareConstants extends Constants {
 	@DefaultStringValue("Any Type")
 	public String anyType();
 	
+	@DefaultStringValue("Are you sure you want to delete this media?")
+	public String areYouSureYouWantToDeleteThisMedia();
+	
 	@DefaultStringValue("Cancel")
 	public String cancel();
 	

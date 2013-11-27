@@ -15,7 +15,7 @@ public interface MediaService extends RemoteService {
 	public MediaResult getMedia(final String title, final MediaType type, final String user, final Date createdFrom, 
 			final Date createdTo, final Date editedFrom, final Date editedTo, final Boolean publik,
 			final Integer start, final Integer length, final String orderField, final boolean ascending) throws MediaServiceException;
-//TODO	public Media getMedia(final String id) throws MediaServiceException;
+	public Media getMedia(final String id) throws MediaServiceException;
 	public void addMedia(final Media media) throws MediaServiceException;
 //TODO	public void editMedia(final Media media) throws MediaServiceException;
 	public void deleteMedia(final String id) throws MediaServiceException;

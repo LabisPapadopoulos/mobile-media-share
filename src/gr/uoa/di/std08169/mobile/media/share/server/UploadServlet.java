@@ -21,6 +21,8 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.mime.MimeTypeException;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import gr.uoa.di.std08169.mobile.media.share.client.services.MediaService;
@@ -28,7 +30,6 @@ import gr.uoa.di.std08169.mobile.media.share.client.services.MediaServiceExcepti
 import gr.uoa.di.std08169.mobile.media.share.client.services.UserService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.UserServiceException;
 import gr.uoa.di.std08169.mobile.media.share.shared.Media;
-import gr.uoa.di.std08169.mobile.media.share.shared.MediaType;
 import gr.uoa.di.std08169.mobile.media.share.shared.User;
 
 public class UploadServlet extends HttpServlet {
@@ -84,9 +85,16 @@ public class UploadServlet extends HttpServlet {
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request"); //400 Bad request
 				return;
 			}
-//			final Media media = mediaService.getMedia(id); TODO
-//			response.setContentType(media.getType());
-			response.setHeader("Content-disposition", "attachment; filename=media"/* + media.getTitle()*/);
+			final Media media = mediaService.getMedia(id);
+			if (media == null) {
+				LOGGER.warning("Not found");
+				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Not found"); // 404 Not found
+				return;
+			}
+			response.setContentType(media.getType());
+			response.setHeader("Content-disposition", "attachment; filename=" + media.getTitle() +
+					//Vriskei tin epektash tou arxeiou kai tin prosthetei ston titlo tou arxeiou sto katevasma
+					TikaConfig.getDefaultConfig().getMimeRepository().forName(media.getType()).getExtension());
 			//Vriskei to arxeio me sugkekrimeno id
 			final File file = new File(mediaDir, id);
 			final FileInputStream input = new FileInputStream(file);
@@ -100,6 +108,12 @@ public class UploadServlet extends HttpServlet {
 				input.close();
 				response.getOutputStream().close();
 			}				
+		} catch (final MediaServiceException e) {
+			LOGGER.log(Level.WARNING, "Internal server error", e); //den borese na psaxei gia to arxeio
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error"); //500 Internal server error
+		} catch (final MimeTypeException e) {
+			LOGGER.log(Level.WARNING, "Internal server error", e); //den borese na psaxei gia thn epektash tou arxeiou
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error"); //500 Internal server error
 		} catch (final UserServiceException e) {
 			LOGGER.log(Level.WARNING, "Access denied", e);
 			response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
@@ -178,13 +192,13 @@ public class UploadServlet extends HttpServlet {
 					fileItem.delete();
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("title")) {
 					//vrethike to title
-					title = fileItem.getString();
+					title = fileItem.getString(UTF_8);
 					fileItem.delete();
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("public")) {
-					publik = "on".equals(fileItem.getString());
+					publik = "on".equals(fileItem.getString(UTF_8));
 					fileItem.delete();
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("locale")) {
-					locale = fileItem.getString();
+					locale = fileItem.getString(UTF_8);
 					fileItem.delete();
 				}
 			}

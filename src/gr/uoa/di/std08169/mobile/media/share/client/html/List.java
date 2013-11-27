@@ -333,11 +333,12 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		if (clickEvent.getSource() == download)
 			//Anoigei neo tab pou tha trexei tin doGet gia na katevei to arxeio
 			Window.open(MOBILE_MEDIA_SHARE_URLS.download(URL.encodeQueryString(selectionModel.getSelectedObject().getId())), "_blank", "");
-		else if (clickEvent.getSource() == edit) {
-			
-		} /* else if ((clickEvent.getSource() == delete) && // TODO
+		else if (clickEvent.getSource() == edit)
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.edit(URL.encodeQueryString(selectionModel.getSelectedObject().getId())));
+		else if ((clickEvent.getSource() == delete) &&
 				Window.confirm(MOBILE_MEDIA_SHARE_CONSTANTS.areYouSureYouWantToDeleteThisMedia())) {
 			// delete file
+			
 			MEDIA_SERVICE.deleteMedia(selectionModel.getSelectedObject().getId(), new AsyncCallback<Void>() {
 				@Override
 				public void onFailure(final Throwable throwable) {
@@ -354,9 +355,9 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 					onRangeChanged(null);
 				}
 			});
-		}*/
+		}
 	}
-
+	
 	//Apo interface RequestCallback
 	@Override
 	public void onError(final Request _, final Throwable throwable) {

@@ -45,6 +45,10 @@ public class MediaServiceServlet extends RemoteServiceServlet implements MediaSe
 				publik, start, length, orderField, ascending);
 	}
 
+	@Override
+	public Media getMedia(final String id) throws MediaServiceException {
+		return mediaService.getMedia(id);
+	}
 
 	@Override
 	public void addMedia(final Media media) throws MediaServiceException {
