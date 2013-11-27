@@ -26,6 +26,9 @@ public class MediaServiceImpl implements MediaService {
 											"FROM Media " +
 											"WHERE TRUE%s%s%s%s%s%s%s%s%s " +
 											"LIMIT ? OFFSET ?;";
+	private static final String GET_MEDIUM = "SELECT type, size, duration, \"user\", created, edited, title, latitude, longitude, public " +
+											"FROM Media " +
+											"WHERE id = ?;";
 	//concat string se postgres -> ||
 	private static final String TITLE_FILTER = " AND match(title, ?)"; //match: sunartish stin postgres
 	private static final String TYPE_FILTER = " AND type LIKE (? || '%')"; //Typos kai meta otidhpote (%)
@@ -170,6 +173,43 @@ public class MediaServiceImpl implements MediaService {
 		} catch (final SQLException e) {
 			LOGGER.log(Level.WARNING, "Error retriving media", e);
 			throw new MediaServiceException("Error retriving media", e);
+		}
+	}
+	
+	@Override
+	public Media getMedia(final String id) throws MediaServiceException {
+		try {
+			final Connection connection = dataSource.getConnection();
+			try {
+				final PreparedStatement getMedia = connection.prepareStatement(GET_MEDIUM);
+				try {
+					getMedia.setString(1, id);
+					final ResultSet resultSet = getMedia.executeQuery();
+					try {
+						Media media = null;
+						if (resultSet.next()) {
+							media = new Media(id, resultSet.getString("type"), resultSet.getLong("size"), resultSet.getInt("duration"),
+									userService.getUser(resultSet.getString("user")), resultSet.getTimestamp("created"),
+									resultSet.getTimestamp("edited"), resultSet.getString("title"), resultSet.getBigDecimal("latitude"),
+									resultSet.getBigDecimal("longitude"), resultSet.getBoolean("public"));
+						}
+						LOGGER.info((media == null) ? ("Media " + id + " not found") : ("Retrieved media " + id));
+						return media;
+					} finally {
+						resultSet.close();
+					}
+				} finally {
+					getMedia.close();
+				}
+			} finally {
+				connection.close();
+			}
+		} catch (final SQLException e) {
+			LOGGER.log(Level.WARNING, "Error retrieving media " + id, e);
+			throw new MediaServiceException("Error retrieving media " + id, e);
+		} catch (final UserServiceException e) {
+			LOGGER.log(Level.WARNING, "Error retrieving media " + id, e);
+			throw new MediaServiceException("Error retrieving media " + id, e);
 		}
 	}
 	

@@ -6,6 +6,9 @@ public interface MobileMediaShareUrls extends Messages {
 	@DefaultMessage("./uploadServlet?id={0}")
 	public String download(final String id);
 	
+	@DefaultMessage("./edit.html?id={0}")
+	public String edit(final String id);
+	
 	@DefaultMessage("./images/locales/{0}.png")
 	public String localeImage(final String locale);
 

@@ -13,6 +13,9 @@ public interface MobileMediaShareMessages extends Messages {
 	@DefaultMessage("Error creating user: {0}")
 	public String errorCreatingUser(final String message);
 	
+	@DefaultMessage("Error deleting media: {0}")
+	public String errorDeletingMedia(final String message);
+	
 	@DefaultMessage("Error retrieving media: {0}")
 	public String errorRetrievingMedia(final String message);
 	
