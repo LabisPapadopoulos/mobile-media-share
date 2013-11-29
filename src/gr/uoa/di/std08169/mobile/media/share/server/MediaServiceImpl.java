@@ -22,9 +22,10 @@ import gr.uoa.di.std08169.mobile.media.share.shared.MediaResult;
 import gr.uoa.di.std08169.mobile.media.share.shared.MediaType;
 
 public class MediaServiceImpl implements MediaService {
+	//epistrefontai ola ta public media, alla kai ta private tou kathe xrhsth
 	private static final String GET_MEDIA = "SELECT id, type, size, duration, \"user\", created, edited, title, latitude, longitude, public " +
 											"FROM Media " +
-											"WHERE TRUE%s%s%s%s%s%s%s%s%s " +
+											"WHERE (public OR \"user\" = ?)%s%s%s%s%s%s%s%s%s " +
 											"LIMIT ? OFFSET ?;";
 	private static final String GET_MEDIUM = "SELECT type, size, duration, \"user\", created, edited, title, latitude, longitude, public " +
 											"FROM Media " +
@@ -44,7 +45,7 @@ public class MediaServiceImpl implements MediaService {
 	
 	private static final String COUNT_MEDIA = 	"SELECT COUNT(*) AS total " +
 												"FROM Media " +
-												"WHERE TRUE%s%s%s%s%s%s%s%s;";
+												"WHERE (public OR \"user\" = ?)%s%s%s%s%s%s%s%s;";
 	
 	private static final String ADD_MEDIA = "INSERT INTO Media (id, type, size, duration, \"user\", " +
 											"created, edited, title, latitude, longitude, public) " +
@@ -66,10 +67,10 @@ public class MediaServiceImpl implements MediaService {
 	}
 	
 	@Override
-	public MediaResult getMedia(final String title, final MediaType type, final String user,
-			final Date createdFrom, final Date createdTo, final Date editedFrom, final Date editedTo,
-			final Boolean publik, final Integer start, final Integer length, final String orderField,
-			final boolean ascending) throws MediaServiceException {
+	public MediaResult getMedia(final String currentUser, final String title, final MediaType type,
+			final String user, final Date createdFrom, final Date createdTo, final Date editedFrom,
+			final Date editedTo, final Boolean publik, final Integer start, final Integer length,
+			final String orderField, final boolean ascending) throws MediaServiceException {
 		
 		//Xtisimo tou string me oles ta pithana filtra pou exei dialexei o xrhsths
 		final String getMediaQuery = 
@@ -95,6 +96,8 @@ public class MediaServiceImpl implements MediaService {
 					final PreparedStatement countMedia = connection.prepareStatement(countMediaQuery);
 					try {
 						int parameter = 1;
+						getMedia.setString(parameter, currentUser);
+						countMedia.setString(parameter++, currentUser);
 						if (title != null) {
 							getMedia.setString(parameter, title);
 							countMedia.setString(parameter++, title);

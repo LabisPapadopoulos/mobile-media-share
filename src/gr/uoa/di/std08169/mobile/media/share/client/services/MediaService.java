@@ -12,7 +12,7 @@ import gr.uoa.di.std08169.mobile.media.share.shared.MediaType;
 //Service gia diaxeirish arxeiwn
 @RemoteServiceRelativePath("../mediaService")
 public interface MediaService extends RemoteService {
-	public MediaResult getMedia(final String title, final MediaType type, final String user, final Date createdFrom, 
+	public MediaResult getMedia(final String currentUser, final String title, final MediaType type, final String user, final Date createdFrom, 
 			final Date createdTo, final Date editedFrom, final Date editedTo, final Boolean publik,
 			final Integer start, final Integer length, final String orderField, final boolean ascending) throws MediaServiceException;
 	public Media getMedia(final String id) throws MediaServiceException;

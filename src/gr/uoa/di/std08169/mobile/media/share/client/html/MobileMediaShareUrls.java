@@ -3,7 +3,7 @@ package gr.uoa.di.std08169.mobile.media.share.client.html;
 import com.google.gwt.i18n.client.Messages;
 
 public interface MobileMediaShareUrls extends Messages {
-	@DefaultMessage("./uploadServlet?id={0}")
+	@DefaultMessage("./mediaServlet?id={0}")
 	public String download(final String id);
 	
 	@DefaultMessage("./edit.html?id={0}")

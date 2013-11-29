@@ -52,7 +52,7 @@ public class Login implements ClickHandler, EntryPoint, KeyUpHandler {
 		//ekei tha einai kai oi parametroi anti gia to url
 		form.setEncoding(FormPanel.ENCODING_MULTIPART);
 		//url gia to servlet login 
-		form.setAction("./loginServlet");
+		form.setAction("./userServlet");
 		int i = 0;
 		email = new TextBox();
 		email.setName("email");

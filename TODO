@@ -1,17 +1,10 @@
 validate user emails via messages
 every page check session info
-calendars me koumpia
-DecimalFormat gia duration, coordinates
-SimpleDateFormat gia dates
-aplo string format gia user
+DecimalFormat gia duration
 login servlet json
 list
 	title safeHtml column
 	type safeHtml column
 	duration textColumn format
-	created - edited textColumns format
-	latitude - longitude textColumns format
 	public safeHtml column
-uploadServlet -> mediaServlet
-loginServlet -> userServlet
 

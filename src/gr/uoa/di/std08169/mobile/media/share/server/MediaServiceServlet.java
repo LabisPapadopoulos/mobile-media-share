@@ -37,12 +37,12 @@ public class MediaServiceServlet extends RemoteServiceServlet implements MediaSe
 	}
 	
 	@Override
-	public MediaResult getMedia(final String title, final MediaType type, final String user,
-			final Date createdFrom, final Date createdTo, final Date editedFrom, final Date editedTo,
-			final Boolean publik, final Integer start, final Integer length, final String orderField,
-			final boolean ascending) throws MediaServiceException {
-		return mediaService.getMedia(title, type, user, createdFrom, createdTo, editedFrom, editedTo, 
-				publik, start, length, orderField, ascending);
+	public MediaResult getMedia(final String currentUser, final String title, final MediaType type,
+			final String user, final Date createdFrom, final Date createdTo, final Date editedFrom,
+			final Date editedTo, final Boolean publik, final Integer start, final Integer length,
+			final String orderField, final boolean ascending) throws MediaServiceException {
+		return mediaService.getMedia(currentUser, title, type, user, createdFrom, createdTo, 
+				editedFrom, editedTo, publik, start, length, orderField, ascending);
 	}
 
 	@Override

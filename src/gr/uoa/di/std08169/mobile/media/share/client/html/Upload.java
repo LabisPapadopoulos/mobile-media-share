@@ -52,7 +52,7 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 		form = new FormPanel(new NamedFrame("_self"));
 		form.setMethod(FormPanel.METHOD_POST);
 		form.setEncoding(FormPanel.ENCODING_MULTIPART);
-		form.setAction("./uploadServlet");
+		form.setAction("./mediaServlet");
 		int i = 0;
 		file = new FileUpload();
 		file.setName("file");
@@ -122,7 +122,7 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 		try {
 			//RequestBuilder gia na kanoume ena GET request sto servlet login gia na paroume
 			//to session mas. RequestCallback (this) einai auto pou tha parei tin apantish asunxrona
-			new RequestBuilder(RequestBuilder.GET, "./loginServlet").sendRequest(null, this);
+			new RequestBuilder(RequestBuilder.GET, "./userServlet").sendRequest(null, this);
 		} catch (final RequestException _) {
 			//otidhpote paei strava, xana gurnaei stin login
 			//url pou theloume na mas paei

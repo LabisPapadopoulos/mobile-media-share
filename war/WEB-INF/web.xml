@@ -11,12 +11,12 @@
 	</listener>
 	<servlet>
 		<!-- Gia upodoxh twn login twn xrhstwn -->
-		<servlet-name>loginServlet</servlet-name>
-		<servlet-class>gr.uoa.di.std08169.mobile.media.share.server.LoginServlet</servlet-class>
+		<servlet-name>userServlet</servlet-name>
+		<servlet-class>gr.uoa.di.std08169.mobile.media.share.server.UserServlet</servlet-class>
  	</servlet>
 	<servlet>
-		<servlet-name>uploadServlet</servlet-name>
-		<servlet-class>gr.uoa.di.std08169.mobile.media.share.server.UploadServlet</servlet-class>
+		<servlet-name>mediaServlet</servlet-name>
+		<servlet-class>gr.uoa.di.std08169.mobile.media.share.server.MediaServlet</servlet-class>
 	</servlet>
 	<servlet>
 		<servlet-name>mediaService</servlet-name> <!-- einai tou GWT -->
@@ -29,13 +29,13 @@
 		<servlet-class>gr.uoa.di.std08169.mobile.media.share.server.UserServiceServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-	    <!-- Denei sto url login to loginServlet -->
-	    <servlet-name>loginServlet</servlet-name>
-	    <url-pattern>/loginServlet</url-pattern>
+	    <!-- Denei sto url login to userServlet -->
+	    <servlet-name>userServlet</servlet-name>
+	    <url-pattern>/userServlet</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
-	    <servlet-name>uploadServlet</servlet-name>
-	    <url-pattern>/uploadServlet</url-pattern>
+	    <servlet-name>mediaServlet</servlet-name>
+	    <url-pattern>/mediaServlet</url-pattern>
 	</servlet-mapping>
 	<!-- Akouei stin dieuthinsh /userService -->
 	<servlet-mapping>
