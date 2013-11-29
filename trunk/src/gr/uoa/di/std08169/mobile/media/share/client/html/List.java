@@ -234,6 +234,8 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	private final SingleSelectionModel<Media> selectionModel; //gia highlight kai epilogh grammhs
 	private final CellTable<Media> mediaTable; //Pinakas gia emfanish twn Media
 	private User selectedUser;
+	private Request userRequest;
+	private String currentUser;
 	
 	public List() {
 		title = new TextBox();
@@ -337,9 +339,10 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.edit(URL.encodeQueryString(selectionModel.getSelectedObject().getId())));
 		else if ((clickEvent.getSource() == delete) &&
 				Window.confirm(MOBILE_MEDIA_SHARE_CONSTANTS.areYouSureYouWantToDeleteThisMedia())) {
-			// delete file
 			
-			MEDIA_SERVICE.deleteMedia(selectionModel.getSelectedObject().getId(), new AsyncCallback<Void>() {
+			//Diagrafh tou arxeiou apo tin vash
+			MEDIA_SERVICE.deleteMedia(selectionModel.getSelectedObject().getId(),
+					new AsyncCallback<Void>() {
 				@Override
 				public void onFailure(final Throwable throwable) {
 					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorDeletingMedia(throwable.getMessage()));
@@ -347,6 +350,14 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 				
 				@Override
 				public void onSuccess(final Void _) {
+					//delete file apo to file systhma
+					try {
+						//encode url se periptwsh pou exei periergous xarakthres
+						new RequestBuilder(RequestBuilder.DELETE, "./mediaServlet?id=" + URL.encodeQueryString(selectionModel.getSelectedObject().getId())).
+								sendRequest(null, List.this);
+					} catch (final RequestException e) {
+						Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorDeletingMedia(e.getMessage()));
+					}
 					//katharizei to highlight tou pinaka
 					selectionModel.clear();
 					//apenergopoiountai ta koubia (download, edit, delete)
@@ -389,7 +400,8 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		try {
 			//RequestBuilder gia na kanoume ena GET request sto servlet login gia na paroume
 			//to session mas. RequestCallback (this) einai auto pou tha parei tin apantish asunxrona
-			new RequestBuilder(RequestBuilder.GET, "./loginServlet").sendRequest(null, this);
+			//Meta phgenei stin onResponseReceived.
+			userRequest = new RequestBuilder(RequestBuilder.GET, "./userServlet").sendRequest(null, this);
 		} catch (final RequestException _) {
 			//otidhpote paei strava, xana gurnaei stin login
 			//url pou theloume na mas paei
@@ -407,6 +419,8 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	//Kaleitai otan xreiazetai na erthoun nea dedomena (p.x SortHandler, ChangeHandler)
 	@Override
 	protected void onRangeChanged(final HasData<Media> _) { // update list rows
+		if (currentUser == null)
+			return;
 		final String title = this.title.getValue().trim().isEmpty() ? null : this.title.getValue().trim();
 		//MediaType epeidh einai ENUM me ena string epistrefetai ena instance
 		final MediaType type = this.type.getValue(this.type.getSelectedIndex()).isEmpty() ? null :
@@ -425,7 +439,7 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 			mediaTable.getColumnSortList().get(0).getColumn().getDataStoreName();
 		final boolean ascending = (mediaTable.getColumnSortList().size() == 0) ? false : 
 			mediaTable.getColumnSortList().get(0).isAscending();
-		MEDIA_SERVICE.getMedia(title, type, (selectedUser == null) ? null : selectedUser.getEmail(),
+		MEDIA_SERVICE.getMedia(currentUser, title, type, (selectedUser == null) ? null : selectedUser.getEmail(),
 				createdFrom, createdTo, editedFrom, editedTo, publik, start, length, orderField, ascending, 
 				new AsyncCallback<MediaResult>() {
 			@Override
@@ -455,60 +469,59 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	//Apo interface RequestCallback
 	@Override
 	public void onResponseReceived(final Request request, final Response response) {
-		//an den einai logged in o xrhsths
-		if ((response.getStatusCode() != 200) || (response.getText().isEmpty()))
-			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.login(
-					//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
-					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
-					//kwdikopoieitai to url map epeidh pernaei san parametros (meta apo ?)
-					URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.list(
-							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
-		Document.get().getBody().addClassName("bodyClass");
-		Document.get().getBody().appendChild(Header.newHeader());
-		final FlowPanel flowPanel = new FlowPanel();
-		flowPanel.getElement().addClassName("search-filter");
-		final InlineLabel titleLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.title());
-		flowPanel.add(titleLabel);
-		flowPanel.add(title);
-		final InlineLabel userLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.user()); 
-		flowPanel.add(userLabel);
-		flowPanel.add(user);
-		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
-		final InlineLabel createdFromLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.createdFrom()); 
-		flowPanel.add(createdFromLabel);
-		flowPanel.add(createdFrom);
-		final InlineLabel createdToLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.createdTo()); 
-		flowPanel.add(createdToLabel);
-		flowPanel.add(createdTo);
-		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
-		final InlineLabel editedFromLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.editedFrom()); 
-		flowPanel.add(editedFromLabel);
-		flowPanel.add(editedFrom);
-		final InlineLabel editedToLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.editedTo()); 
-		flowPanel.add(editedToLabel);
-		flowPanel.add(editedTo);
-		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
-		final InlineLabel typeLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.type()); 
-		flowPanel.add(typeLabel);
-		flowPanel.add(type);
-		final InlineLabel publicLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.publik()); 
-		flowPanel.add(publicLabel);
-		flowPanel.add(publik);
-		final InlineLabel pageSizeLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.pageSize());
-		flowPanel.add(pageSizeLabel);
-		flowPanel.add(pageSize);
-		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
-		flowPanel.add(download);
-		flowPanel.add(edit);
-		flowPanel.add(delete);
-		flowPanel.add(pager);
-		RootPanel.get().add(flowPanel);
-		RootPanel.get().add(mediaTable);
-		
-		
-//		Document.get().getBody().
-		//emailLabel.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
-//		Document.get().getBody().setAttribute("style", "width: " + mediaTable.getOffsetWidth() + "px;");
+		if(request == userRequest) {
+			//an den einai logged in o xrhsths
+			if ((response.getStatusCode() != 200) || (response.getText().isEmpty()))
+				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.login(
+						//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
+						URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
+						//kwdikopoieitai to url map epeidh pernaei san parametros (meta apo ?)
+						URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.list(
+								URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
+			currentUser = response.getText();
+			Document.get().getBody().addClassName("bodyClass");
+			Document.get().getBody().appendChild(Header.newHeader());
+			final FlowPanel flowPanel = new FlowPanel();
+			flowPanel.getElement().addClassName("search-filter");
+			final InlineLabel titleLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.title());
+			flowPanel.add(titleLabel);
+			flowPanel.add(title);
+			final InlineLabel userLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.user()); 
+			flowPanel.add(userLabel);
+			flowPanel.add(user);
+			flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
+			final InlineLabel createdFromLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.createdFrom()); 
+			flowPanel.add(createdFromLabel);
+			flowPanel.add(createdFrom);
+			final InlineLabel createdToLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.createdTo()); 
+			flowPanel.add(createdToLabel);
+			flowPanel.add(createdTo);
+			flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
+			final InlineLabel editedFromLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.editedFrom()); 
+			flowPanel.add(editedFromLabel);
+			flowPanel.add(editedFrom);
+			final InlineLabel editedToLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.editedTo()); 
+			flowPanel.add(editedToLabel);
+			flowPanel.add(editedTo);
+			flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
+			final InlineLabel typeLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.type()); 
+			flowPanel.add(typeLabel);
+			flowPanel.add(type);
+			final InlineLabel publicLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.publik()); 
+			flowPanel.add(publicLabel);
+			flowPanel.add(publik);
+			final InlineLabel pageSizeLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.pageSize());
+			flowPanel.add(pageSizeLabel);
+			flowPanel.add(pageSize);
+			flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
+			flowPanel.add(download);
+			flowPanel.add(edit);
+			flowPanel.add(delete);
+			flowPanel.add(pager);
+			RootPanel.get().add(flowPanel);
+			RootPanel.get().add(mediaTable);
+			onRangeChanged(null);
+		}
 	}
 	
 	//Otan dialegei o xrhsths sugkekrimenh protash
@@ -525,8 +538,9 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		final Media media = selectionModel.getSelectedObject();
 		//enable ta download, edit kai delete
 		download.setEnabled(media != null);
-		edit.setEnabled(media != null);
-		delete.setEnabled(media != null);
+		//edit kai delete kapoio arxeio an anhkei ston trexonta xrhsth
+		edit.setEnabled((media != null) && media.getUser().getEmail().equals(currentUser));
+		delete.setEnabled((media != null) && media.getUser().getEmail().equals(currentUser));
 	}
 
 	@Override
