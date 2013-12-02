@@ -397,7 +397,7 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		mediaTable.getColumnSortList().push(TITLE);
 		//o pager selidopoiei tin lista
 		pager.setDisplay(mediaTable);
-		//O AsyncDataProvider tha vazei dedomena stin lista
+		//O AsyncDataProvider tha vazei dedomena stin lista (table)
 		addDataDisplay(mediaTable);
 		selectedUser = null;
 	}
@@ -449,13 +449,15 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	
 	//Apo interface RequestCallback
 	@Override
-	public void onError(final Request _, final Throwable throwable) {
-		Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.login(
-				//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
-				URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
-				//kwdikopoieitai to url map epeidh pernaei san parametros (meta apo ?)
-				URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.list(
-						URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
+	public void onError(final Request request, final Throwable throwable) {
+		if(request == userRequest) {
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.login(
+					//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
+					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
+					//kwdikopoieitai to url map epeidh pernaei san parametros (meta apo ?)
+					URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.list(
+							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
+		}
 	}
 
 	@Override
@@ -528,7 +530,6 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 				selectionModel.clear();
 				onSelection(null);
 				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingMedia(throwable.getMessage()));
-				throw new RuntimeException(throwable);
 			}
 
 			@Override
@@ -544,18 +545,21 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		});
 	}
 	
-	//Apo interface RequestCallback
+	//Apo interface RequestCallback.
+	//H onResponseReceived einai h onSuccess tou RequestCallback
 	@Override
 	public void onResponseReceived(final Request request, final Response response) {
-		if(request == userRequest) {
+		if (request == userRequest) {
 			//an den einai logged in o xrhsths
-			if ((response.getStatusCode() != 200) || (response.getText().isEmpty()))
+			if ((response.getStatusCode() != 200) || (response.getText().isEmpty())) {
 				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.login(
 						//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
 						URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
 						//kwdikopoieitai to url map epeidh pernaei san parametros (meta apo ?)
 						URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.list(
 								URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
+				return;
+			}
 			currentUser = response.getText();
 			Document.get().getBody().addClassName("bodyClass");
 			Document.get().getBody().appendChild(Header.newHeader());
@@ -628,7 +632,6 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 			flowPanel.add(pager);
 			flowPanel.add(mediaTable);
 			RootPanel.get().add(flowPanel);
-			//RootPanel.get().add(mediaTable);
 			onRangeChanged(null);
 		}
 	}
