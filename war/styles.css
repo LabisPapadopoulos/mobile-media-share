@@ -53,46 +53,23 @@ div.menu {
 }
 
 a.map, a.list, a.newPhoto, a.newVideo, a.upload, a.myAccount, a.logout {
-	background-clip: padding-box;
-	background-position: left center;
-	background-repeat: no-repeat;
-	background-size: contain;
 	border: 1px solid grey;
 	border-radius: 5px;
-	margin: 1px;
-	padding: 8px;
-	padding-left: 35px;
-	padding-right: 8px;
+	margin: 2px;
+	padding: 10px;
+	text-decoration: none;
 }
 
 a.map:hover, a.list:hover, a.newPhoto:hover, a.newVideo:hover, a.upload:hover, a.myAccount:hover, a.logout:hover {
 	background-color: #dee7f0;
 }
 
-a.map {
-	background-image: url('./images/map.svg');
-}
-
-a.list {
-	background-image: url('./images/list.svg');
-}
-
-a.newPhoto {
-	background-image: url('./images/newPhoto.svg');
-}
-
-a.newVideo {
-	background-image: url('./images/newVideo.svg');
-}
-
-a.upload {
-	background-image: url('./images/upload.svg');
-}
-a.myAccount {
-	background-image: url('./images/myAccount.svg');
-}
-a.logout {
-	background-image: url('./images/logout.svg');
+img.mapImg, img.listImg, img.newPhotoImg, img.newVideoImg, img.uploadImg, img.myAccountImg, img.logoutImg {
+	margin: 1px;
+	padding-right: 5px;
+	width: 35px;
+	height: 35px;
+	margin-bottom: -13px;
 }
 
 /* language select */
@@ -112,12 +89,12 @@ form {
 
 span.label {
 	position: absolute;
-	right: 50%;
+	right: 55%;
 }
 
 input.field, span.field {
 	position: absolute;
-	left: 50%;
+	left: 46%;
 }
 
 form button {
@@ -128,28 +105,68 @@ form button {
 .newUser {
 	clear: both;
 	text-align: center;
-	padding-top: 20px;
+	padding-top: 50px;
+	padding-left: 25px;
 	position: relative;
 }
+
+.newUserButtons, .listButtons {
+	margin-right: 10px;
+	width: 90px;
+}
+/*list -- Search -- */
 
 .search-filter {
-	clear: both;
-	text-align: center;
 	position: relative;
+	//clear: both;
+	//text-align: center;
+	
 }
 
+.listField {
+	position: absolute;
+}
 
+.listLabelCol1 {
+	position: absolute;
+	right: 81%; /* me dexia stoixish */
+}
 
+.listInputCol1 {
+	position: absolute;
+	left: 20%;
+}
 
+.listLabelCol2 {
+	position: absolute;
+	right: 51%;
+}
 
+.listInputCol2 {
+	position: absolute;
+	left: 51%;
+}
 
+.listLabelType {
+	position: absolute;
+	left: 71%;
+}
 
+.listInputType {
+	position: absolute;
+	left: 76%;
+}
 
+.pager {
+	position: absolute;
+	left: 9%;
+}
 
-p{
+p {
 	text-align: center;
 	font-size: 18px;
 }
+
 .table {
 	width: 250px;
 	background-color: white;
@@ -157,6 +174,7 @@ p{
 	padding: 1px;
 	border-spacing: 3px;
 }
+
 .foto {
 	text-align: center;
 }

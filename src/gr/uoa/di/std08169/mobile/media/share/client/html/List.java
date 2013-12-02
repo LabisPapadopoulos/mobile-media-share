@@ -89,6 +89,9 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	private static final int MIN_PAGE_SIZE = 10;
 	private static final int MAX_PAGE_SIZE = 100;
 	private static final int PAGE_SIZE_STEP = 10;
+	private static final int TOP = 25;
+	private static final int TOP_STEP = 5;
+	private static final int LEFT_OFFSET = 100;
 	private static final BigDecimal DEGREES_BASE = new BigDecimal(60);
 	private static final TextColumn<Media> TITLE = new TextColumn<Media>() { // TODO
 		@Override
@@ -238,8 +241,21 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	private String currentUser;
 	
 	public List() {
+		int i = 1;
+		int j = 0;
 		title = new TextBox();
 		title.addKeyUpHandler(this);
+		title.getElement().addClassName("listInputCol1");
+		title.getElement().setAttribute("style",
+				"top: " + (TOP * i) + "px;"); //25px
+		
+		user = new SuggestBox(new UserOracle());
+		user.addKeyUpHandler(this);
+		user.addSelectionHandler(this); //otan epilexei kati apo ta proteinomena
+		user.getElement().addClassName("listInputCol2");
+		user.getElement().setAttribute("style",
+				"top: " + (TOP * i) + "px;"); //25px
+		
 		type = new ListBox();
 		//(To ti fainetai, timh tou ti fainetai)
 		type.addItem(MOBILE_MEDIA_SHARE_CONSTANTS.anyType(), "");
@@ -247,9 +263,12 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		for (MediaType mediaType : MediaType.values())
 			type.addItem(MEDIA_TYPE_CONSTANTS.getString(mediaType.name()), mediaType.name());
 		type.addChangeHandler(this); //otan tou allaxei timh
-		user = new SuggestBox(new UserOracle());
-		user.addKeyUpHandler(this);
-		user.addSelectionHandler(this); //otan epilexei kati apo ta proteinomena
+		type.getElement().addClassName("listInputType");
+		type.getElement().setAttribute("style",
+				"top: " + (TOP_STEP + TOP * i++) + "px;"); //25px
+	
+		// i = 2
+		j = 0;
 		final DateBox.Format dateBoxFormat = new DateBox.DefaultFormat(DATE_FORMAT);
 		createdFrom = new DateBox();
 		createdFrom.setFormat(dateBoxFormat);
@@ -258,44 +277,103 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		createdFrom.addValueChangeHandler(this); //otan tha allaxei timh
 		//me kathe allagh tou textBox, enhmerwnetai o pinakas
 		createdFrom.getTextBox().addKeyUpHandler(this);
+		createdFrom.getElement().addClassName("listInputCol1");
+		createdFrom.getElement().setAttribute("style",
+				"top: " + (i * (TOP + TOP_STEP) + TOP_STEP) + "px;"); //65px
+		
 		createdTo = new DateBox();
 		createdTo.setFormat(dateBoxFormat);
 		createdTo.setFireNullValues(true);
 		createdTo.addValueChangeHandler(this); //otan tha allaxei timh
 		createdTo.getTextBox().addKeyUpHandler(this);
+		createdTo.getElement().addClassName("listInputCol2");
+		createdTo.getElement().setAttribute("style",
+				"top: " + (i * (TOP + TOP_STEP) + TOP_STEP) + "px;"); //35px
+		
+		// i = 2
+		j = 0;
 		editedFrom = new DateBox();
 		editedFrom.setFormat(dateBoxFormat);
 		editedFrom.setFireNullValues(true);
 		editedFrom.addValueChangeHandler(this); //otan tha allaxei timh
 		editedFrom.getTextBox().addKeyUpHandler(this);
+		editedFrom.getElement().addClassName("listInputCol1");
+		editedFrom.getElement().setAttribute("style",
+				"top: " + (i * (TOP + TOP) + TOP_STEP + TOP_STEP) + "px;"); //110px
+		
 		editedTo = new DateBox();
 		editedTo.setFormat(dateBoxFormat);
 		editedTo.setFireNullValues(true);
 		editedTo.addValueChangeHandler(this); //otan tha allaxei timh
 		editedTo.getTextBox().addKeyUpHandler(this);
+		editedTo.getElement().addClassName("listInputCol2");
+		editedTo.getElement().setAttribute("style",
+				"top: " + (i * (TOP + TOP) + TOP_STEP + TOP_STEP) + "px;"); //110px
+		
+		// i = 2
+		j = 0;
 		publik = new ListBox();
 		publik.addItem(MOBILE_MEDIA_SHARE_CONSTANTS.anyType(), "");
 		publik.addItem(MOBILE_MEDIA_SHARE_CONSTANTS.publik(), Boolean.TRUE.toString());
 		publik.addItem(MOBILE_MEDIA_SHARE_CONSTANTS._private(), Boolean.FALSE.toString());
 		publik.addChangeHandler(this);
+		publik.getElement().addClassName("listInputCol1");
+		publik.getElement().setAttribute("style",
+				"top: " + (i * (TOP + TOP + TOP) - TOP_STEP) + "px;"); //145px
+		
 		pageSize = new ListBox();
-		for(int i = MIN_PAGE_SIZE; i <= MAX_PAGE_SIZE; i += PAGE_SIZE_STEP)
-			pageSize.addItem(Integer.toString(i), Integer.toString(i));
+		for(int p = MIN_PAGE_SIZE; p <= MAX_PAGE_SIZE; p += PAGE_SIZE_STEP)
+			pageSize.addItem(Integer.toString(p), Integer.toString(p));
 		pageSize.addChangeHandler(this);
+		pageSize.getElement().addClassName("listInputCol2");
+		pageSize.getElement().setAttribute("style",
+				"top: " + (i * (TOP + TOP + TOP) - TOP_STEP) + "px;"); //145px
+		
+		//i = 3
+		j = 1;
+		i++;
 		download = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.download());
 		download.setEnabled(false);
 		download.addClickHandler(this);
+		download.getElement().addClassName("listField");
+		download.getElement().addClassName("listButtons");
+		download.getElement().setAttribute("style",
+				//180px
+				"top: " + ((TOP * i) + (TOP * i) + TOP + TOP_STEP) + "px; left: " + (LEFT_OFFSET * j++) + "px;"); //100px
+		
+		
 		edit = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.edit());
 		edit.setEnabled(false);
 		edit.addClickHandler(this);
+		edit.getElement().addClassName("listField");
+		edit.getElement().addClassName("listButtons");
+		edit.getElement().setAttribute("style",
+				//180px
+				"top: " + ((TOP * i) + (TOP * i) + TOP + TOP_STEP) + "px; left: " + (LEFT_OFFSET * j++) + "px;"); //200px
+		
 		delete = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.delete());
 		delete.setEnabled(false);
 		delete.addClickHandler(this);
+		delete.getElement().addClassName("listField");
+		delete.getElement().addClassName("listButtons");
+		delete.getElement().setAttribute("style",
+				//180px
+				"top: " + ((TOP * i) + (TOP * i++) + TOP + TOP_STEP) + "px; left: " + (LEFT_OFFSET * j++) + "px;"); //300px
+		
+		//i = 4
+		j = 1;
 		pager = new SimplePager();
 		pager.setPageSize(MIN_PAGE_SIZE);
+		pager.getElement().addClassName("pager");
+		pager.getElement().setAttribute("style",
+				//220px
+				"top: " + ((TOP * i) + (TOP * i) + (i * TOP_STEP)) + "px;");
+		
 		selectionModel = new SingleSelectionModel<Media>();
 		selectionModel.addSelectionChangeHandler(this);
 		mediaTable = new CellTable<Media>();
+		mediaTable.getElement().setAttribute("style", "padding-top: " + ((TOP + TOP) * i) + "px;"); //200px; TODO
+		
 		mediaTable.setSelectionModel(selectionModel);
 		//gia na allazei selida o xrhsths kai me ta velakia (dexia-aristera)
 		mediaTable.setKeyboardPagingPolicy(HasKeyboardPagingPolicy.KeyboardPagingPolicy.CHANGE_PAGE);
@@ -481,36 +559,66 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 			currentUser = response.getText();
 			Document.get().getBody().addClassName("bodyClass");
 			Document.get().getBody().appendChild(Header.newHeader());
+			int i = 1;
 			final FlowPanel flowPanel = new FlowPanel();
 			flowPanel.getElement().addClassName("search-filter");
 			final InlineLabel titleLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.title());
+			titleLabel.getElement().addClassName("listLabelCol1");
+			titleLabel.getElement().setAttribute("style", 
+					"top: " + (TOP + TOP_STEP + TOP_STEP * i) + "px;"); //35px
 			flowPanel.add(titleLabel);
 			flowPanel.add(title);
-			final InlineLabel userLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.user()); 
+			final InlineLabel userLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.user());
+			userLabel.getElement().addClassName("listLabelCol2");
+			userLabel.getElement().setAttribute("style", 
+					"top: " + (TOP + TOP_STEP + TOP_STEP * i) + "px;");
 			flowPanel.add(userLabel);
 			flowPanel.add(user);
+			final InlineLabel typeLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.type());
+			typeLabel.getElement().addClassName("listLabelType");
+			typeLabel.getElement().setAttribute("style", 
+					"top: " + (TOP + TOP_STEP + TOP_STEP * i++) + "px;");
+			flowPanel.add(typeLabel);
+			flowPanel.add(type);
 			flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
-			final InlineLabel createdFromLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.createdFrom()); 
+			//i = 2
+			final InlineLabel createdFromLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.createdFrom());
+			createdFromLabel.getElement().addClassName("listLabelCol1");
+			createdFromLabel.getElement().setAttribute("style", 
+					"top: " + (TOP + TOP * i) + "px;"); //75px
 			flowPanel.add(createdFromLabel);
 			flowPanel.add(createdFrom);
-			final InlineLabel createdToLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.createdTo()); 
+			final InlineLabel createdToLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.createdTo());
+			createdToLabel.getElement().addClassName("listLabelCol2");
+			createdToLabel.getElement().setAttribute("style", 
+					"top: " + (TOP + TOP * i++) + "px;"); //75px
 			flowPanel.add(createdToLabel);
 			flowPanel.add(createdTo);
 			flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
-			final InlineLabel editedFromLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.editedFrom()); 
+			//i = 3
+			final InlineLabel editedFromLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.editedFrom());
+			editedFromLabel.getElement().addClassName("listLabelCol1");
+			editedFromLabel.getElement().setAttribute("style", 
+					"top: " + ((TOP + TOP * i) + (TOP_STEP * i) + TOP_STEP) + "px;"); //120px
 			flowPanel.add(editedFromLabel);
 			flowPanel.add(editedFrom);
-			final InlineLabel editedToLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.editedTo()); 
+			final InlineLabel editedToLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.editedTo());
+			editedToLabel.getElement().addClassName("listLabelCol2");
+			editedToLabel.getElement().setAttribute("style",
+					"top: " + ((TOP + TOP * i) + (TOP_STEP * i++) + TOP_STEP) + "px;"); //120px
 			flowPanel.add(editedToLabel);
 			flowPanel.add(editedTo);
 			flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
-			final InlineLabel typeLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.type()); 
-			flowPanel.add(typeLabel);
-			flowPanel.add(type);
-			final InlineLabel publicLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.publik()); 
+			final InlineLabel publicLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.publik());
+			publicLabel.getElement().addClassName("listLabelCol1");
+			publicLabel.getElement().setAttribute("style", 
+					"top: " + (TOP + TOP + TOP * i) + "px;"); //150px
 			flowPanel.add(publicLabel);
 			flowPanel.add(publik);
 			final InlineLabel pageSizeLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.pageSize());
+			pageSizeLabel.getElement().addClassName("listLabelCol2");
+			pageSizeLabel.getElement().setAttribute("style", 
+					"top: " + (TOP + TOP + TOP * i) + "px;");
 			flowPanel.add(pageSizeLabel);
 			flowPanel.add(pageSize);
 			flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
@@ -518,8 +626,9 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 			flowPanel.add(edit);
 			flowPanel.add(delete);
 			flowPanel.add(pager);
+			flowPanel.add(mediaTable);
 			RootPanel.get().add(flowPanel);
-			RootPanel.get().add(mediaTable);
+			//RootPanel.get().add(mediaTable);
 			onRangeChanged(null);
 		}
 	}

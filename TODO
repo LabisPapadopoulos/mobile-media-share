@@ -7,4 +7,6 @@ list
 	type safeHtml column
 	duration textColumn format
 	public safeHtml column
+Forgot Password? (login page)
+Edit		 (List page)
 

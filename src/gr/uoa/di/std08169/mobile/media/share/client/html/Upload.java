@@ -36,7 +36,7 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 	private static final MobileMediaShareUrls MOBILE_MEDIA_SHARE_URLS = 
 			GWT.create(MobileMediaShareUrls.class);
 	private static final int TOP_STEP = 30;
-	private static final int LEFT_OFFSET = 425;
+	private static final int LEFT_OFFSET = 430;
 	private static final int LEFT_STEP = 100;
 	
 	private final FormPanel form;
@@ -75,10 +75,12 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 		ok = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.ok());
 		ok.addClickHandler(this);
 		ok.setEnabled(false);
-		ok.getElement().setAttribute("style", "top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
+		ok.getElement().setAttribute("style", 
+				"top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 		reset = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.reset());
 		reset.addClickHandler(this);
-		reset.getElement().setAttribute("style", "top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
+		reset.getElement().setAttribute("style", 
+				"top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 	}
 	
 	@Override
