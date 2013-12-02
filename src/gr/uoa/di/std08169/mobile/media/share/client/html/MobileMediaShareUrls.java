@@ -9,6 +9,10 @@ public interface MobileMediaShareUrls extends Messages {
 	@DefaultMessage("./edit.html?id={0}")
 	public String edit(final String id);
 	
+	//sensor: an exei sensora h suskeuh pou fortwnetai o xarths
+	@DefaultMessage("sensor=true&language={0}")
+	public String googleMapsOptions(final String locale);
+	
 	@DefaultMessage("./images/locales/{0}.png")
 	public String localeImage(final String locale);
 
