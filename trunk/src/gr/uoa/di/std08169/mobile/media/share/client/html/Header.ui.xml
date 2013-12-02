@@ -9,25 +9,32 @@
 			</div>
 			<div class="menu">
 			    <a ui:field="mapLink" class="map">
+			        <img src="./images/map.svg" class="mapImg" />
 			        <!-- inline keimeno xwris allagh grammhs -->
 			        <span ui:field="map"></span>
 			    </a>
 			    <a ui:field="listLink" class="list">
+			        <img src="./images/list.svg" class="listImg" />
 			        <span ui:field="list"></span>
 			    </a>
    			    <a ui:field="newPhotoLink" class="newPhoto">
+   			        <img src="./images/newPhoto.svg" class="newPhotoImg" />
 			        <span ui:field="newPhoto"></span>
 			    </a>
    			    <a ui:field="newVideoLink" class="newVideo">
+   			        <img src="./images/newVideo.svg" class="newVideoImg" />
 			        <span ui:field="newVideo"></span>
 			    </a>
    			    <a ui:field="uploadLink" class="upload">
+   			        <img src="./images/upload.svg" class="uploadImg" />
 			        <span ui:field="upload"></span>
 			    </a>
 			    <a ui:field="myAccountLink" class="myAccount">
+			        <img src="./images/myAccount.svg" class="myAccountImg" />
 			        <span ui:field="myAccount"></span>
 			    </a>
 			    <a ui:field="logoutLink" class="logout">
+			        <img src="./images/logout.svg" class="logoutImg" />
 			        <span ui:field="logout"></span>
 			    </a>
 			</div>

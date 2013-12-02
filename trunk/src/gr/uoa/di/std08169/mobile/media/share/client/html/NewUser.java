@@ -34,7 +34,7 @@ public class NewUser implements ClickHandler, EntryPoint, KeyUpHandler {
 	private static final MobileMediaShareUrls MOBILE_MEDIA_SHARE_URLS =
 			GWT.create(MobileMediaShareUrls.class);
 	private static final int TOP_STEP = 30;
-	private static final int LEFT_OFFSET = 340;
+	private static final int LEFT_OFFSET = 360;
 	private static final int LEFT_STEP = 100;
 	
 	private final TextBox email;
@@ -60,14 +60,20 @@ public class NewUser implements ClickHandler, EntryPoint, KeyUpHandler {
 		password2.addKeyUpHandler(this);
 		int j = 0;
 		ok = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.ok());
-		ok.getElement().setAttribute("style", "top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
+		ok.getElement().addClassName("newUserButtons");
+		ok.getElement().setAttribute("style", 
+				"top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 		ok.addClickHandler(this);
 		ok.setEnabled(false);
 		reset = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.reset());
-		reset.getElement().setAttribute("style", "top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
+		reset.getElement().addClassName("newUserButtons");
+		reset.getElement().setAttribute("style", 
+				"top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 		reset.addClickHandler(this);
 		cancel = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.cancel());
-		cancel.getElement().setAttribute("style", "top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
+		cancel.getElement().addClassName("newUserButtons");
+		cancel.getElement().setAttribute("style", 
+				"top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 		cancel.addClickHandler(this);
 	}
 

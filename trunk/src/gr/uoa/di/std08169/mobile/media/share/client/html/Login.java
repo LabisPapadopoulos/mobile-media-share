@@ -31,7 +31,8 @@ public class Login implements ClickHandler, EntryPoint, KeyUpHandler {
 	private static final MobileMediaShareUrls MOBILE_MEDIA_SHARE_URLS =
 			GWT.create(MobileMediaShareUrls.class);
 	private static final int TOP_STEP = 30;
-	private static final int LEFT_OFFSET = 340;
+	private static final int TOP_BUTTON_STEP = 5;
+	private static final int LEFT_OFFSET = 365;
 	private static final int LEFT_STEP = 100;
 	
 	//Ta textBoxes/buttons pou xreiazomaste gia tin arxikh login othonh
@@ -67,14 +68,17 @@ public class Login implements ClickHandler, EntryPoint, KeyUpHandler {
 		int j = 0;
 		//string login apo to interface
 		login = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.login());
-		login.getElement().setAttribute("style", "top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
+		login.getElement().setAttribute("style", 
+				"top: " + ((TOP_STEP + TOP_BUTTON_STEP) * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 		login.addClickHandler(this);
 		login.setEnabled(false);
 		newUser = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.newUser());
-		newUser.getElement().setAttribute("style", "top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
+		newUser.getElement().setAttribute("style", 
+				"top: " + ((TOP_STEP + TOP_BUTTON_STEP) * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 		newUser.addClickHandler(this);
 		forgotPassword = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.forgotPassword_());
-		forgotPassword.getElement().setAttribute("style", "top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
+		forgotPassword.getElement().setAttribute("style", 
+				"top: " + ((TOP_STEP + TOP_BUTTON_STEP) * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 		forgotPassword.addClickHandler(this);
 	}
 	
