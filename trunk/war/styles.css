@@ -180,8 +180,11 @@ p {
 }
 
 div.map {
-	padding-top: 100px;
-	height: 500px;
-	width: 500px;
+/*	position: relative;
+	top: 180px;
+//	padding-top: 100px; */
+	height: 480px;
+	width: 640px;
+	left: 180px;
 }
 

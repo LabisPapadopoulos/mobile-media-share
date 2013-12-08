@@ -11,6 +11,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.ParagraphElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -66,8 +67,8 @@ public class Map implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHandle
 	public static final String GOOGLE_MAPS_API = "maps";
 	public static final String GOOGLE_MAPS_VERSION = "3";
 	public static final double GOOGLE_MAPS_ZOOM = 8.0;
-	public static final double GOOGLE_MAPS_LATITUDE = 37.99295;
-	public static final double GOOGLE_MAPS_LONGITUDE = 23.705792;
+	public static final double GOOGLE_MAPS_LATITUDE = 37.968546;	//DIT lat
+	public static final double GOOGLE_MAPS_LONGITUDE = 23.766968;	//DIT lng
 	private static final MobileMediaShareConstants MOBILE_MEDIA_SHARE_CONSTANTS = 
 			GWT.create(MobileMediaShareConstants.class);
 	private static final MediaTypeConstants MEDIA_TYPE_CONSTANTS =
@@ -439,6 +440,10 @@ public class Map implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHandle
 		flowPanel.add(download);
 		flowPanel.add(edit);
 		flowPanel.add(delete);
+		final ParagraphElement paragraphElement = Document.get().createPElement();
+		paragraphElement.setAttribute("style", "padding-bottom: " + (TOP_STEP + TOP_STEP + TOP_STEP + TOP + TOP * i) + "px;"); //140px
+		paragraphElement.setInnerHTML("&nbsp;");
+		flowPanel.getElement().appendChild(paragraphElement);
 		flowPanel.getElement().appendChild(mapDiv);
 		RootPanel.get().add(flowPanel);
 		updateMap();
