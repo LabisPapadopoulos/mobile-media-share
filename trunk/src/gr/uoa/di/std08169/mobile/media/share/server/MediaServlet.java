@@ -197,15 +197,17 @@ public class MediaServlet extends HttpServlet {
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("public")) {
 					publik = "on".equals(fileItem.getString(UTF_8));
 					fileItem.delete();
+				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("latitude")) {
+					latitude = new BigDecimal(fileItem.getString(UTF_8));
+					fileItem.delete();
+				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("longitude")) {
+					longitude = new BigDecimal(fileItem.getString(UTF_8));
+					fileItem.delete();
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("locale")) {
 					locale = fileItem.getString(UTF_8);
 					fileItem.delete();
 				}
 			}
-			latitude = new BigDecimal(0); // TODO
-			longitude = new BigDecimal(0);
-			
-			
 			//Den anevase o xrhsths arxeio
 			if ((id == null) || (type == null) || (size == 0)) {
 				LOGGER.warning("No file specified");

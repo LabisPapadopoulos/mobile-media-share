@@ -352,7 +352,7 @@ public class Map implements CenterChangedHandler, ChangeHandler, ClickHandler, E
 						//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
 						URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
 						//kwdikopoieitai to url map epeidh pernaei san parametros (meta apo ?)
-						URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.list(
+						URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.map(
 								URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
 				return;
 			}
