@@ -528,7 +528,7 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 				updateRowData(0, Collections.<Media>emptyList());
 				updateRowCount(0, false);
 				selectionModel.clear();
-				onSelection(null);
+				onSelectionChange(null);
 				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingMedia(throwable.getMessage()));
 			}
 

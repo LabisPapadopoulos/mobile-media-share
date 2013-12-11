@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 11.0, SVG Export Plug-In  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN"    "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd" [
+	<!ENTITY ns_flows "http://ns.adobe.com/Flows/1.0/">
+	<!ENTITY ns_svg "http://www.w3.org/2000/svg">
+	<!ENTITY ns_xlink "http://www.w3.org/1999/xlink">
+]>
+<svg  xmlns="&ns_svg;" xmlns:xlink="&ns_xlink;" xmlns:a="http://ns.adobe.com/AdobeSVGViewerExtensions/3.0/"
+	 width="32" height="32" viewBox="-3.51563 -2.8335 32 32" xml:space="preserve">
+	<defs>
+	</defs>
+	<g>
+		<linearGradient id="XMLID_1_" gradientUnits="userSpaceOnUse" x1="14.7832" y1="1.58496" x2="14.7832" y2="19.7874">
+			<stop  offset="0" style="stop-color:#EBE8E4"/>
+			<stop  offset="1" style="stop-color:#B9B5AB"/>
+			<a:midPointStop  offset="0" style="stop-color:#EBE8E4"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#EBE8E4"/>
+			<a:midPointStop  offset="1" style="stop-color:#B9B5AB"/>
+		</linearGradient>
+		
+			<rect x="7.24951" y="0.5" fill="url(#XMLID_1_)" stroke="#565248" stroke-linecap="round" stroke-linejoin="round" width="15.06885" height="19.16748"/> 
+		<linearGradient id="XMLID_2_" gradientUnits="userSpaceOnUse" x1="11.5332" y1="5.50146" x2="11.5332" y2="23.7039">
+			<stop  offset="0" style="stop-color:#EBE8E4"/>
+			<stop  offset="1" style="stop-color:#B9B5AB"/>
+			<a:midPointStop  offset="0" style="stop-color:#EBE8E4"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#EBE8E4"/>
+			<a:midPointStop  offset="1" style="stop-color:#B9B5AB"/>
+		</linearGradient>
+		
+			<rect x="3.99951" y="4.4165" fill="url(#XMLID_2_)" stroke="#565248" stroke-linecap="round" stroke-linejoin="round" width="15.06885" height="19.16797"/> 
+		<linearGradient id="XMLID_3_" gradientUnits="userSpaceOnUse" x1="8.03369" y1="9.50195" x2="8.03369" y2="27.70439">
+			<stop  offset="0" style="stop-color:#EBE8E4"/>
+			<stop  offset="1" style="stop-color:#B9B5AB"/>
+			<a:midPointStop  offset="0" style="stop-color:#EBE8E4"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#EBE8E4"/>
+			<a:midPointStop  offset="1" style="stop-color:#B9B5AB"/>
+		</linearGradient>
+		
+			<rect x="0.5" y="8.41699" fill="url(#XMLID_3_)" stroke="#565248" stroke-linecap="round" stroke-linejoin="round" width="15.06836" height="19.16748"/> 
+		
+			<line fill="none" stroke="#807D74" stroke-linecap="round" stroke-linejoin="round" x1="3.23438" y1="12.33301" x2="12.65088" y2="12.33301"/>
+		
+			<line fill="none" stroke="#807D74" stroke-linecap="round" stroke-linejoin="round" x1="3.23438" y1="16.25049" x2="12.65088" y2="16.25049"/>
+		
+			<line fill="none" stroke="#807D74" stroke-linecap="round" stroke-linejoin="round" x1="3.23438" y1="19.8335" x2="12.65088" y2="19.8335"/>
+		
+			<line fill="none" stroke="#807D74" stroke-linecap="round" stroke-linejoin="round" x1="3.23438" y1="23.3335" x2="12.65088" y2="23.3335"/>
+	</g>
+</svg>

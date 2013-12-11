@@ -1,6 +1,8 @@
 package gr.uoa.di.std08169.mobile.media.share.server;
 
+import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -43,6 +45,14 @@ public class MediaServiceServlet extends RemoteServiceServlet implements MediaSe
 			final String orderField, final boolean ascending) throws MediaServiceException {
 		return mediaService.getMedia(currentUser, title, type, user, createdFrom, createdTo, 
 				editedFrom, editedTo, publik, start, length, orderField, ascending);
+	}
+	
+	@Override
+	public List<Media> getMedia(final String currentUser, final String title, final MediaType type, final String user, final Date createdFrom, 
+			final Date createdTo, final Date editedFrom, final Date editedTo, final Boolean publik, final BigDecimal minLatitude, 
+			final BigDecimal minLongitude, final BigDecimal maxLatitude, final BigDecimal maxLongitude) throws MediaServiceException {
+		return mediaService.getMedia(currentUser, title, type, user, createdFrom, createdTo, editedFrom, editedTo, publik, minLatitude, 
+				minLongitude, maxLatitude, maxLongitude);
 	}
 
 	@Override

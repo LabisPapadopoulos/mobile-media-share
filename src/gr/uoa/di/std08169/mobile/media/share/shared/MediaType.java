@@ -6,7 +6,7 @@ public enum MediaType {
 	IMAGE("image/"),
 	TEXT("text/"),
 	VIDEO("video/");
-	
+
 	public static MediaType getMediaType(final String mimeType) {
 		if (mimeType == null)
 			return null;
@@ -21,7 +21,7 @@ public enum MediaType {
 		return mimeTypePrefix;
 	}
 	
-	private final String mimeTypePrefix;
+	private final String  mimeTypePrefix;
 	
 	private MediaType(final String mimeTypePrefix) {
 		this.mimeTypePrefix = mimeTypePrefix;
