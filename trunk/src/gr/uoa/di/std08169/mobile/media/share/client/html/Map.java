@@ -1,11 +1,22 @@
 package gr.uoa.di.std08169.mobile.media.share.client.html;
 
+import gr.uoa.di.std08169.mobile.media.share.client.i18n.MediaTypeConstants;
+import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants;
+import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessages;
+import gr.uoa.di.std08169.mobile.media.share.client.services.MediaService;
+import gr.uoa.di.std08169.mobile.media.share.client.services.MediaServiceAsync;
+import gr.uoa.di.std08169.mobile.media.share.client.services.UserOracle;
+import gr.uoa.di.std08169.mobile.media.share.client.services.UserSuggestion;
+import gr.uoa.di.std08169.mobile.media.share.shared.Media;
+import gr.uoa.di.std08169.mobile.media.share.shared.MediaType;
+import gr.uoa.di.std08169.mobile.media.share.shared.User;
+
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 import com.google.gwt.ajaxloader.client.AjaxLoader;
-import com.google.gwt.ajaxloader.client.AjaxLoader.AjaxLoaderOptions;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -46,24 +57,19 @@ import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.maps.gwt.client.GoogleMap;
+import com.google.maps.gwt.client.GoogleMap.CenterChangedHandler;
+import com.google.maps.gwt.client.GoogleMap.ZoomChangedHandler;
 import com.google.maps.gwt.client.LatLng;
 import com.google.maps.gwt.client.MapOptions;
 import com.google.maps.gwt.client.MapTypeId;
+import com.google.maps.gwt.client.Marker;
+import com.google.maps.gwt.client.MarkerImage;
+import com.google.maps.gwt.client.MarkerOptions;
+import com.google.maps.gwt.client.MouseEvent;
 
-import gr.uoa.di.std08169.mobile.media.share.client.i18n.MediaTypeConstants;
-import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants;
-import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessages;
-import gr.uoa.di.std08169.mobile.media.share.client.services.MediaService;
-import gr.uoa.di.std08169.mobile.media.share.client.services.MediaServiceAsync;
-import gr.uoa.di.std08169.mobile.media.share.client.services.UserOracle;
-import gr.uoa.di.std08169.mobile.media.share.client.services.UserSuggestion;
-import gr.uoa.di.std08169.mobile.media.share.shared.Media;
-import gr.uoa.di.std08169.mobile.media.share.shared.MediaResult;
-import gr.uoa.di.std08169.mobile.media.share.shared.MediaType;
-import gr.uoa.di.std08169.mobile.media.share.shared.User;
-
-public class Map implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHandler,
-		RequestCallback, SelectionHandler<Suggestion>, ValueChangeHandler<Date>, Runnable {
+public class Map implements CenterChangedHandler, ChangeHandler, ClickHandler, EntryPoint, KeyUpHandler,
+		Marker.ClickHandler, RequestCallback, SelectionHandler<Suggestion>, ValueChangeHandler<Date>, Runnable,
+		ZoomChangedHandler {
 	public static final String GOOGLE_MAPS_API = "maps";
 	public static final String GOOGLE_MAPS_VERSION = "3";
 	public static final double GOOGLE_MAPS_ZOOM = 8.0;
@@ -98,10 +104,14 @@ public class Map implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHandle
 	private final Button download;
 	private final Button edit;
 	private final Button delete;
+	private final java.util.Map<Marker, Media> markers;
+	private final java.util.Map<MediaType, MarkerImage> markerImages;
+	private final java.util.Map<MediaType, MarkerImage> selectedMarkerImages;
 	private User selectedUser;
 	private Request userRequest;
 	private String currentUser;
 	private GoogleMap googleMap;
+	private Marker selectedMarker;
 	
 	public Map() {
 		int i = 1;
@@ -214,6 +224,34 @@ public class Map implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHandle
 		delete.getElement().setAttribute("style",
 				//180px
 				"top: " + ((TOP * i) + (TOP * i++) + TOP + TOP_STEP) + "px; left: " + (LEFT_OFFSET * j++) + "px;"); //300px
+		markers = new HashMap<Marker, Media>();
+		markerImages = new HashMap<MediaType, MarkerImage>();
+		selectedMarkerImages = new HashMap<MediaType, MarkerImage>();
+	}
+	
+	//Handler gia zoomarisma kai allagh kentrou xarth
+	@Override
+	public void handle() {
+		updateMap();
+	}
+	
+	//Handler gia click se marker ston xarth
+	@Override
+	public void handle(final MouseEvent event) {
+		// xedialexe to selected marker
+		if (selectedMarker != null) {
+			selectedMarker.setIcon(markerImages.get(MediaType.getMediaType(markers.get(selectedMarker).getType())));
+		}
+		//Se epilegmeno antikeimeno bainei h pio megalh tou eikona 
+		for (java.util.Map.Entry<Marker, Media> marker : markers.entrySet()) {
+			if (marker.getKey().getPosition().equals(event.getLatLng())) { // autos o marker dialexthke
+				marker.getKey().setIcon(selectedMarkerImages.get(MediaType.getMediaType(marker.getValue().getType())));
+				selectedMarker = marker.getKey();
+				download.setEnabled(true);
+				edit.setEnabled(true);
+				delete.setEnabled(true);
+			}
+		}
 	}
 	
 	//Gia allagh ston typo apo ton xrhsth
@@ -223,42 +261,35 @@ public class Map implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHandle
 	}
 	
 	@Override
-	public void onClick(final ClickEvent clickEvent) { // clicking on download, edit or delete // TODO
+	public void onClick(final ClickEvent clickEvent) { // clicking on download, edit or delete
 		if (clickEvent.getSource() == download)
 			//Anoigei neo tab pou tha trexei tin doGet gia na katevei to arxeio
-{/* TODO			Window.open(MOBILE_MEDIA_SHARE_URLS.download(URL.encodeQueryString(selectionModel.getSelectedObject().getId())), "_blank", ""); */}
+			Window.open(MOBILE_MEDIA_SHARE_URLS.download(URL.encodeQueryString(markers.get(selectedMarker).getId())), "_blank", "");
 		else if (clickEvent.getSource() == edit)
-{/* TODO			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.edit(URL.encodeQueryString(selectionModel.getSelectedObject().getId()))); */}
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.edit(URL.encodeQueryString(markers.get(selectedMarker).getId())));
 		else if ((clickEvent.getSource() == delete) &&
-				Window.confirm(MOBILE_MEDIA_SHARE_CONSTANTS.areYouSureYouWantToDeleteThisMedia())) {
-// TODO {			
-//			//Diagrafh tou arxeiou apo tin vash
-//			MEDIA_SERVICE.deleteMedia(selectionModel.getSelectedObject().getId(),
-//					new AsyncCallback<Void>() {
-//				@Override
-//				public void onFailure(final Throwable throwable) {
-//					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorDeletingMedia(throwable.getMessage()));
-//				}
-//				
-//				@Override
-//				public void onSuccess(final Void _) {
-//					//delete file apo to file systhma
-//					try {
-//						//encode url se periptwsh pou exei periergous xarakthres
-//						new RequestBuilder(RequestBuilder.DELETE, "./mediaServlet?id=" + URL.encodeQueryString(selectionModel.getSelectedObject().getId())).
-//								sendRequest(null, Map.this);
-//					} catch (final RequestException e) {
-//						Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorDeletingMedia(e.getMessage()));
-//					}
-//					//katharizei to highlight tou pinaka
-//					selectionModel.clear();
-//					//apenergopoiountai ta koubia (download, edit, delete)
-//					onSelectionChange(null);
-//					//fernei nea dedomena ston pinaka
-//					onRangeChanged(null);
-//				}
-//			});
-//}TODO
+				Window.confirm(MOBILE_MEDIA_SHARE_CONSTANTS.areYouSureYouWantToDeleteThisMedia())) {			
+			//Diagrafh tou arxeiou apo tin vash
+			MEDIA_SERVICE.deleteMedia(markers.get(selectedMarker).getId(),
+					new AsyncCallback<Void>() {
+				@Override
+				public void onFailure(final Throwable throwable) {
+					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorDeletingMedia(throwable.getMessage()));
+				}
+				
+				@Override
+				public void onSuccess(final Void _) {
+					//delete file apo to file systhma
+					try {
+						//encode url se periptwsh pou exei periergous xarakthres
+						new RequestBuilder(RequestBuilder.DELETE, "./mediaServlet?id=" + URL.encodeQueryString(markers.get(selectedMarker).getId())).
+								sendRequest(null, Map.this);
+					} catch (final RequestException e) {
+						Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorDeletingMedia(e.getMessage()));
+					}
+					updateMap();
+				}
+			});
 		}
 	}
 	
@@ -359,13 +390,17 @@ public class Map implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHandle
 		mapDiv.addClassName("map");
 		//Dhmiourgei ton xarth me tis panw ruthmiseis kai to vazei sto mapDiv
 		googleMap = GoogleMap.create(mapDiv, options);
-		//Statith javascript kalsh pou elenxei an o browser upostirizei geografiko prosdiorismo theshs (san Window.alert)
+		//Listener gia otan allaxtei to kentro tou xarth
+		googleMap.addCenterChangedListener(this);
+		//Listener gia otan zoomaretai o xarths
+		googleMap.addZoomChangedListener(this);
+		//Statikh javascript klash pou elenxei an o browser upostirizei geografiko prosdiorismo theshs (san Window.alert)
 		Geolocation.getIfSupported().getCurrentPosition(new Callback<Position, PositionError>() {
 			@Override
 			public void onFailure(final PositionError error) {
 				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingYourLocation(error.getMessage()));
 				googleMap.setCenter(LatLng.create(GOOGLE_MAPS_LATITUDE, GOOGLE_MAPS_LONGITUDE));
-
+				updateMap();
 			}
 
 			@Override
@@ -374,10 +409,14 @@ public class Map implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHandle
 										//Coordinates: pairnei tis suntetagmenes tis theshs
 				googleMap.setCenter(LatLng.create(position.getCoordinates().getLatitude(),
 						position.getCoordinates().getLongitude()));
+				updateMap();
 			}
 		});
-		
-		
+		for (MediaType type : MediaType.values()) {
+			//Ftaxnei to markerImage apo to arxiko size (originalSize) se size
+			markerImages.put(type, MarkerImage.create(MOBILE_MEDIA_SHARE_URLS.markerImage(type.name().toLowerCase())));
+			selectedMarkerImages.put(type, MarkerImage.create(MOBILE_MEDIA_SHARE_URLS.selectedImage(type.name().toLowerCase())));
+		}
 		Document.get().getBody().addClassName("bodyClass");
 		Document.get().getBody().appendChild(Header.newHeader());
 		int i = 1;
@@ -446,7 +485,6 @@ public class Map implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHandle
 		flowPanel.getElement().appendChild(paragraphElement);
 		flowPanel.getElement().appendChild(mapDiv);
 		RootPanel.get().add(flowPanel);
-		updateMap();
 	}
 	
 	private void updateMap() {
@@ -469,33 +507,48 @@ public class Map implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHandle
 		//epistrefei ta voreio-anatolika (suntetagmenes tetragwnou pou kaluptei o xarths)
 		final BigDecimal maxLatitude = new BigDecimal(googleMap.getBounds().getNorthEast().lat());
 		final BigDecimal maxLongitude = new BigDecimal(googleMap.getBounds().getNorthEast().lng());
-		
-/*		MEDIA_SERVICE.getMedia(currentUser, title, type, (selectedUser == null) ? null : selectedUser.getEmail(), TODO
-				createdFrom, createdTo, editedFrom, editedTo, publik, start, length, orderField, ascending, 
-				new AsyncCallback<MediaResult>() {
+		MEDIA_SERVICE.getMedia(currentUser, title, type, (selectedUser == null) ? null : selectedUser.getEmail(),
+				createdFrom, createdTo, editedFrom, editedTo, publik, minLatitude, minLongitude, maxLatitude, maxLongitude, 
+				new AsyncCallback<List<Media>>() {
 			@Override
 			public void onFailure(final Throwable throwable) {//se front-end ston browser
-				//Afou egine Failure, bainei adeia Lista apo Media
-				TODO
-				updateRowData(0, Collections.<Media>emptyList());
-				updateRowCount(0, false);
-				selectionModel.clear();
-				onSelection(null);
+				for (java.util.Map.Entry<Marker, Media> marker : markers.entrySet())
+					//svinei ton marker apo ton xarth
+					marker.getKey().setMap((GoogleMap) null);
+				markers.clear(); //adeiasma listas apo markers
+				selectedMarker = null;
+				download.setEnabled(false);
+				edit.setEnabled(false);
+				delete.setEnabled(false);
 				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingMedia(throwable.getMessage()));
-				throw new RuntimeException(throwable);
 			}
 
 			@Override
-			public void onSuccess(final MediaResult result) {
-				TODO
-				//deixnei ta kainouria dedomena pou efere h onRangeChanged
-				updateRowData(start, result.getMedia()); //h selida pou efere
-				//ananewnei sumfwna me tis sunolikes grammes pou sigoura gnwrizei ton arithmo (true)
-				updateRowCount(result.getTotal(), true);
-				selectionModel.clear(); //katharizei tin highlight grammh tou xrhsth
-				//kanei disable ta download, edit kai delete afou den einai kamia grammh epilegmenh
-				onSelectionChange(null);
+			public void onSuccess(final List<Media> result) {
+				for (java.util.Map.Entry<Marker, Media> marker : markers.entrySet())
+					//svinei ton marker apo ton xarth
+					marker.getKey().setMap((GoogleMap) null);
+				markers.clear(); //adeiasma tou map apo markers
+				//Ruthmiseis gia ta shmeia ston xarth
+				final MarkerOptions options = MarkerOptions.create();
+				options.setMap(googleMap);
+				options.setClickable(true);
+				//Shmeia ston xarth gia kathe media
+				for (Media media : result) {
+					final Marker marker = Marker.create(options);
+					//doubleValue: to gurnaei se double apo bigDecimal
+					marker.setPosition(LatLng.create(media.getLatitude().doubleValue(), media.getLongitude().doubleValue()));
+					marker.setTitle(media.getTitle());
+					//vriskei tin katallhlh eikona gia sugkekrimeno tupo antikeimenou apo to hashMap
+					marker.setIcon(markerImages.get(MediaType.getMediaType(media.getType())));
+					marker.addClickListener(Map.this);
+					markers.put(marker, media);
+				}
+				selectedMarker = null;
+				download.setEnabled(false);
+				edit.setEnabled(false);
+				delete.setEnabled(false);
 			}
-		}); */
+		});
 	}
 }
