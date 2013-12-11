@@ -1,14 +1,23 @@
 package gr.uoa.di.std08169.mobile.media.share.client.html;
 
+import java.math.BigDecimal;
+
+import com.google.gwt.ajaxloader.client.AjaxLoader;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.ParagraphElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.geolocation.client.Geolocation;
+import com.google.gwt.geolocation.client.Position;
+import com.google.gwt.geolocation.client.PositionError;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -27,14 +36,25 @@ import com.google.gwt.user.client.ui.NamedFrame;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.maps.gwt.client.GoogleMap;
+import com.google.maps.gwt.client.LatLng;
+import com.google.maps.gwt.client.MapOptions;
+import com.google.maps.gwt.client.MapTypeId;
+import com.google.maps.gwt.client.Marker;
+import com.google.maps.gwt.client.MarkerImage;
+import com.google.maps.gwt.client.MarkerOptions;
+import com.google.maps.gwt.client.MouseEvent;
 
 import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants;
+import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessages;
 
-public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHandler, RequestCallback {
+public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMap.ClickHandler, KeyUpHandler, RequestCallback, Runnable {
 	private static final MobileMediaShareConstants MOBILE_MEDIA_SHARE_CONSTANTS = 
 			GWT.create(MobileMediaShareConstants.class);
 	private static final MobileMediaShareUrls MOBILE_MEDIA_SHARE_URLS = 
 			GWT.create(MobileMediaShareUrls.class);
+	private static final MobileMediaShareMessages MOBILE_MEDIA_SHARE_MESSAGES =
+			GWT.create(MobileMediaShareMessages.class);
 	private static final int TOP_STEP = 30;
 	private static final int LEFT_OFFSET = 430;
 	private static final int LEFT_STEP = 100;
@@ -42,10 +62,12 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 	private final FormPanel form;
 	private final FileUpload file;
 	private final TextBox title;
-//	private final GoogleMap map; //TODO [Latitude, Longitude]
 	private final CheckBox publik;
+	private final Hidden latitude;
+	private final Hidden longitude;
 	private final Button ok;
 	private final Button reset;
+	private Marker marker;
 	
 	public Upload() {
 		//gia na min anoixei kainourio parathuro
@@ -69,7 +91,9 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 		publik.setName("public");
 		publik.getElement().addClassName("field");
 		publik.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
-		// anamesa sto publik kai sto ok tha bei allo field to opoio tha kanei
+		//onomata pou tha pane pisw sto servlet
+		latitude = new Hidden("latitude");
+		longitude = new Hidden("longitude");
 		i++;
 		int j = 0;
 		ok = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.ok());
@@ -81,6 +105,16 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 		reset.addClickHandler(this);
 		reset.getElement().setAttribute("style", 
 				"top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
+	}
+	
+	//Otan o xrhsths pataei panw ston xarth
+	@Override
+	public void handle(final MouseEvent event) {
+		//orismos theshs marker
+		marker.setPosition(event.getLatLng());
+		//orismos timwn twn latitude and longitude
+		latitude.setValue(new BigDecimal(event.getLatLng().lat()).toString());
+		longitude.setValue(new BigDecimal(event.getLatLng().lng()).toString());
 	}
 	
 	@Override
@@ -141,13 +175,64 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 	@Override
 	public void onResponseReceived(final Request request, final Response response) {
 		//an den einai logged in o xrhsths
-		if ((response.getStatusCode() != 200) || (response.getText().isEmpty()))
+		if ((response.getStatusCode() != 200) || (response.getText().isEmpty())) {
 			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.login(
 					//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
 					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
 					//kwdikopoieitai to url map epeidh pernaei san parametros (meta apo ?)
 					URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.upload(
-							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));	
+							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
+			return;
+		}
+		//Ajax loader: fortwnei pragmata mesw ajax
+		//Ruthmiseis gia to google maps
+		final AjaxLoader.AjaxLoaderOptions options = AjaxLoader.AjaxLoaderOptions.newInstance();
+		options.setOtherParms(MOBILE_MEDIA_SHARE_URLS.googleMapsOptions(LocaleInfo.getCurrentLocale().getLocaleName()));
+		AjaxLoader.loadApi(Map.GOOGLE_MAPS_API, Map.GOOGLE_MAPS_VERSION, this, options);		
+	}
+
+	//Molis fortwthei o xarths kaleitai h run
+	@Override
+	public void run() {
+		final MapOptions options = MapOptions.create(); //Dhmiourgeia antikeimenou me Factory (xwris constructor)
+		//Default na fenetai xarths apo dorhforo (Hybrid)
+		options.setMapTypeId(MapTypeId.HYBRID);
+		options.setZoom(Map.GOOGLE_MAPS_ZOOM);
+		final DivElement mapDiv = Document.get().createDivElement();
+		mapDiv.addClassName("map");
+		//Dhmiourgei ton xarth me tis panw ruthmiseis kai to vazei sto mapDiv
+		final GoogleMap googleMap = GoogleMap.create(mapDiv, options);
+		googleMap.addClickListener(this);
+		final MarkerOptions markerOptions = MarkerOptions.create();
+		markerOptions.setMap(googleMap);
+//TODO	markerOptions.setIcon(icon);
+		marker = Marker.create(markerOptions);
+		//Statikh javascript klash pou elenxei an o browser upostirizei geografiko prosdiorismo theshs (san Window.alert)
+		Geolocation.getIfSupported().getCurrentPosition(new Callback<Position, PositionError>() {
+			@Override
+			public void onFailure(final PositionError error) {
+				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingYourLocation(error.getMessage()));
+				final LatLng latLng = LatLng.create(Map.GOOGLE_MAPS_LATITUDE, Map.GOOGLE_MAPS_LONGITUDE); 
+				googleMap.setCenter(latLng);
+				marker.setPosition(latLng);
+				//orismos timwn twn latitude and longitude
+				latitude.setValue(new BigDecimal(latLng.lat()).toString());
+				longitude.setValue(new BigDecimal(latLng.lng()).toString());
+			}
+
+			@Override
+			public void onSuccess(final Position position) {
+				//Kentrarei o xarths sto shmeio pou vrethike o xrhsths (Latitude, Longitude)
+										//Coordinates: pairnei tis suntetagmenes tis theshs
+				final LatLng latLng = LatLng.create(position.getCoordinates().getLatitude(),
+						position.getCoordinates().getLongitude());
+				googleMap.setCenter(latLng);
+				marker.setPosition(latLng);
+				//orismos timwn twn latitude and longitude
+				latitude.setValue(new BigDecimal(latLng.lat()).toString());
+				longitude.setValue(new BigDecimal(latLng.lng()).toString());
+			}
+		});
 		Document.get().getBody().addClassName("bodyClass");
 		//Apo to DOM prosthetei komvo (to header me olous tous upokomvous pou exei mesa)
 		Document.get().getBody().appendChild(Header.newHeader());
@@ -176,6 +261,13 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHan
 		latitudeLongitudeLabel.getElement().addClassName("label");
 		latitudeLongitudeLabel.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
 		flowPanel.add(latitudeLongitudeLabel);
+		final ParagraphElement paragraphElement = Document.get().createPElement();
+		paragraphElement.setAttribute("style", "padding-bottom: " + (TOP_STEP * i) + "px;"); //140px
+		paragraphElement.setInnerHTML("&nbsp;");
+		flowPanel.getElement().appendChild(paragraphElement);
+		flowPanel.getElement().appendChild(mapDiv);
+		flowPanel.add(latitude);
+		flowPanel.add(longitude);
 		flowPanel.add(new Hidden("locale", LocaleInfo.getCurrentLocale().getLocaleName()));
 		flowPanel.add(ok);
 		flowPanel.add(reset);
