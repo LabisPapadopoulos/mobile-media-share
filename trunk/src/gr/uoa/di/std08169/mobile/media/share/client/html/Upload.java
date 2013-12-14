@@ -55,6 +55,7 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMa
 			GWT.create(MobileMediaShareUrls.class);
 	private static final MobileMediaShareMessages MOBILE_MEDIA_SHARE_MESSAGES =
 			GWT.create(MobileMediaShareMessages.class);
+	private static final String MARKER_URL = "./images/uploadMarker.svg";
 	private static final int TOP = 5;
 	private static final int TOP_STEP = 30;
 	private static final int LEFT_OFFSET = 430;
@@ -206,7 +207,7 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMa
 		googleMap.addClickListener(this);
 		final MarkerOptions markerOptions = MarkerOptions.create();
 		markerOptions.setMap(googleMap);
-		markerOptions.setIcon(MarkerImage.create(MOBILE_MEDIA_SHARE_URLS.markerUpload("uploadMarker"))); //TODO
+		markerOptions.setIcon(MarkerImage.create(MARKER_URL));
 		marker = Marker.create(markerOptions);
 		//Statikh javascript klash pou elenxei an o browser upostirizei geografiko prosdiorismo theshs (san Window.alert)
 		Geolocation.getIfSupported().getCurrentPosition(new Callback<Position, PositionError>() {
