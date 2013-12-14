@@ -31,9 +31,6 @@ public interface MobileMediaShareUrls extends Messages {
 	@DefaultMessage("./images/markersSmall/{0}.svg")
 	public String markerImage(final String name);
 	
-	@DefaultMessage("./images/{0}.svg")
-	public String markerUpload(final String name);
-	
 	@DefaultMessage("./myAccount.html?locale={0}")
 	public String myAccount(final String locale);
 	
