@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 11.0, SVG Export Plug-In  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN"    "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd" [
+	<!ENTITY ns_flows "http://ns.adobe.com/Flows/1.0/">
+	<!ENTITY ns_svg "http://www.w3.org/2000/svg">
+	<!ENTITY ns_xlink "http://www.w3.org/1999/xlink">
+]>
+<svg  xmlns="&ns_svg;" xmlns:xlink="&ns_xlink;" xmlns:a="http://ns.adobe.com/AdobeSVGViewerExtensions/3.0/"
+	 width="32" height="32" viewBox="-4 -4.125 32 32" xml:space="preserve">
+	<defs>
+	</defs>
+	<g>
+		<linearGradient id="XMLID_1_" gradientUnits="userSpaceOnUse" x1="12.4082" y1="0.24561" x2="12.7832" y2="25.1206">
+			<stop  offset="0" style="stop-color:#FF0000"/>
+			<stop  offset="1" style="stop-color:#FF0000"/>
+			<a:midPointStop  offset="0" style="stop-color:#FFFFFF"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#FFFFFF"/>
+			<a:midPointStop  offset="1" style="stop-color:#807D74"/>
+		</linearGradient>
+		<polygon fill="url(#XMLID_1_)" stroke="#565248" stroke-linecap="round" stroke-linejoin="round" points="0.5,2.25 12.375,23.625 
+			24.375,2.125 "/>
+		<linearGradient id="XMLID_2_" gradientUnits="userSpaceOnUse" x1="12.0835" y1="0.62695" x2="12.16699" y2="10.21045">
+			<stop  offset="0" style="stop-color:#B9B5AB"/>
+			<stop  offset="1" style="stop-color:#807D74"/>
+			<a:midPointStop  offset="0" style="stop-color:#B9B5AB"/>
+			<a:midPointStop  offset="0.5" style="stop-color:#B9B5AB"/>
+			<a:midPointStop  offset="1" style="stop-color:#807D74"/>
+		</linearGradient>
+		
+			<rect x="7.25" y="0.5" fill="url(#XMLID_2_)" stroke="#565248" stroke-linecap="round" stroke-linejoin="round" width="9.75" height="9.75"/> 
+		<rect x="8.5835" y="0.9585" fill="#FFFFFF" width="7.24951" height="1.5"/> 
+		<path fill="#565248" d="M9.6665,6.79199l-1.25,0.77344L8.3335,10.125h7.8335V6.79199H9.6665z M10.0835,9.88672H9V7.625h1.0835
+			V9.88672z"/>
+	</g>
+</svg>

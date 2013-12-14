@@ -4,13 +4,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 public class Media {
-	//Geografiko platos (voreia/noteia)
-	private static final BigDecimal MIN_LATITUDE = new BigDecimal(-90);
-	private static final BigDecimal MAX_LATITUDE = new BigDecimal(90);
-	//Geografiko Mhkos (anatolika/dutika)
-	private static final BigDecimal MIN_LONGITUDE = new BigDecimal(0);//GMT (Londino)
-	private static final BigDecimal MAX_LONGITUDE = new BigDecimal(360);
-	
 	private final String id;
 	private final String type;
 	private final long size;
@@ -61,22 +54,8 @@ public class Media {
 		this.created = created;
 		this.edited = edited;
 		this.title = title;
-		//[-90, 90]
-		if (latitude.compareTo(MIN_LATITUDE) < 0) //comapreTo(): kanei afairesh 
-			this.latitude = MIN_LATITUDE;
-		else if (latitude.compareTo(MAX_LATITUDE) > 0)
-			this.latitude = MAX_LATITUDE;
-		else
-			this.latitude = latitude;
-		//[0, 360)
-		if (longitude.compareTo(MIN_LONGITUDE) < 0)//gia p.x -2
-			//longitude = 360 + longitude; 
-			this.longitude = MAX_LONGITUDE.add(longitude);
-		else if (longitude.compareTo(MAX_LONGITUDE) >= 0)//gia >= 360
-			//longitude = longitude - 360;
-			this.longitude = longitude.subtract(MAX_LONGITUDE);
-		else
-			this.longitude = longitude;
+		this.latitude = latitude;
+		this.longitude = longitude;
 		this.publik = publik;
 	}
 	
