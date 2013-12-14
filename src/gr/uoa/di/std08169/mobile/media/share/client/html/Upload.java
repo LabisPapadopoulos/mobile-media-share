@@ -55,6 +55,7 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMa
 			GWT.create(MobileMediaShareUrls.class);
 	private static final MobileMediaShareMessages MOBILE_MEDIA_SHARE_MESSAGES =
 			GWT.create(MobileMediaShareMessages.class);
+	private static final int TOP = 5;
 	private static final int TOP_STEP = 30;
 	private static final int LEFT_OFFSET = 430;
 	private static final int LEFT_STEP = 100;
@@ -90,7 +91,7 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMa
 		publik = new CheckBox();
 		publik.setName("public");
 		publik.getElement().addClassName("field");
-		publik.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
+		publik.getElement().setAttribute("style", "top: " + (TOP + TOP_STEP * (i++)) + "px;");
 		//onomata pou tha pane pisw sto servlet
 		latitude = new Hidden("latitude");
 		longitude = new Hidden("longitude");
@@ -100,11 +101,11 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMa
 		ok.addClickHandler(this);
 		ok.setEnabled(false);
 		ok.getElement().setAttribute("style", 
-				"top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
+				"top: " + (i * (TOP_STEP * i) + (TOP_STEP * i) + (TOP_STEP * i) + TOP_STEP) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 		reset = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.reset());
 		reset.addClickHandler(this);
 		reset.getElement().setAttribute("style", 
-				"top: " + (TOP_STEP * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
+				"top: " + (i * (TOP_STEP * i) + (TOP_STEP * i) + (TOP_STEP * i) + TOP_STEP) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 	}
 	
 	//Otan o xrhsths pataei panw ston xarth
@@ -205,7 +206,7 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMa
 		googleMap.addClickListener(this);
 		final MarkerOptions markerOptions = MarkerOptions.create();
 		markerOptions.setMap(googleMap);
-//TODO	markerOptions.setIcon(icon);
+		markerOptions.setIcon(MarkerImage.create(MOBILE_MEDIA_SHARE_URLS.markerUpload("uploadMarker"))); //TODO
 		marker = Marker.create(markerOptions);
 		//Statikh javascript klash pou elenxei an o browser upostirizei geografiko prosdiorismo theshs (san Window.alert)
 		Geolocation.getIfSupported().getCurrentPosition(new Callback<Position, PositionError>() {
@@ -240,29 +241,28 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMa
 		int i = 0;
 		final InlineLabel fileLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.file());
 		fileLabel.getElement().addClassName("label");
-		fileLabel.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
+		fileLabel.getElement().setAttribute("style", "top: " + (TOP + TOP_STEP * (i++)) + "px;");
 		flowPanel.add(fileLabel);
 		flowPanel.add(file);
 		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
 		final InlineLabel titleLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.title());
 		titleLabel.getElement().addClassName("label");
-		titleLabel.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
+		titleLabel.getElement().setAttribute("style", "top: " + (TOP + TOP_STEP * (i++)) + "px;");
 		flowPanel.add(titleLabel);
 		flowPanel.add(title);
 		flowPanel.getElement().appendChild(Document.get().createBRElement());
 		final InlineLabel publicLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.publik());
 		publicLabel.getElement().addClassName("label");
-		publicLabel.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
+		publicLabel.getElement().setAttribute("style", "top: " + (TOP + TOP_STEP * (i++)) + "px;");
 		flowPanel.add(publicLabel);
 		flowPanel.add(publik);
 		flowPanel.getElement().appendChild(Document.get().createBRElement());
 		final InlineLabel latitudeLongitudeLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.latitude() + 
-				"/" + MOBILE_MEDIA_SHARE_CONSTANTS.longitude());
+				" / " + MOBILE_MEDIA_SHARE_CONSTANTS.longitude());
 		latitudeLongitudeLabel.getElement().addClassName("label");
-		latitudeLongitudeLabel.getElement().setAttribute("style", "top: " + (TOP_STEP * (i++)) + "px;");
+		latitudeLongitudeLabel.getElement().setAttribute("style", "top: " + (TOP + TOP_STEP * (i++)) + "px;");
 		flowPanel.add(latitudeLongitudeLabel);
 		final ParagraphElement paragraphElement = Document.get().createPElement();
-		paragraphElement.setAttribute("style", "padding-bottom: " + (TOP_STEP * i) + "px;"); //140px
 		paragraphElement.setInnerHTML("&nbsp;");
 		flowPanel.getElement().appendChild(paragraphElement);
 		flowPanel.getElement().appendChild(mapDiv);

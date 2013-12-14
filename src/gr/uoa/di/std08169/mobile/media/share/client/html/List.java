@@ -92,6 +92,7 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	private static final int TOP = 25;
 	private static final int TOP_STEP = 5;
 	private static final int LEFT_OFFSET = 100;
+	private static final int ALIGN_CENTER = 267;
 	private static final BigDecimal DEGREES_BASE = new BigDecimal(60);
 	private static final TextColumn<Media> TITLE = new TextColumn<Media>() { // TODO
 		@Override
@@ -339,7 +340,8 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		download.getElement().addClassName("listButtons");
 		download.getElement().setAttribute("style",
 				//180px
-				"top: " + ((TOP * i) + (TOP * i) + TOP + TOP_STEP) + "px; left: " + (LEFT_OFFSET * j++) + "px;"); //100px
+				"top: " + ((TOP * i) + (TOP * i) + TOP + TOP_STEP) + "px; " +
+				"left: " + ((LEFT_OFFSET * j++) + ALIGN_CENTER) + "px;"); //100px + ALIGN_CENTER
 		
 		
 		edit = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.edit());
@@ -349,7 +351,8 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		edit.getElement().addClassName("listButtons");
 		edit.getElement().setAttribute("style",
 				//180px
-				"top: " + ((TOP * i) + (TOP * i) + TOP + TOP_STEP) + "px; left: " + (LEFT_OFFSET * j++) + "px;"); //200px
+				"top: " + ((TOP * i) + (TOP * i) + TOP + TOP_STEP) + "px; " +
+				"left: " + ((LEFT_OFFSET * j++) + ALIGN_CENTER) + "px;"); //200px + ALIGN_CENTER
 		
 		delete = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.delete());
 		delete.setEnabled(false);
@@ -358,7 +361,8 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		delete.getElement().addClassName("listButtons");
 		delete.getElement().setAttribute("style",
 				//180px
-				"top: " + ((TOP * i) + (TOP * i++) + TOP + TOP_STEP) + "px; left: " + (LEFT_OFFSET * j++) + "px;"); //300px
+				"top: " + ((TOP * i) + (TOP * i++) + TOP + TOP_STEP) + "px; " +
+				"left: " + ((LEFT_OFFSET * j++) + ALIGN_CENTER) + "px;"); //300px + ALIGN_CENTER
 		
 		//i = 4
 		j = 1;
@@ -431,7 +435,8 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 					//delete file apo to file systhma
 					try {
 						//encode url se periptwsh pou exei periergous xarakthres
-						new RequestBuilder(RequestBuilder.DELETE, "./mediaServlet?id=" + URL.encodeQueryString(selectionModel.getSelectedObject().getId())).
+						new RequestBuilder(RequestBuilder.DELETE, "./mediaServlet?id=" + 
+								URL.encodeQueryString(selectionModel.getSelectedObject().getId())).
 								sendRequest(null, List.this);
 					} catch (final RequestException e) {
 						Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorDeletingMedia(e.getMessage()));

@@ -92,7 +92,8 @@ public class Map implements CenterChangedHandler, ChangeHandler, ClickHandler, E
 	private static final int TOP = 25;
 	private static final int TOP_STEP = 5;
 	private static final int LEFT_OFFSET = 100;
-	
+	private static final int ALIGN_CENTER = 267;
+
 	private final TextBox title;
 	private final ListBox type; //dropdown
 	private final SuggestBox user;
@@ -139,7 +140,19 @@ public class Map implements CenterChangedHandler, ChangeHandler, ClickHandler, E
 		type.getElement().addClassName("listInputType");
 		type.getElement().setAttribute("style",
 				"top: " + (TOP_STEP + TOP * i++) + "px;"); //25px
+		
+		// i = 3
+		j = 0;
+		publik = new ListBox();
+		publik.addItem(MOBILE_MEDIA_SHARE_CONSTANTS.anyType(), "");
+		publik.addItem(MOBILE_MEDIA_SHARE_CONSTANTS.publik(), Boolean.TRUE.toString());
+		publik.addItem(MOBILE_MEDIA_SHARE_CONSTANTS._private(), Boolean.FALSE.toString());
+		publik.addChangeHandler(this);
+		publik.getElement().addClassName("listInputType");
+		publik.getElement().setAttribute("style",
+				"top: " + ((++i * TOP) - TOP_STEP)+ "px;"); //70px
 	
+		--i;
 		// i = 2
 		j = 0;
 		final DateBox.Format dateBoxFormat = new DateBox.DefaultFormat(DATE_FORMAT);
@@ -183,17 +196,6 @@ public class Map implements CenterChangedHandler, ChangeHandler, ClickHandler, E
 		editedTo.getElement().setAttribute("style",
 				"top: " + (i * (TOP + TOP) + TOP_STEP + TOP_STEP) + "px;"); //110px
 		
-		// i = 2
-		j = 0;
-		publik = new ListBox();
-		publik.addItem(MOBILE_MEDIA_SHARE_CONSTANTS.anyType(), "");
-		publik.addItem(MOBILE_MEDIA_SHARE_CONSTANTS.publik(), Boolean.TRUE.toString());
-		publik.addItem(MOBILE_MEDIA_SHARE_CONSTANTS._private(), Boolean.FALSE.toString());
-		publik.addChangeHandler(this);
-		publik.getElement().addClassName("listInputCol1");
-		publik.getElement().setAttribute("style",
-				"top: " + (i * (TOP + TOP + TOP) - TOP_STEP) + "px;"); //145px
-		
 		//i = 3
 		j = 1;
 		i++;
@@ -204,7 +206,8 @@ public class Map implements CenterChangedHandler, ChangeHandler, ClickHandler, E
 		download.getElement().addClassName("listButtons");
 		download.getElement().setAttribute("style",
 				//180px
-				"top: " + ((TOP * i) + (TOP * i) + TOP + TOP_STEP) + "px; left: " + (LEFT_OFFSET * j++) + "px;"); //100px
+				"top: " + ((TOP * i) + (TOP * i) + TOP + TOP_STEP) + "px; " +
+				"left: " + ((LEFT_OFFSET * j++) + ALIGN_CENTER) + "px;"); //100px + ALIGN_CENTER
 		
 		
 		edit = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.edit());
@@ -214,7 +217,8 @@ public class Map implements CenterChangedHandler, ChangeHandler, ClickHandler, E
 		edit.getElement().addClassName("listButtons");
 		edit.getElement().setAttribute("style",
 				//180px
-				"top: " + ((TOP * i) + (TOP * i) + TOP + TOP_STEP) + "px; left: " + (LEFT_OFFSET * j++) + "px;"); //200px
+				"top: " + ((TOP * i) + (TOP * i) + TOP + TOP_STEP) + "px; " +
+				"left: " + ((LEFT_OFFSET * j++) + ALIGN_CENTER) + "px;"); //200px + ALIGN_CENTER
 		
 		delete = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.delete());
 		delete.setEnabled(false);
@@ -223,7 +227,8 @@ public class Map implements CenterChangedHandler, ChangeHandler, ClickHandler, E
 		delete.getElement().addClassName("listButtons");
 		delete.getElement().setAttribute("style",
 				//180px
-				"top: " + ((TOP * i) + (TOP * i++) + TOP + TOP_STEP) + "px; left: " + (LEFT_OFFSET * j++) + "px;"); //300px
+				"top: " + ((TOP * i) + (TOP * i++) + TOP + TOP_STEP) + "px; " +
+				"left: " + ((LEFT_OFFSET * j++) + ALIGN_CENTER) + "px;"); //300px + ALIGN_CENTER
 		markers = new HashMap<Marker, Media>();
 		markerImages = new HashMap<MediaType, MarkerImage>();
 		selectedMarkerImages = new HashMap<MediaType, MarkerImage>();
@@ -282,7 +287,8 @@ public class Map implements CenterChangedHandler, ChangeHandler, ClickHandler, E
 					//delete file apo to file systhma
 					try {
 						//encode url se periptwsh pou exei periergous xarakthres
-						new RequestBuilder(RequestBuilder.DELETE, "./mediaServlet?id=" + URL.encodeQueryString(markers.get(selectedMarker).getId())).
+						new RequestBuilder(RequestBuilder.DELETE, "./mediaServlet?id=" + 
+								URL.encodeQueryString(markers.get(selectedMarker).getId())).
 								sendRequest(null, Map.this);
 					} catch (final RequestException e) {
 						Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorDeletingMedia(e.getMessage()));
@@ -454,6 +460,13 @@ public class Map implements CenterChangedHandler, ChangeHandler, ClickHandler, E
 				"top: " + (TOP + TOP * i++) + "px;"); //75px
 		flowPanel.add(createdToLabel);
 		flowPanel.add(createdTo);
+		--i;
+		final InlineLabel publicLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.publik());
+		publicLabel.getElement().addClassName("listLabelType");
+		publicLabel.getElement().setAttribute("style", 
+				"top: " + (TOP + TOP * i++) + "px;"); //75px
+		flowPanel.add(publicLabel);
+		flowPanel.add(publik);
 		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
 		//i = 3
 		final InlineLabel editedFromLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.editedFrom());
@@ -469,18 +482,11 @@ public class Map implements CenterChangedHandler, ChangeHandler, ClickHandler, E
 		flowPanel.add(editedToLabel);
 		flowPanel.add(editedTo);
 		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
-		final InlineLabel publicLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.publik());
-		publicLabel.getElement().addClassName("listLabelCol1");
-		publicLabel.getElement().setAttribute("style", 
-				"top: " + (TOP + TOP + TOP * i) + "px;"); //150px
-		flowPanel.add(publicLabel);
-		flowPanel.add(publik);
-		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
 		flowPanel.add(download);
 		flowPanel.add(edit);
 		flowPanel.add(delete);
 		final ParagraphElement paragraphElement = Document.get().createPElement();
-		paragraphElement.setAttribute("style", "padding-bottom: " + (TOP_STEP + TOP_STEP + TOP_STEP + TOP + TOP * i) + "px;"); //140px
+		paragraphElement.setAttribute("style", "padding-bottom: " + (TOP_STEP + TOP + TOP * i) + "px;"); //120px
 		paragraphElement.setInnerHTML("&nbsp;");
 		flowPanel.getElement().appendChild(paragraphElement);
 		flowPanel.getElement().appendChild(mapDiv);
