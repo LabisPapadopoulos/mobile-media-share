@@ -35,6 +35,7 @@
 			<arg value="gr.uoa.di.std08169.mobile.media.share.List" />
 			<arg value="gr.uoa.di.std08169.mobile.media.share.Login" />
 			<arg value="gr.uoa.di.std08169.mobile.media.share.Map" />
+			<arg value="gr.uoa.di.std08169.mobile.media.share.NewPhoto" />
 			<arg value="gr.uoa.di.std08169.mobile.media.share.NewUser" />
 			<arg value="gr.uoa.di.std08169.mobile.media.share.Upload" />
 		</java>
@@ -48,6 +49,7 @@
 		<delete dir="war/list" failonerror="false" />
 		<delete dir="war/login" failonerror="false" />  <!-- to out tou module -->
 		<delete dir="war/map" failonerror="false" />
+		<delete dir="war/newPhoto" failonerror="false" />
 		<delete dir="war/newUser" failonerror="false" />
 		<delete dir="war/upload" failonerror="false" />
 		<delete dir="war/WEB-INF/classes" failonerror="false" />

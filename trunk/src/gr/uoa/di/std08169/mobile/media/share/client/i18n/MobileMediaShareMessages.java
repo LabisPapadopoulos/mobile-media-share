@@ -9,6 +9,9 @@ public interface MobileMediaShareMessages extends Messages {
 	@DefaultMessage("{0}@...")
 	public String emailFormat(final String email);
 	
+	@DefaultMessage("Error capturing photo: {0}")
+	public String errorCapturingPhoto(final String message);
+	
 	//{0} to prwto orisma (message)
 	@DefaultMessage("Error creating user: {0}")
 	public String errorCreatingUser(final String message);
