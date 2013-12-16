@@ -377,7 +377,6 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		selectionModel.addSelectionChangeHandler(this);
 		mediaTable = new CellTable<Media>();
 		mediaTable.getElement().setAttribute("style", "padding-top: " + ((TOP + TOP) * i) + "px;"); //200px; TODO
-		
 		mediaTable.setSelectionModel(selectionModel);
 		//gia na allazei selida o xrhsths kai me ta velakia (dexia-aristera)
 		mediaTable.setKeyboardPagingPolicy(HasKeyboardPagingPolicy.KeyboardPagingPolicy.CHANGE_PAGE);
