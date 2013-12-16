@@ -49,13 +49,13 @@ import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstan
 import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessages;
 
 public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMap.ClickHandler, KeyUpHandler, RequestCallback, Runnable {
+	public static final String MARKER_URL = "./images/uploadMarker.svg";
 	private static final MobileMediaShareConstants MOBILE_MEDIA_SHARE_CONSTANTS = 
 			GWT.create(MobileMediaShareConstants.class);
 	private static final MobileMediaShareUrls MOBILE_MEDIA_SHARE_URLS = 
 			GWT.create(MobileMediaShareUrls.class);
 	private static final MobileMediaShareMessages MOBILE_MEDIA_SHARE_MESSAGES =
 			GWT.create(MobileMediaShareMessages.class);
-	private static final String MARKER_URL = "./images/uploadMarker.svg";
 	private static final int TOP = 5;
 	private static final int TOP_STEP = 30;
 	private static final int LEFT_OFFSET = 430;
@@ -102,11 +102,13 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMa
 		ok.addClickHandler(this);
 		ok.setEnabled(false);
 		ok.getElement().setAttribute("style", 
-				"top: " + (i * (TOP_STEP * i) + (TOP_STEP * i) + (TOP_STEP * i) + TOP_STEP) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
+				"top: " + (i * (TOP_STEP * i) + (TOP_STEP * i) + (TOP_STEP * i) + TOP_STEP) + "px; " +
+						"left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 		reset = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.reset());
 		reset.addClickHandler(this);
 		reset.getElement().setAttribute("style", 
-				"top: " + (i * (TOP_STEP * i) + (TOP_STEP * i) + (TOP_STEP * i) + TOP_STEP) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
+				"top: " + (i * (TOP_STEP * i) + (TOP_STEP * i) + (TOP_STEP * i) + TOP_STEP) + "px; " +
+						"left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 	}
 	
 	//Otan o xrhsths pataei panw ston xarth
@@ -132,6 +134,7 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMa
 		} 
 	}
 
+	//Otan allaxei timh tou file field
 	@Override
 	public void onChange(final ChangeEvent _) {
 														//to onoma tou arxeiou na mhn einai keno
@@ -190,7 +193,7 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMa
 		//Ruthmiseis gia to google maps
 		final AjaxLoader.AjaxLoaderOptions options = AjaxLoader.AjaxLoaderOptions.newInstance();
 		options.setOtherParms(MOBILE_MEDIA_SHARE_URLS.googleMapsOptions(LocaleInfo.getCurrentLocale().getLocaleName()));
-		AjaxLoader.loadApi(Map.GOOGLE_MAPS_API, Map.GOOGLE_MAPS_VERSION, this, options);		
+		AjaxLoader.loadApi(Map.GOOGLE_MAPS_API, Map.GOOGLE_MAPS_VERSION, this, options);
 	}
 
 	//Molis fortwthei o xarths kaleitai h run

@@ -10,6 +10,9 @@ public interface MobileMediaShareConstants extends Constants {
 	@DefaultStringValue("<anonymous>")
 	public String _anonymous_();
 	
+	@DefaultStringValue("access denied")
+	public String accessDenied();
+	
 	@DefaultStringValue("Any Type")
 	public String anyType();
 	
@@ -18,6 +21,9 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("Cancel")
 	public String cancel();
+	
+	@DefaultStringValue("Capture Photo")
+	public String capturePhoto();
 	
 	@DefaultStringValue("Confirm Password")
 	public String confirmPassword();
@@ -99,6 +105,9 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("New Video")
 	public String newVideo();
+	
+	@DefaultStringValue("not supported")
+	public String notSupported();
 	
 	@DefaultStringValue("OK")
 	public String ok();

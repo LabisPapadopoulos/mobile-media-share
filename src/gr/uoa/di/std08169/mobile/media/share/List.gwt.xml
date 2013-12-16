@@ -5,4 +5,3 @@
 	<!-- entry-point: Poia einai h java classh pou ulopoiei to module -->
         <entry-point class="gr.uoa.di.std08169.mobile.media.share.client.html.List" />
 </module>
-
