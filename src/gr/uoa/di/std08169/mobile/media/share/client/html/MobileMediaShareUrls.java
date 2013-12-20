@@ -34,7 +34,7 @@ public interface MobileMediaShareUrls extends Messages {
 	@DefaultMessage("./myAccount.html?locale={0}")
 	public String myAccount(final String locale);
 	
-	@DefaultMessage("./newPhoto.html?locale={0}")
+	@DefaultMessage("./newPhoto.jsp?locale={0}")
 	public String newPhoto(final String locale);
 	
 	@DefaultMessage("./newUser.html?locale={0}")
