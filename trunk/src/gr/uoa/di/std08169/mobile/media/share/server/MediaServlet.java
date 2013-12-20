@@ -1,5 +1,6 @@
 package gr.uoa.di.std08169.mobile.media.share.server;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -38,6 +40,7 @@ public class MediaServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final String MAP_URL = "./map.html?locale=%s";
 	private static final String UTF_8 = "UTF-8";
+	private static final String PHOTO_PREFIX = "data:image/png;base64,";
 	private static final Logger LOGGER = Logger.getLogger(MediaServlet.class.getName());
 	//tmp directory me to opoio exei xekinhsei h JVM kai ekei tha dexetai o tomcat ta arxeia pou anevazoun oi xrhstes
 
@@ -190,6 +193,44 @@ public class MediaServlet extends HttpServlet {
 					}
 					//diagrafh apo ton disko
 					fileItem.delete();
+				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("photo")) {
+					if (!fileItem.getString(UTF_8).startsWith(PHOTO_PREFIX)) {
+						LOGGER.warning("Photo is not image/png");
+						response.sendError(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE, "Photo is not image/png"); //415 UNSUPPORTED MEDIA TYPE
+						return;
+					}
+					//apokwdikopoihsh tis eikonas
+					final byte[] data = Base64.decodeBase64(fileItem.getString(UTF_8).substring(PHOTO_PREFIX.length()));
+					//antigrafh ths eikonas apo enan pinaka apo bytes
+					final InputStream input = new ByteArrayInputStream(data);
+					try {
+						//Monadiko anagnwristiko gia otidhpote theloume
+						id = UUID.randomUUID().toString();
+						final File file = new File(mediaDir, id);
+						file.createNewFile();
+						try {
+							final FileOutputStream output = new FileOutputStream(file);
+							try {
+								final byte[] buffer = new byte[BUFFER_SIZE];
+								int read = 0;
+								while((read = input.read(buffer)) > 0)
+									output.write(buffer, 0, read);								
+							} finally {
+								output.close();
+							}
+						//otidhpote borei na ginei throw (akoma kai error)
+						} catch (final IOException e) {
+							file.delete();
+							throw e;
+						}
+						type = "image/png";
+						size = data.length;
+					} finally {
+						input.close();
+					}
+					//diagrafh apo ton disko
+					fileItem.delete();
+					
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("title")) {
 					//vrethike to title
 					title = fileItem.getString(UTF_8);
@@ -212,7 +253,7 @@ public class MediaServlet extends HttpServlet {
 			if ((id == null) || (type == null) || (size == 0)) {
 				LOGGER.warning("No file specified");
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No file specified"); //400 Bad Request
-				return;	
+				return;
 			}
 			if (title == null) {
 				LOGGER.warning("No title specified");

@@ -19,6 +19,8 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import com.google.gwt.i18n.client.Messages.DefaultMessage;
+
 //Login Servlet
 public class UserServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
