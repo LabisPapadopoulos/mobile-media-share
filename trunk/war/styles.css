@@ -189,3 +189,16 @@ div.map {
 	margin-bottom: 80px;
 }
 
+div.mediaMap {
+	width: 640px;
+	height: 480px;
+	left: 180px;
+	top: 80px;
+	margin-bottom: 180px;
+}
+
+.photo {
+	position: relative;
+	left: 180px;
+}
+

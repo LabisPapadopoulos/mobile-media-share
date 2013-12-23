@@ -38,5 +38,4 @@ public class UserSuggestion implements SuggestOracle.Suggestion {
 	public String getReplacementString() {
 		return MOBILE_MEDIA_SHARE_MESSAGES.emailFormat(user.getEmail().substring(0, user.getEmail().indexOf(EMAIL_DELIMITER)));
 	}
-
 }

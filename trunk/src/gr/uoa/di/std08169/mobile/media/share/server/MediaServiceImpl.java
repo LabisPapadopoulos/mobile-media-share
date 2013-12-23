@@ -1,5 +1,10 @@
 package gr.uoa.di.std08169.mobile.media.share.server;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,9 +17,12 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-import gr.uoa.di.std08169.mobile.media.share.client.services.MediaService;
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.mime.MimeTypeException;
+
 import gr.uoa.di.std08169.mobile.media.share.client.services.MediaServiceException;
 import gr.uoa.di.std08169.mobile.media.share.client.services.UserService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.UserServiceException;
@@ -22,7 +30,7 @@ import gr.uoa.di.std08169.mobile.media.share.shared.Media;
 import gr.uoa.di.std08169.mobile.media.share.shared.MediaResult;
 import gr.uoa.di.std08169.mobile.media.share.shared.MediaType;
 
-public class MediaServiceImpl implements MediaService {
+public class MediaServiceImpl implements ExtendedMediaService {
 	//epistrefontai ola ta public media, alla kai ta private tou kathe xrhsth
 	private static final String GET_MEDIA = "SELECT id, type, size, duration, \"user\", created, edited, title, latitude, longitude, public " +
 											"FROM Media " +
@@ -61,11 +69,21 @@ public class MediaServiceImpl implements MediaService {
 	private static final Logger LOGGER = Logger.getLogger(MediaServiceImpl.class.getName());
 	
 	private DataSource dataSource;
+	private File mediaDir;
+	private int bufferSize;
 	private UserService userService;
 	
 	//Setters gia ta beans
 	public void setDataSource(final DataSource dataSource) {
 		this.dataSource = dataSource;
+	}
+	
+	public void setMediaDir(final File mediaDir) {
+		this.mediaDir = mediaDir;
+	}
+	
+	public void setBufferSize(final int bufferSize) {
+		this.bufferSize = bufferSize;
 	}
 	
 	public void setUserService(final UserService userService) {
@@ -303,12 +321,50 @@ public class MediaServiceImpl implements MediaService {
 	}
 	
 	@Override
-	public void addMedia(final Media media) throws MediaServiceException {
+	public void getMedia(final String id, final HttpServletResponse response) throws MediaServiceException {
+		try {
+			final Media media = getMedia(id);
+			if (media == null) {
+				LOGGER.warning("Not found");
+				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Not found"); // 404 Not found
+				return;
+			}
+			response.setContentType(media.getType());
+			response.setHeader("Content-disposition", "attachment; filename=" + media.getTitle() +
+					//Vriskei tin epektash tou arxeiou kai tin prosthetei ston titlo tou arxeiou sto katevasma
+					TikaConfig.getDefaultConfig().getMimeRepository().forName(media.getType()).getExtension());
+			//Vriskei to arxeio me sugkekrimeno id
+			final File file = new File(mediaDir, id);
+			final FileInputStream input = new FileInputStream(file);
+			try {
+				final byte[] buffer = new byte[bufferSize];
+				int read = 0;
+				while((read = input.read(buffer)) > 0)
+					//stelnei to arxeio ston xrhsth
+					response.getOutputStream().write(buffer, 0, read);								
+			} finally {
+				input.close();
+				response.getOutputStream().close();
+			}
+		} catch (final IOException e) {
+			LOGGER.log(Level.WARNING, "Error retrieving media " + id, e);
+			throw new MediaServiceException("Error retrieving media " + id, e);			
+		} catch (final MimeTypeException e) {
+			LOGGER.log(Level.WARNING, "Error retrieving media " + id, e);
+			throw new MediaServiceException("Error retrieving media " + id, e);			
+		}
+	}
+	
+	@Override
+	public void addMedia(final Media media, final InputStream input) throws MediaServiceException {
 		try {
 			final Connection connection = dataSource.getConnection();
 			try {
+				//Xekinaei ena transaction
+				connection.setAutoCommit(false);
 				final PreparedStatement addMedia = connection.prepareStatement(ADD_MEDIA);
 				try {
+					// add in db
 					addMedia.setString(1, media.getId());
 					addMedia.setString(2, media.getType());
 					addMedia.setLong(3, media.getSize());
@@ -321,13 +377,42 @@ public class MediaServiceImpl implements MediaService {
 					addMedia.setBigDecimal(10, media.getLongitude());
 					addMedia.setBoolean(11, media.isPublic());
 					addMedia.executeUpdate();
+					// add to disk
+					final File file = new File(mediaDir, media.getId());
+					file.createNewFile();
+					try {
+						final FileOutputStream output = new FileOutputStream(file);
+						try {
+							final byte[] buffer = new byte[bufferSize];
+							int read = 0;
+							while((read = input.read(buffer)) > 0)
+								output.write(buffer, 0, read);								
+						} finally {
+							output.close();
+						}
+					//otidhpote borei na ginei throw (akoma kai error)
+					} catch (final IOException e) {
+						file.delete();
+						throw e;
+					}
+					//epikurwsh tou transaction
+					connection.commit();
 					LOGGER.info("Added media " + media);
 				} finally {
 					addMedia.close();
 				}
+			} catch (final IOException e) {
+				//epanafora stin arxikh tous katastash ta panta
+				connection.rollback();
+				//enhmerwsh kai to upoloipo stack (autoi pou to kalesan)
+				//oti kati den phge kala.
+				throw e;
 			} finally {
 				connection.close();
 			}
+		}catch (final IOException e) {
+			LOGGER.log(Level.WARNING, "Error adding media " + media, e);
+			throw new MediaServiceException("Error adding media " + media, e);
 		} catch (final SQLException e) {
 			LOGGER.log(Level.WARNING, "Error adding media " + media, e);
 			throw new MediaServiceException("Error adding media " + media, e);
@@ -341,8 +426,11 @@ public class MediaServiceImpl implements MediaService {
 			try {
 				final PreparedStatement deleteMedia = connection.prepareStatement(DELETE_MEDIA);
 				try {
+					//Diagrafh tou media apo tin vash
 					deleteMedia.setString(1, id);
 					deleteMedia.executeUpdate();
+					//Diagrafh tou media apo ton disko
+					new File(mediaDir, id).delete();
 					LOGGER.info("Deleted media " + id);
 				} finally {
 					deleteMedia.close();

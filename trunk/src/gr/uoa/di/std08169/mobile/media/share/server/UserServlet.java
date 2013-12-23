@@ -19,8 +19,6 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import com.google.gwt.i18n.client.Messages.DefaultMessage;
-
 //Login Servlet
 public class UserServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -41,7 +39,7 @@ public class UserServlet extends HttpServlet {
 		//Pairnei ena pragma (bean) pou to lene userService gia na kanei douleies gia xrhstes
 		//(to opoio to userService mhlaei me tin bash).
 		userService = (UserService) WebApplicationContextUtils.
-				getWebApplicationContext(getServletContext()).getBean("userService", UserServiceImpl.class);
+				getWebApplicationContext(getServletContext()).getBean("userService", UserService.class);
 	}
 	
 	//Tin doGet tha tin kaloun oles oi othones ektos apo tin login gia na doun an o xrhsths einai

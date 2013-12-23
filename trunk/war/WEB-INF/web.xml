@@ -47,8 +47,8 @@
 		<url-pattern>/userService</url-pattern>
 	</servlet-mapping>
 	<welcome-file-list>
-		<!-- Me to pou xekinaei paei sto map.html -->
-		<welcome-file>map.html</welcome-file>
+		<!-- Me to pou xekinaei paei sto map.jsp -->
+		<welcome-file>map.jsp</welcome-file>
 	</welcome-file-list>
 	<!-- Tha zhtaei h efarmogh na mhlaei MONO me https -->
 	<security-constraint>

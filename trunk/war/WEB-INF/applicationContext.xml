@@ -8,9 +8,10 @@
 			</list>
 		</property>
 	</bean>
-
+	<!-- Etoima beans - koinoxrhsta (singleton) -->
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" scope="singleton" destroy-method="close">
-		<property name="driverClassName" value="${jdbc.driver}" />
+		<!-- value: den einai bean, einai aplo property -->
+	    <property name="driverClassName" value="${jdbc.driver}" />
 		<property name="url" value="${jdbc.url}" />
 	</bean>
 	<!-- To bean dataSource metatrepetai apo to spring se java antikeimeno ston kwdika
@@ -25,9 +26,15 @@
 	<bean id="mediaDir" class="java.io.File" scope="singleton">
 		<constructor-arg value="${media.dir}" />
 	</bean>
+	<bean id="bufferSize" class="java.lang.Integer" scope="singleton">
+		<constructor-arg value="${buffer.size}" />
+	</bean>
 	<bean id="mediaService" class="gr.uoa.di.std08169.mobile.media.share.server.MediaServiceImpl" scope="singleton">
 		<!-- Epeidh exei setter dataSource kai tha parei bean me id to ref (etoimo dataSource) -->
 		<property name="dataSource" ref="dataSource" />
+		<!-- ref giati mhlame gia bean -->
+		<property name="mediaDir" ref="mediaDir" />
+		<property name="bufferSize" ref="bufferSize" />
 		<!-- To mediaService xrhsimopoiei to userService bean -->
 		<property name="userService" ref="userService" />
 	</bean>

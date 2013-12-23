@@ -24,6 +24,5 @@ public interface MediaServiceAsync {
 			final Date createdTo, final Date editedFrom, final Date editedTo, final Boolean publik, final BigDecimal minLatitude, 
 			final BigDecimal minLongitude, final BigDecimal maxLatitude, final BigDecimal maxLongitude, final AsyncCallback<List<Media>> callback);
 	public void getMedia(final String id, final AsyncCallback<Media> callback);
-	public void addMedia(final Media media, final AsyncCallback<Void> callback);
 	public void deleteMedia(final String id, final AsyncCallback<Void> callback);
 }

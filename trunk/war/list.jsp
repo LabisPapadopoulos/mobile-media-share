@@ -4,18 +4,16 @@
 <%! private static final String UTF_8 = "UTF-8"; %>
 <%! private static final String DEFAULT_LOCALE = "en"; %>
 
-<%-- Epeidh h JSP selida tha ginei servlet, exei etoimes tis metavlites request, response kai me vash
-	autes elegxei an exei sundethei 'h oxi o xrhsths --%>
 <% if (request.getSession().getAttribute("email") == null) {
 	final String locale = (request.getParameter("locale") == null) ? DEFAULT_LOCALE : request.getParameter("locale");
 	response.sendRedirect("./login.html?locale=" + URLEncoder.encode(locale, UTF_8) + 
-		"&url=" + URLEncoder.encode("./newPhoto.jsp?locale=" + URLEncoder.encode(locale, UTF_8), UTF_8));
+		"&url=" + URLEncoder.encode("./list.jsp?locale=" + URLEncoder.encode(locale, UTF_8), UTF_8));
 } else { %>
 	<!DOCTYPE html>
 	<html>
 		<head>
 			<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-			<script type="text/javascript" src="./newPhoto/newPhoto.nocache.js"></script>
+			<script type="text/javascript" src="./list/list.nocache.js"></script>
 			<title>Mobile Media Share</title>
 		</head>
 		<body>

@@ -19,6 +19,7 @@ import gr.uoa.di.std08169.mobile.media.share.shared.User;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -29,14 +30,8 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -61,7 +56,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 //AsyncDataProvider<Media>: fernei dedomena (Media)  
-public class List extends AsyncDataProvider<Media> implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHandler, RequestCallback, 
+public class List extends AsyncDataProvider<Media> implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHandler, 
 		SelectionChangeEvent.Handler, SelectionHandler<SuggestOracle.Suggestion>, ValueChangeHandler<Date> {
 	private static final MobileMediaShareConstants MOBILE_MEDIA_SHARE_CONSTANTS =
 			//kanei automath ulopoihsh to GWT tou interface
@@ -238,8 +233,6 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	private final SingleSelectionModel<Media> selectionModel; //gia highlight kai epilogh grammhs
 	private final CellTable<Media> mediaTable; //Pinakas gia emfanish twn Media
 	private User selectedUser;
-	private Request userRequest;
-	private String currentUser;
 	
 	public List() {
 		int i = 1;
@@ -431,15 +424,6 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 				
 				@Override
 				public void onSuccess(final Void _) {
-					//delete file apo to file systhma
-					try {
-						//encode url se periptwsh pou exei periergous xarakthres
-						new RequestBuilder(RequestBuilder.DELETE, "./mediaServlet?id=" + 
-								URL.encodeQueryString(selectionModel.getSelectedObject().getId())).
-								sendRequest(null, List.this);
-					} catch (final RequestException e) {
-						Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorDeletingMedia(e.getMessage()));
-					}
 					//katharizei to highlight tou pinaka
 					selectionModel.clear();
 					//apenergopoiountai ta koubia (download, edit, delete)
@@ -448,19 +432,6 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 					onRangeChanged(null);
 				}
 			});
-		}
-	}
-	
-	//Apo interface RequestCallback
-	@Override
-	public void onError(final Request request, final Throwable throwable) {
-		if(request == userRequest) {
-			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.login(
-					//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
-					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
-					//kwdikopoieitai to url map epeidh pernaei san parametros (meta apo ?)
-					URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.list(
-							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
 		}
 	}
 
@@ -481,30 +452,85 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	
 	@Override
 	public void onModuleLoad() { // set up HTML
-		try {
-			//RequestBuilder gia na kanoume ena GET request sto servlet login gia na paroume
-			//to session mas. RequestCallback (this) einai auto pou tha parei tin apantish asunxrona
-			//Meta phgenei stin onResponseReceived.
-			userRequest = new RequestBuilder(RequestBuilder.GET, "./userServlet").sendRequest(null, this);
-		} catch (final RequestException _) {
-			//otidhpote paei strava, xana gurnaei stin login
-			//url pou theloume na mas paei
-			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.login(
-					//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
-					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
-					//kwdikopoieitai to url map epeidh pernaei san parametros (meta apo ?)
-					//an petuxei to login paei sto list html
-					URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.list(
-							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
-		}
+		Document.get().getBody().addClassName("bodyClass");
+		Document.get().getBody().appendChild(Header.newHeader());
+		int i = 1;
+		final FlowPanel flowPanel = new FlowPanel();
+		flowPanel.getElement().addClassName("search-filter");
+		final InlineLabel titleLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.title());
+		titleLabel.getElement().addClassName("listLabelCol1");
+		titleLabel.getElement().setAttribute("style", 
+				"top: " + (TOP + TOP_STEP + TOP_STEP * i) + "px;"); //35px
+		flowPanel.add(titleLabel);
+		flowPanel.add(title);
+		final InlineLabel userLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.user());
+		userLabel.getElement().addClassName("listLabelCol2");
+		userLabel.getElement().setAttribute("style", 
+				"top: " + (TOP + TOP_STEP + TOP_STEP * i) + "px;");
+		flowPanel.add(userLabel);
+		flowPanel.add(user);
+		final InlineLabel typeLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.type());
+		typeLabel.getElement().addClassName("listLabelType");
+		typeLabel.getElement().setAttribute("style", 
+				"top: " + (TOP + TOP_STEP + TOP_STEP * i++) + "px;");
+		flowPanel.add(typeLabel);
+		flowPanel.add(type);
+		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
+		//i = 2
+		final InlineLabel createdFromLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.createdFrom());
+		createdFromLabel.getElement().addClassName("listLabelCol1");
+		createdFromLabel.getElement().setAttribute("style", 
+				"top: " + (TOP + TOP * i) + "px;"); //75px
+		flowPanel.add(createdFromLabel);
+		flowPanel.add(createdFrom);
+		final InlineLabel createdToLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.createdTo());
+		createdToLabel.getElement().addClassName("listLabelCol2");
+		createdToLabel.getElement().setAttribute("style", 
+				"top: " + (TOP + TOP * i++) + "px;"); //75px
+		flowPanel.add(createdToLabel);
+		flowPanel.add(createdTo);
+		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
+		//i = 3
+		final InlineLabel editedFromLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.editedFrom());
+		editedFromLabel.getElement().addClassName("listLabelCol1");
+		editedFromLabel.getElement().setAttribute("style", 
+				"top: " + ((TOP + TOP * i) + (TOP_STEP * i) + TOP_STEP) + "px;"); //120px
+		flowPanel.add(editedFromLabel);
+		flowPanel.add(editedFrom);
+		final InlineLabel editedToLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.editedTo());
+		editedToLabel.getElement().addClassName("listLabelCol2");
+		editedToLabel.getElement().setAttribute("style",
+				"top: " + ((TOP + TOP * i) + (TOP_STEP * i++) + TOP_STEP) + "px;"); //120px
+		flowPanel.add(editedToLabel);
+		flowPanel.add(editedTo);
+		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
+		final InlineLabel publicLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.publik());
+		publicLabel.getElement().addClassName("listLabelCol1");
+		publicLabel.getElement().setAttribute("style", 
+				"top: " + (TOP + TOP + TOP * i) + "px;"); //150px
+		flowPanel.add(publicLabel);
+		flowPanel.add(publik);
+		final InlineLabel pageSizeLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.pageSize());
+		pageSizeLabel.getElement().addClassName("listLabelCol2");
+		pageSizeLabel.getElement().setAttribute("style", 
+				"top: " + (TOP + TOP + TOP * i) + "px;");
+		flowPanel.add(pageSizeLabel);
+		flowPanel.add(pageSize);
+		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
+		flowPanel.add(download);
+		flowPanel.add(edit);
+		flowPanel.add(delete);
+		flowPanel.add(pager);
+		flowPanel.add(mediaTable);
+		RootPanel.get().add(flowPanel);
+		onRangeChanged(null);
 	}
 	
 	//AsyncDataProvider<Media> fernei dedomena.
 	//Kaleitai otan xreiazetai na erthoun nea dedomena (p.x SortHandler, ChangeHandler)
 	@Override
 	protected void onRangeChanged(final HasData<Media> _) { // update list rows
-		if (currentUser == null)
-			return;
+		final String currentUser = InputElement.as(Document.get().getElementById("email")).getValue();
 		final String title = this.title.getValue().trim().isEmpty() ? null : this.title.getValue().trim();
 		//MediaType epeidh einai ENUM me ena string epistrefetai ena instance
 		final MediaType type = this.type.getValue(this.type.getSelectedIndex()).isEmpty() ? null :
@@ -549,97 +575,6 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		});
 	}
 	
-	//Apo interface RequestCallback.
-	//H onResponseReceived einai h onSuccess tou RequestCallback
-	@Override
-	public void onResponseReceived(final Request request, final Response response) {
-		if (request == userRequest) {
-			//an den einai logged in o xrhsths
-			if ((response.getStatusCode() != 200) || (response.getText().isEmpty())) {
-				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.login(
-						//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
-						URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
-						//kwdikopoieitai to url map epeidh pernaei san parametros (meta apo ?)
-						URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.list(
-								URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
-				return;
-			}
-			currentUser = response.getText();
-			Document.get().getBody().addClassName("bodyClass");
-			Document.get().getBody().appendChild(Header.newHeader());
-			int i = 1;
-			final FlowPanel flowPanel = new FlowPanel();
-			flowPanel.getElement().addClassName("search-filter");
-			final InlineLabel titleLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.title());
-			titleLabel.getElement().addClassName("listLabelCol1");
-			titleLabel.getElement().setAttribute("style", 
-					"top: " + (TOP + TOP_STEP + TOP_STEP * i) + "px;"); //35px
-			flowPanel.add(titleLabel);
-			flowPanel.add(title);
-			final InlineLabel userLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.user());
-			userLabel.getElement().addClassName("listLabelCol2");
-			userLabel.getElement().setAttribute("style", 
-					"top: " + (TOP + TOP_STEP + TOP_STEP * i) + "px;");
-			flowPanel.add(userLabel);
-			flowPanel.add(user);
-			final InlineLabel typeLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.type());
-			typeLabel.getElement().addClassName("listLabelType");
-			typeLabel.getElement().setAttribute("style", 
-					"top: " + (TOP + TOP_STEP + TOP_STEP * i++) + "px;");
-			flowPanel.add(typeLabel);
-			flowPanel.add(type);
-			flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
-			//i = 2
-			final InlineLabel createdFromLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.createdFrom());
-			createdFromLabel.getElement().addClassName("listLabelCol1");
-			createdFromLabel.getElement().setAttribute("style", 
-					"top: " + (TOP + TOP * i) + "px;"); //75px
-			flowPanel.add(createdFromLabel);
-			flowPanel.add(createdFrom);
-			final InlineLabel createdToLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.createdTo());
-			createdToLabel.getElement().addClassName("listLabelCol2");
-			createdToLabel.getElement().setAttribute("style", 
-					"top: " + (TOP + TOP * i++) + "px;"); //75px
-			flowPanel.add(createdToLabel);
-			flowPanel.add(createdTo);
-			flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
-			//i = 3
-			final InlineLabel editedFromLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.editedFrom());
-			editedFromLabel.getElement().addClassName("listLabelCol1");
-			editedFromLabel.getElement().setAttribute("style", 
-					"top: " + ((TOP + TOP * i) + (TOP_STEP * i) + TOP_STEP) + "px;"); //120px
-			flowPanel.add(editedFromLabel);
-			flowPanel.add(editedFrom);
-			final InlineLabel editedToLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.editedTo());
-			editedToLabel.getElement().addClassName("listLabelCol2");
-			editedToLabel.getElement().setAttribute("style",
-					"top: " + ((TOP + TOP * i) + (TOP_STEP * i++) + TOP_STEP) + "px;"); //120px
-			flowPanel.add(editedToLabel);
-			flowPanel.add(editedTo);
-			flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
-			final InlineLabel publicLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.publik());
-			publicLabel.getElement().addClassName("listLabelCol1");
-			publicLabel.getElement().setAttribute("style", 
-					"top: " + (TOP + TOP + TOP * i) + "px;"); //150px
-			flowPanel.add(publicLabel);
-			flowPanel.add(publik);
-			final InlineLabel pageSizeLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.pageSize());
-			pageSizeLabel.getElement().addClassName("listLabelCol2");
-			pageSizeLabel.getElement().setAttribute("style", 
-					"top: " + (TOP + TOP + TOP * i) + "px;");
-			flowPanel.add(pageSizeLabel);
-			flowPanel.add(pageSize);
-			flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
-			flowPanel.add(download);
-			flowPanel.add(edit);
-			flowPanel.add(delete);
-			flowPanel.add(pager);
-			flowPanel.add(mediaTable);
-			RootPanel.get().add(flowPanel);
-			onRangeChanged(null);
-		}
-	}
-	
 	//Otan dialegei o xrhsths sugkekrimenh protash
 	@Override
 	public void onSelection(final SelectionEvent<SuggestOracle.Suggestion> selectionEvent) { // selecting a user
@@ -652,6 +587,7 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	public void onSelectionChange(final SelectionChangeEvent _) { // selecting a row		
 		//analoga me to epilegmeno pou edwse o xrhsths (se mia grammh)
 		final Media media = selectionModel.getSelectedObject();
+		final String currentUser = InputElement.as(Document.get().getElementById("email")).getValue();
 		//enable ta download, edit kai delete
 		download.setEnabled(media != null);
 		//edit kai delete kapoio arxeio an anhkei ston trexonta xrhsth

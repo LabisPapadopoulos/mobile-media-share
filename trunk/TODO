@@ -16,6 +16,11 @@ My Account page
 Logout
 Footer
 reset maps in upload & new photo
+media service handle files
+breadcrumbs
+map edit & delete only if owner
+split media service impl in metadata store and data store
+transactions in media service
 
 .
 .
