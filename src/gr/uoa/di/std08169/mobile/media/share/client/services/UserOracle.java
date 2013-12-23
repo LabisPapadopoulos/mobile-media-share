@@ -45,8 +45,5 @@ public class UserOracle extends SuggestOracle {
 				callback.onSuggestionsReady(request, response);
 			}
 		});
-		
-		
 	}
-
 }

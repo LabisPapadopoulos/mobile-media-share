@@ -1,5 +1,6 @@
 package gr.uoa.di.std08169.mobile.media.share.server;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -22,7 +23,6 @@ public class MediaServiceServlet extends RemoteServiceServlet implements MediaSe
 	private static final long serialVersionUID = 1L;
 
 	private MediaService mediaService;
-	
 
 	//init gia to servlet
 	@Override
@@ -58,11 +58,6 @@ public class MediaServiceServlet extends RemoteServiceServlet implements MediaSe
 	@Override
 	public Media getMedia(final String id) throws MediaServiceException {
 		return mediaService.getMedia(id);
-	}
-
-	@Override
-	public void addMedia(final Media media) throws MediaServiceException {
-		mediaService.addMedia(media);
 	}
 	
 	@Override

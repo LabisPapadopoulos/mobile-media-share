@@ -1,9 +1,9 @@
 package gr.uoa.di.std08169.mobile.media.share.client.html;
 
+import java.math.BigDecimal;
+
 import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants;
 import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessages;
-
-import java.math.BigDecimal;
 
 import com.google.gwt.ajaxloader.client.AjaxLoader;
 import com.google.gwt.core.client.Callback;
@@ -41,7 +41,8 @@ import com.google.maps.gwt.client.MarkerImage;
 import com.google.maps.gwt.client.MarkerOptions;
 import com.google.maps.gwt.client.MouseEvent;
 
-public class NewPhoto implements ClickHandler, EntryPoint, GoogleMap.ClickHandler, KeyUpHandler, Runnable {
+public class NewVideo implements ClickHandler, EntryPoint, GoogleMap.ClickHandler, KeyUpHandler, Runnable {
+
 	private static final MobileMediaShareConstants MOBILE_MEDIA_SHARE_CONSTANTS = 
 			GWT.create(MobileMediaShareConstants.class);
 	private static final MobileMediaShareUrls MOBILE_MEDIA_SHARE_URLS = 
@@ -66,8 +67,9 @@ public class NewPhoto implements ClickHandler, EntryPoint, GoogleMap.ClickHandle
 	private VideoElement video;
 	private CanvasElement canvas;
 	private Marker marker;
-		
-	public NewPhoto() {
+	
+	
+	public NewVideo() {
 		//gia na min anoixei kainourio parathuro
 		form = new FormPanel(new NamedFrame("_self"));
 		form.setMethod(FormPanel.METHOD_POST);
@@ -118,7 +120,7 @@ public class NewPhoto implements ClickHandler, EntryPoint, GoogleMap.ClickHandle
 		latitude.setValue(new BigDecimal(event.getLatLng().lat()).toString());
 		longitude.setValue(new BigDecimal(event.getLatLng().lng()).toString());		
 	}
-	
+
 	@Override
 	public void onClick(final ClickEvent clickEvent) {
 		if (clickEvent.getSource() == capture) {
@@ -160,7 +162,7 @@ public class NewPhoto implements ClickHandler, EntryPoint, GoogleMap.ClickHandle
 		options.setOtherParms(MOBILE_MEDIA_SHARE_URLS.googleMapsOptions(LocaleInfo.getCurrentLocale().getLocaleName()));
 		AjaxLoader.loadApi(Map.GOOGLE_MAPS_API, Map.GOOGLE_MAPS_VERSION, this, options);
 	}
-
+	
 	@Override
 	public void run() {
 		final MapOptions options = MapOptions.create(); //Dhmiourgeia antikeimenou me Factory (xwris constructor)
@@ -169,7 +171,7 @@ public class NewPhoto implements ClickHandler, EntryPoint, GoogleMap.ClickHandle
 		options.setZoom(Map.GOOGLE_MAPS_ZOOM);
 		final DivElement mapDiv = Document.get().createDivElement();
 		mapDiv.addClassName("mediaMap");
-		//mapDiv.setAttribute("style", "top: 100px;"); //TODO
+		mapDiv.setAttribute("style", "top: 100px;"); //TODO
 		//Dhmiourgei ton xarth me tis panw ruthmiseis kai to vazei sto mapDiv
 		final GoogleMap googleMap = GoogleMap.create(mapDiv, options);
 		googleMap.addClickListener(this);

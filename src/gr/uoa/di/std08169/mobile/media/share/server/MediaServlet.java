@@ -2,13 +2,12 @@ package gr.uoa.di.std08169.mobile.media.share.server;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,8 +22,6 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.tika.config.TikaConfig;
-import org.apache.tika.mime.MimeTypeException;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import gr.uoa.di.std08169.mobile.media.share.client.services.MediaService;
@@ -36,17 +33,15 @@ import gr.uoa.di.std08169.mobile.media.share.shared.User;
 
 public class MediaServlet extends HttpServlet {
 	private static final File TMP_DIR = new File(System.getProperty("java.io.tmpdir"));
-	private static final int BUFFER_SIZE = 1024;
 	private static final long serialVersionUID = 1L;
-	private static final String MAP_URL = "./map.html?locale=%s";
+	private static final String MAP_URL = "./map.jsp?locale=%s";
 	private static final String UTF_8 = "UTF-8";
 	private static final String PHOTO_PREFIX = "data:image/png;base64,";
 	private static final Logger LOGGER = Logger.getLogger(MediaServlet.class.getName());
 	//tmp directory me to opoio exei xekinhsei h JVM kai ekei tha dexetai o tomcat ta arxeia pou anevazoun oi xrhstes
 
-	//Pou tha apothikeutei monima to arxeio
-	private File mediaDir;
-	private MediaService mediaService; //Java Bean
+	private ExtendedMediaService mediaService; //Java Bean
+	private int bufferSize;
 	private UserService userService;
 	
 	/**
@@ -55,12 +50,12 @@ public class MediaServlet extends HttpServlet {
 	 */
 	@Override
 	public void init() {
-		mediaDir = (File) WebApplicationContextUtils.getWebApplicationContext(getServletContext()).
-					getBean("mediaDir", File.class);
-		mediaService = (MediaService) WebApplicationContextUtils.getWebApplicationContext(getServletContext()).
-				getBean("mediaService", MediaServiceImpl.class);
+		mediaService = (ExtendedMediaService) WebApplicationContextUtils.getWebApplicationContext(getServletContext()).
+				getBean("mediaService", MediaService.class);
+		bufferSize = (Integer) WebApplicationContextUtils.getWebApplicationContext(getServletContext()).
+				getBean("bufferSize", Integer.class);
 		userService = (UserService) WebApplicationContextUtils.getWebApplicationContext(getServletContext()).
-				getBean("userService", UserServiceImpl.class);
+				getBean("userService", UserService.class);
 	}
 	
 	/**
@@ -88,34 +83,9 @@ public class MediaServlet extends HttpServlet {
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request"); //400 Bad request
 				return;
 			}
-			final Media media = mediaService.getMedia(id);
-			if (media == null) {
-				LOGGER.warning("Not found");
-				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Not found"); // 404 Not found
-				return;
-			}
-			response.setContentType(media.getType());
-			response.setHeader("Content-disposition", "attachment; filename=" + media.getTitle() +
-					//Vriskei tin epektash tou arxeiou kai tin prosthetei ston titlo tou arxeiou sto katevasma
-					TikaConfig.getDefaultConfig().getMimeRepository().forName(media.getType()).getExtension());
-			//Vriskei to arxeio me sugkekrimeno id
-			final File file = new File(mediaDir, id);
-			final FileInputStream input = new FileInputStream(file);
-			try {
-				final byte[] buffer = new byte[BUFFER_SIZE];
-				int read = 0;
-				while((read = input.read(buffer)) > 0)
-					//stelnei to arxeio ston xrhsth
-					response.getOutputStream().write(buffer, 0, read);								
-			} finally {
-				input.close();
-				response.getOutputStream().close();
-			}				
+			mediaService.getMedia(id, response);
 		} catch (final MediaServiceException e) {
 			LOGGER.log(Level.WARNING, "Internal server error", e); //den borese na psaxei gia to arxeio
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error"); //500 Internal server error
-		} catch (final MimeTypeException e) {
-			LOGGER.log(Level.WARNING, "Internal server error", e); //den borese na psaxei gia thn epektash tou arxeiou
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error"); //500 Internal server error
 		} catch (final UserServiceException e) {
 			LOGGER.log(Level.WARNING, "Access denied", e);
@@ -124,7 +94,7 @@ public class MediaServlet extends HttpServlet {
 	}
 	
 	/**
-	 * Anevazei ena arxeio kai kanei redirect sto map.html
+	 * Anevazei ena arxeio kai kanei redirect sto map.jsp
 	 */
 	@Override
 	public void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
@@ -160,39 +130,17 @@ public class MediaServlet extends HttpServlet {
 			BigDecimal longitude = null;
 			boolean publik = false;
 			String locale = null;
+			InputStream input = null;
 			//Diathetei mnhmh gia metafora arxeiou mexri kai BUFFER_SIZE bytes. Apo ekei kai panw xrhsimopoiei disko.
-			for (FileItem fileItem : new ServletFileUpload(new DiskFileItemFactory(BUFFER_SIZE, TMP_DIR)).parseRequest(request)) {
+			final List<FileItem> fileItems = new ServletFileUpload(new DiskFileItemFactory(bufferSize, TMP_DIR)).parseRequest(request); 
+			for (FileItem fileItem : fileItems) {
 				//an einai arxeio
 				if ((!fileItem.isFormField()) && fileItem.getFieldName().equals("file")) {
 					//vrethike ena arxeio
-					final InputStream input = fileItem.getInputStream();
-					try {
-						//Monadiko anagnwristiko gia otidhpote theloume
-						id = UUID.randomUUID().toString();
-						final File file = new File(mediaDir, id);
-						file.createNewFile();
-						try {
-							final FileOutputStream output = new FileOutputStream(file);
-							try {
-								final byte[] buffer = new byte[BUFFER_SIZE];
-								int read = 0;
-								while((read = input.read(buffer)) > 0)
-									output.write(buffer, 0, read);								
-							} finally {
-								output.close();
-							}
-						//otidhpote borei na ginei throw (akoma kai error)
-						} catch (final IOException e) {
-							file.delete();
-							throw e;
-						}
-						type = fileItem.getContentType();
-						size = fileItem.getSize();
-					} finally {
-						input.close();
-					}
-					//diagrafh apo ton disko
-					fileItem.delete();
+					input = fileItem.getInputStream();
+					id = UUID.randomUUID().toString();
+					type = fileItem.getContentType();
+					size = fileItem.getSize();
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("photo")) {
 					if (!fileItem.getString(UTF_8).startsWith(PHOTO_PREFIX)) {
 						LOGGER.warning("Photo is not image/png");
@@ -202,71 +150,59 @@ public class MediaServlet extends HttpServlet {
 					//apokwdikopoihsh tis eikonas
 					final byte[] data = Base64.decodeBase64(fileItem.getString(UTF_8).substring(PHOTO_PREFIX.length()));
 					//antigrafh ths eikonas apo enan pinaka apo bytes
-					final InputStream input = new ByteArrayInputStream(data);
-					try {
-						//Monadiko anagnwristiko gia otidhpote theloume
-						id = UUID.randomUUID().toString();
-						final File file = new File(mediaDir, id);
-						file.createNewFile();
-						try {
-							final FileOutputStream output = new FileOutputStream(file);
-							try {
-								final byte[] buffer = new byte[BUFFER_SIZE];
-								int read = 0;
-								while((read = input.read(buffer)) > 0)
-									output.write(buffer, 0, read);								
-							} finally {
-								output.close();
-							}
-						//otidhpote borei na ginei throw (akoma kai error)
-						} catch (final IOException e) {
-							file.delete();
-							throw e;
-						}
-						type = "image/png";
-						size = data.length;
-					} finally {
-						input.close();
-					}
-					//diagrafh apo ton disko
-					fileItem.delete();
-					
+					input = new ByteArrayInputStream(data);
+					id = UUID.randomUUID().toString();
+					type = "image/png";
+					size = data.length;
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("title")) {
 					//vrethike to title
 					title = fileItem.getString(UTF_8);
-					fileItem.delete();
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("public")) {
 					publik = "on".equals(fileItem.getString(UTF_8));
-					fileItem.delete();
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("latitude")) {
 					latitude = new BigDecimal(fileItem.getString(UTF_8));
-					fileItem.delete();
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("longitude")) {
 					longitude = new BigDecimal(fileItem.getString(UTF_8));
-					fileItem.delete();
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("locale")) {
 					locale = fileItem.getString(UTF_8);
-					fileItem.delete();
 				}
 			}
 			//Den anevase o xrhsths arxeio
-			if ((id == null) || (type == null) || (size == 0)) {
+			if ((id == null) || (type == null) || (size == 0) || (input == null)) {
 				LOGGER.warning("No file specified");
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No file specified"); //400 Bad Request
+				if (input != null)
+					input.close();
+				for (FileItem fileItem : fileItems)
+					fileItem.delete();
 				return;
 			}
 			if (title == null) {
 				LOGGER.warning("No title specified");
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No title specified"); //400 Bad Request
+				if (input != null)
+					input.close();
+				for (FileItem fileItem : fileItems)
+					fileItem.delete();
 				return;
 			}
 			if((latitude == null) || (longitude == null)) {
 				LOGGER.warning("No location specified");
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No location specified"); //400 Bad Request
+				if (input != null)
+					input.close();
+				for (FileItem fileItem : fileItems)
+					fileItem.delete();
 				return;
 			}
-			mediaService.addMedia(new Media(id, type, size, duration, user, created, edited, title, latitude,
-					longitude, publik));
+			try {
+				mediaService.addMedia(new Media(id, type, size, duration, user, created, edited, title, latitude,
+						longitude, publik), input);
+			} finally {
+				input.close();
+				for (FileItem fileItem : fileItems)
+					fileItem.delete();
+			}
 			LOGGER.info("User " + user + " uploaded media " + id);
 			response.sendRedirect(String.format(MAP_URL, URLEncoder.encode(locale, UTF_8)));
 		} catch (final FileUploadException e) {
@@ -279,45 +215,5 @@ public class MediaServlet extends HttpServlet {
 			LOGGER.log(Level.WARNING, "Access denied", e);
 			response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
 		}
-	}
-	
-	/**
-	 * Diagrafei ena arxeio apo to disko
-	 */
-	@Override
-	public void doDelete(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
-		if ((String) request.getSession().getAttribute("email") == null) {
-			LOGGER.warning("Authentication required");
-			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication required"); //401 Unauthorized
-			return;
-		}
-		try {
-			final User user = userService.getUser((String) request.getSession().getAttribute("email"));
-			if (user == null) {
-				LOGGER.warning("Access denied");
-				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
-				return;
-			}
-			final String id = request.getParameter("id");
-			if ((id == null) || id.isEmpty()) {
-				LOGGER.warning("No media ID specified");
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No media ID specified"); //400 Bad request
-				return;
-			}
-			final File file = new File(mediaDir, id);
-			if (!file.exists()) {
-				LOGGER.warning("Media " + id + " does not exist");
-				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Media " + id + " does not exist"); //404 Not found
-				return;
-			}
-			file.delete();
-			LOGGER.info("User " + user + " deleted media " + id);
-			//gia ok (afou den exei na steilei swma) apantaei me No content me tin sendError,
-			//gia na mhn prospathei o browser na vrei swma gia diavasma.
-			response.sendError(HttpServletResponse.SC_NO_CONTENT, "File deleted successfully"); //204 No content
-		} catch (final UserServiceException e) {
-			LOGGER.log(Level.WARNING, "Access denied", e);
-			response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
-		}
-	}
+	}	
 }

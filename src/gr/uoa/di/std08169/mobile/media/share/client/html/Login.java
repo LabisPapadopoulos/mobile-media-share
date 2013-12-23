@@ -1,6 +1,7 @@
 package gr.uoa.di.std08169.mobile.media.share.client.html;
 
 import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
@@ -69,16 +70,19 @@ public class Login implements ClickHandler, EntryPoint, KeyUpHandler {
 		//string login apo to interface
 		login = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.login());
 		login.getElement().setAttribute("style", 
-				"top: " + ((TOP_STEP + TOP_BUTTON_STEP) * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
+				"top: " + ((TOP_STEP + TOP_BUTTON_STEP) * i) + "px; " +
+				"left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 		login.addClickHandler(this);
 		login.setEnabled(false);
 		newUser = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.newUser());
 		newUser.getElement().setAttribute("style", 
-				"top: " + ((TOP_STEP + TOP_BUTTON_STEP) * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
+				"top: " + ((TOP_STEP + TOP_BUTTON_STEP) * i) + "px; " +
+				"left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 		newUser.addClickHandler(this);
 		forgotPassword = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.forgotPassword_());
 		forgotPassword.getElement().setAttribute("style", 
-				"top: " + ((TOP_STEP + TOP_BUTTON_STEP) * i) + "px; left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
+				"top: " + ((TOP_STEP + TOP_BUTTON_STEP) * i) + "px; " +
+				"left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 		forgotPassword.addClickHandler(this);
 	}
 	
@@ -93,7 +97,7 @@ public class Login implements ClickHandler, EntryPoint, KeyUpHandler {
 				//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
 				URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 		else if (clickEvent.getSource() == forgotPassword)
-			Window.alert("As prosexes!");
+			Window.alert("As prosexes!"); //TODO
 	}
 	
 	@Override

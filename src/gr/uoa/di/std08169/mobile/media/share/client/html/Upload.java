@@ -18,12 +18,6 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.geolocation.client.Geolocation;
 import com.google.gwt.geolocation.client.Position;
 import com.google.gwt.geolocation.client.PositionError;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
@@ -48,7 +42,7 @@ import com.google.maps.gwt.client.MouseEvent;
 import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants;
 import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessages;
 
-public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMap.ClickHandler, KeyUpHandler, RequestCallback, Runnable {
+public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMap.ClickHandler, KeyUpHandler, Runnable {
 	public static final String MARKER_URL = "./images/uploadMarker.svg";
 	private static final MobileMediaShareConstants MOBILE_MEDIA_SHARE_CONSTANTS = 
 			GWT.create(MobileMediaShareConstants.class);
@@ -143,16 +137,6 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMa
 	}
 
 	@Override
-	public void onError(final Request _, final Throwable __) {
-		Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.login(
-				//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
-				URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
-				//kwdikopoieitai to url map epeidh pernaei san parametros (meta apo ?)
-				URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.upload(
-						URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
-	}
-
-	@Override
 	public void onKeyUp(final KeyUpEvent _) {
 		ok.setEnabled((file.getFilename() != null) && (!file.getFilename().trim().isEmpty()) &&
 				(!title.getValue().trim().isEmpty()));		
@@ -160,35 +144,6 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMa
 
 	@Override
 	public void onModuleLoad() {
-		try {
-			//RequestBuilder gia na kanoume ena GET request sto servlet login gia na paroume
-			//to session mas. RequestCallback (this) einai auto pou tha parei tin apantish asunxrona
-			new RequestBuilder(RequestBuilder.GET, "./userServlet").sendRequest(null, this);
-		} catch (final RequestException _) {
-			//otidhpote paei strava, xana gurnaei stin login
-			//url pou theloume na mas paei
-			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.login(
-					//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
-					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
-					//kwdikopoieitai to url map epeidh pernaei san parametros (meta apo ?)
-					URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.upload(
-							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
-		}
-	}
-	
-	//molis phre epituxws tin apantish
-	@Override
-	public void onResponseReceived(final Request request, final Response response) {
-		//an den einai logged in o xrhsths
-		if ((response.getStatusCode() != 200) || (response.getText().isEmpty())) {
-			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.login(
-					//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
-					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
-					//kwdikopoieitai to url map epeidh pernaei san parametros (meta apo ?)
-					URL.encodeQueryString(MOBILE_MEDIA_SHARE_URLS.upload(
-							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())))));
-			return;
-		}
 		//Ajax loader: fortwnei pragmata mesw ajax
 		//Ruthmiseis gia to google maps
 		final AjaxLoader.AjaxLoaderOptions options = AjaxLoader.AjaxLoaderOptions.newInstance();
