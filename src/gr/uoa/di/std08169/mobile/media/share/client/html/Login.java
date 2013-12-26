@@ -72,6 +72,7 @@ public class Login implements ClickHandler, EntryPoint, KeyUpHandler {
 		login.getElement().setAttribute("style", 
 				"top: " + ((TOP_STEP + TOP_BUTTON_STEP) * i) + "px; " +
 				"left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
+		login.getElement().setAttribute("type", "submit");
 		login.addClickHandler(this);
 		login.setEnabled(false);
 		newUser = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.newUser());

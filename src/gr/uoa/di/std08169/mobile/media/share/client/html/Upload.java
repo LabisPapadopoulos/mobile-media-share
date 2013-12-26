@@ -8,6 +8,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.ParagraphElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -71,6 +72,7 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMa
 		form.setMethod(FormPanel.METHOD_POST);
 		form.setEncoding(FormPanel.ENCODING_MULTIPART);
 		form.setAction("./mediaServlet");
+		form.getElement().setClassName("uploadForm");
 		int i = 0;
 		file = new FileUpload();
 		file.setName("file");
@@ -96,12 +98,12 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMa
 		ok.addClickHandler(this);
 		ok.setEnabled(false);
 		ok.getElement().setAttribute("style", 
-				"top: " + (i * (TOP_STEP * i) + (TOP_STEP * i) + (TOP_STEP * i) + TOP_STEP) + "px; " +
+				"top: " + (i * (TOP_STEP * i) + (TOP_STEP * i) + (TOP_STEP * i) + TOP_STEP + TOP_STEP) + "px; " +
 						"left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 		reset = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.reset());
 		reset.addClickHandler(this);
 		reset.getElement().setAttribute("style", 
-				"top: " + (i * (TOP_STEP * i) + (TOP_STEP * i) + (TOP_STEP * i) + TOP_STEP) + "px; " +
+				"top: " + (i * (TOP_STEP * i) + (TOP_STEP * i) + (TOP_STEP * i) + TOP_STEP + TOP_STEP) + "px; " +
 						"left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 	}
 	
@@ -196,6 +198,11 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMa
 		Document.get().getBody().addClassName("bodyClass");
 		//Apo to DOM prosthetei komvo (to header me olous tous upokomvous pou exei mesa)
 		Document.get().getBody().appendChild(Header.newHeader());
+		final ImageElement uploadImage = Document.get().createImageElement();
+		uploadImage.setSrc("./images/uploadLogo.png");
+		uploadImage.setClassName("uploadImage");
+		uploadImage.setAlt("Upload Image");
+		Document.get().getBody().appendChild(uploadImage);
 		final FlowPanel flowPanel = new FlowPanel();
 		int i = 0;
 		final InlineLabel fileLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.file());

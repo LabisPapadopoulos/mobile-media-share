@@ -31,25 +31,32 @@ div.header {
 
 /* logo */
 div.logo {
-	clear: both;
+	/* clear: both; */
+	padding-bottom: 10px;
 }
 
 img.logo {
+/*
 	float: left;
 	height: 128px;
 	width: 128px;
 	margin-bottom: 20px;
-	margin-left: 40px;
+	margin-left: 40px; */
+	width: 720px;
+	box-shadow: 0 0 15px #888;
 }
 
+/*
 h1 {
 	float: right;
 	margin-right: 10px;
 }
+*/
 
 /* menu */
 div.menu {
 	clear: both;
+	padding-bottom: 30px;
 }
 
 a.map, a.list, a.newPhoto, a.newVideo, a.upload, a.myAccount, a.logout {
@@ -58,6 +65,14 @@ a.map, a.list, a.newPhoto, a.newVideo, a.upload, a.myAccount, a.logout {
 	margin: 2px;
 	padding: 10px;
 	text-decoration: none;
+}
+
+a.logout {
+	position: absolute;
+	float: right;
+	top: 110px;
+	margin: 5px;
+	margin-left: 20px;
 }
 
 a.map:hover, a.list:hover, a.newPhoto:hover, a.newVideo:hover, a.upload:hover, a.myAccount:hover, a.logout:hover {
@@ -72,12 +87,31 @@ img.mapImg, img.listImg, img.newPhotoImg, img.newVideoImg, img.uploadImg, img.my
 	margin-bottom: -13px;
 }
 
+img.logoutImg {
+	margin-top: -7px;
+}
+
+img.uploadImage {
+	position: relative;
+	left: 700px;
+	top: 20px;
+	height: 120px;
+}
+
 /* language select */
-a.locale {
+a.locale_el {
 	float: right;
 	margin: 5px;
-	position: relative;
-	top: -100px;
+	margin-left: 20px;
+	position: absolute;
+	top: 50px;
+}
+
+a.locale_en {
+	margin: 5px;
+	margin-left: 75px;
+	position: absolute;
+	top: 50px;
 }
 
 form {
@@ -85,6 +119,10 @@ form {
 	text-align: center;
 	padding-top: 20px;
 	position: relative;
+}
+
+form.uploadForm {
+	top: -100px;
 }
 
 span.label {
@@ -118,9 +156,7 @@ form button {
 
 .search-filter {
 	position: relative;
-	//clear: both;
-	//text-align: center;
-	
+	padding-bottom: 50px;
 }
 
 .listField {
@@ -162,6 +198,14 @@ form button {
 	left: 42.5%;
 }
 
+img.listImage {
+	float: right;
+	height: 200px;
+	padding-top: 40px;
+	padding-bottom: 20px;
+	padding-right: 50px;
+}
+
 p {
 	text-align: center;
 	font-size: 18px;
@@ -183,10 +227,11 @@ div.map {
 /*	position: relative;
 	top: 180px;
 //	padding-top: 100px; */
+	top: 20px;
 	width: 800px;
 	height: 600px;
 	left: 100px;
-	margin-bottom: 80px;
+	/* margin-bottom: 80px; */
 }
 
 div.mediaMap {

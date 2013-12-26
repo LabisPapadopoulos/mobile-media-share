@@ -2,10 +2,13 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"> <!-- Template tou GWT (namespace) -->
 	<div><!-- header -->
 	    <div class="header">
-			<div class="logo" >
+			<div ui:field="banner" class="logo" >
 			    <!-- ui:field gia na vrisketai apo to gwt -->
 				<img ui:field="logo" src="./images/logo.png" class="logo" />
-				<h1 ui:field="title"></h1>
+				<a ui:field="logoutLink" class="logout">
+			        <img src="./images/logout.svg" class="logoutImg" />
+			        <span ui:field="logout"></span>
+			    </a>
 			</div>
 			<div class="menu">
 			    <a ui:field="mapLink" class="map">
@@ -32,10 +35,6 @@
 			    <a ui:field="myAccountLink" class="myAccount">
 			        <img src="./images/myAccount.svg" class="myAccountImg" />
 			        <span ui:field="myAccount"></span>
-			    </a>
-			    <a ui:field="logoutLink" class="logout">
-			        <img src="./images/logout.svg" class="logoutImg" />
-			        <span ui:field="logout"></span>
 			    </a>
 			</div>
 		</div>

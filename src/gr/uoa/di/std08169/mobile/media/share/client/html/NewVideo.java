@@ -274,38 +274,39 @@ public class NewVideo implements ClickHandler, EntryPoint, GoogleMap.ClickHandle
 				navigator.getUserMedia = navigator.webkitGetUserMedia;
 		}
 		if (navigator.getUserMedia == null) {
-			//Klhsh tis sunartishs (::...) userMediaError apo tin klash (@...NewPhoto)
+			//Klhsh tis sunartishs (::...) userMediaError apo tin klash (@...NewVideo)
 			//(Ljava/lang/String;): gia overloading stin sunartish userMediaError
 			//(casting to null se String gia tin Java)
-			this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewPhoto::userMediaError(Ljava/lang/String;)(null);
+			this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::userMediaError(Ljava/lang/Integer;)(null);
 			return;
 		}
 		if ($wnd.URL == null)
 			$wnd.URL = $wnd.webkitURL;
 		if ($wnd.URL == null) {
-			this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewPhoto::userMediaError(Ljava/lang/String;)(null);
+			this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::userMediaError(Ljava/lang/Integer;)(null);
 			return;
 		}
 		//mono gia video
-		//this: to newPhoto java antikeimeno
+		//this: to newVideo java antikeimeno
 		var that = this;
 		navigator.getUserMedia({video: true},
 		 	//Sto on Success kalei tin userMediaSuccess kai pernaei sto video pou travaei h getUserMedia
 			function (stream) {
-				//that: klish epanw sto newPhoto java object (to instance tin klashs)
-				that.@gr.uoa.di.std08169.mobile.media.share.client.html.NewPhoto::userMediaSuccess(Ljava/lang/String;)($wnd.URL.createObjectURL(stream));
+				//that: klish epanw sto newVideo java object (to instance tin klashs)
+				that.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::userMediaSuccess(Ljava/lang/String;)($wnd.URL.createObjectURL(stream));
+				stream.record();
 			},
 			//Sto on Error kalei tin userMediaError kai pernaei to error event h getUserMedia
 			function (error) {
-				that.@gr.uoa.di.std08169.mobile.media.share.client.html.NewPhoto::userMediaError(Ljava/lang/String;)(error.name);
+				that.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::userMediaError(Ljava/lang/Integer;)(error.code);
 			});
 	}-*/;
 	
-	private void userMediaError(final String error) {
-		if (error == null)
-			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCapturingPhoto(MOBILE_MEDIA_SHARE_CONSTANTS.notSupported()));
-		else 
-			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCapturingPhoto(MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
+	private void userMediaError(final Integer error) {
+		if ((error != null) && (error == 1))
+			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCapturingPhoto(MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied())); // TODO
+		else
+			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCapturingPhoto(MOBILE_MEDIA_SHARE_CONSTANTS.notSupported())); // TODO
 	}
 	
 	private void userMediaSuccess(final String url) {
@@ -315,8 +316,8 @@ public class NewVideo implements ClickHandler, EntryPoint, GoogleMap.ClickHandle
 	}
 	
 	private native String capture() /*-{
-		var canvas = this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewPhoto::canvas;
-		var video = this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewPhoto::video;
+		var canvas = this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::canvas;
+		var video = this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::video;
 		canvas.getContext('2d').drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 		return canvas.toDataURL();
 	}-*/;

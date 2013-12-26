@@ -169,7 +169,6 @@ public class NewPhoto implements ClickHandler, EntryPoint, GoogleMap.ClickHandle
 		options.setZoom(Map.GOOGLE_MAPS_ZOOM);
 		final DivElement mapDiv = Document.get().createDivElement();
 		mapDiv.addClassName("mediaMap");
-		//mapDiv.setAttribute("style", "top: 100px;"); //TODO
 		//Dhmiourgei ton xarth me tis panw ruthmiseis kai to vazei sto mapDiv
 		final GoogleMap googleMap = GoogleMap.create(mapDiv, options);
 		googleMap.addClickListener(this);
@@ -275,13 +274,13 @@ public class NewPhoto implements ClickHandler, EntryPoint, GoogleMap.ClickHandle
 			//Klhsh tis sunartishs (::...) userMediaError apo tin klash (@...NewPhoto)
 			//(Ljava/lang/String;): gia overloading stin sunartish userMediaError
 			//(casting to null se String gia tin Java)
-			this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewPhoto::userMediaError(Ljava/lang/String;)(null);
+			this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewPhoto::userMediaError(Ljava/lang/Integer;)(null);
 			return;
 		}
 		if ($wnd.URL == null)
 			$wnd.URL = $wnd.webkitURL;
 		if ($wnd.URL == null) {
-			this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewPhoto::userMediaError(Ljava/lang/String;)(null);
+			this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewPhoto::userMediaError(Ljava/lang/Integer;)(null);
 			return;
 		}
 		//mono gia video
@@ -295,15 +294,15 @@ public class NewPhoto implements ClickHandler, EntryPoint, GoogleMap.ClickHandle
 			},
 			//Sto on Error kalei tin userMediaError kai pernaei to error event h getUserMedia
 			function (error) {
-				that.@gr.uoa.di.std08169.mobile.media.share.client.html.NewPhoto::userMediaError(Ljava/lang/String;)(error.name);
+				that.@gr.uoa.di.std08169.mobile.media.share.client.html.NewPhoto::userMediaError(Ljava/lang/Integer;)(error.code);
 			});
 	}-*/;
 	
-	private void userMediaError(final String error) {
-		if (error == null)
-			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCapturingPhoto(MOBILE_MEDIA_SHARE_CONSTANTS.notSupported()));
-		else 
+	private void userMediaError(final Integer error) {
+		if ((error != null) && (error == 1))
 			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCapturingPhoto(MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
+		else
+			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCapturingPhoto(MOBILE_MEDIA_SHARE_CONSTANTS.notSupported()));
 	}
 	
 	private void userMediaSuccess(final String url) {
