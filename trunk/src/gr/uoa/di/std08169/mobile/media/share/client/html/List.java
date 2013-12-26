@@ -19,6 +19,8 @@ import gr.uoa.di.std08169.mobile.media.share.shared.User;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.HeadingElement;
+import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -369,7 +371,7 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		selectionModel = new SingleSelectionModel<Media>();
 		selectionModel.addSelectionChangeHandler(this);
 		mediaTable = new CellTable<Media>();
-		mediaTable.getElement().setAttribute("style", "padding-top: " + ((TOP + TOP) * i) + "px;"); //200px; TODO
+//		mediaTable.getElement().setAttribute("style", "padding-top: " + ((TOP + TOP) * i) + "px;"); //200px; TODO
 		mediaTable.setSelectionModel(selectionModel);
 		//gia na allazei selida o xrhsths kai me ta velakia (dexia-aristera)
 		mediaTable.setKeyboardPagingPolicy(HasKeyboardPagingPolicy.KeyboardPagingPolicy.CHANGE_PAGE);
@@ -454,6 +456,14 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	public void onModuleLoad() { // set up HTML
 		Document.get().getBody().addClassName("bodyClass");
 		Document.get().getBody().appendChild(Header.newHeader());
+		final HeadingElement breadcrumb = Document.get().createHElement(1);
+		breadcrumb.appendChild(Document.get().createTextNode(MOBILE_MEDIA_SHARE_CONSTANTS.list()));
+		Document.get().getBody().appendChild(breadcrumb);
+		final ImageElement uploadImage = Document.get().createImageElement();
+		uploadImage.setSrc("./images/listLogo.png");
+		uploadImage.setClassName("listImage");
+		uploadImage.setAlt("List Image");
+		Document.get().getBody().appendChild(uploadImage);
 		int i = 1;
 		final FlowPanel flowPanel = new FlowPanel();
 		flowPanel.getElement().addClassName("search-filter");

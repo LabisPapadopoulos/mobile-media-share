@@ -8,7 +8,6 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -40,10 +39,10 @@ public class Header {
 	//To GWT tha vrei UI field me onoma logo kai tha to valei stin metavlhth logo
 	//protected giati tha ftiaxei ulopoihsh kai tha prepei na ta piraxei kai to GWT
 	@UiField
-	protected ImageElement logo;
+	protected DivElement banner;
 	
 	@UiField
-	protected HeadingElement title;
+	protected ImageElement logo;
 
 	@UiField
 	protected AnchorElement mapLink; //<a></a>
@@ -99,7 +98,6 @@ public class Header {
 		locales = new HashMap<ImageElement, String>();
 		logo.setAlt(MOBILE_MEDIA_SHARE_CONSTANTS.mobileMediaShare()); //alt=""
 		//Gia pragmata pou theloun periexomeno
-		title.setInnerText(MOBILE_MEDIA_SHARE_CONSTANTS.mobileMediaShare());
 		//redirect sto map kai krataei kai tin glwssa
 		mapLink.setHref(MOBILE_MEDIA_SHARE_URLS.map(LocaleInfo.getCurrentLocale().getLocaleName()));
 		mapLink.setTitle(MOBILE_MEDIA_SHARE_CONSTANTS.map());
@@ -129,13 +127,13 @@ public class Header {
 				final AnchorElement localeAnchor = Document.get().createAnchorElement();
 				localeAnchor.setHref(Window.Location.createUrlBuilder().setParameter("locale", locale).buildString());
 				localeAnchor.setTitle(LocaleInfo.getLocaleNativeDisplayName(locale));
-				localeAnchor.setClassName("locale");
+				localeAnchor.setClassName("locale_" + locale);
 				final ImageElement localeImage = Document.get().createImageElement();
 				localeImage.setSrc(MOBILE_MEDIA_SHARE_URLS.localeImage(locale));
 									//Emfanizei to locale sti glwssa tou
 				localeImage.setAlt(LocaleInfo.getLocaleNativeDisplayName(locale));
-				localeAnchor.appendChild(localeImage);				
-				header.appendChild(localeAnchor);
+				localeAnchor.appendChild(localeImage);
+				banner.appendChild(localeAnchor);
 			}
 		}
 	}
