@@ -74,7 +74,6 @@ public class Login implements ClickHandler, EntryPoint, KeyUpHandler {
 				"left: " + (LEFT_OFFSET + LEFT_STEP * j++) + "px;");
 		login.getElement().setAttribute("type", "submit");
 		login.addClickHandler(this);
-		login.setEnabled(false);
 		newUser = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.newUser());
 		newUser.getElement().setAttribute("style", 
 				"top: " + ((TOP_STEP + TOP_BUTTON_STEP) * i) + "px; " +
@@ -138,5 +137,6 @@ public class Login implements ClickHandler, EntryPoint, KeyUpHandler {
 		flowPanel.add(new Hidden("url", Window.Location.getParameter("url")));
 		form.add(flowPanel);
 		RootPanel.get().add(form);
+		email.setFocus(true);
 	}
 }
