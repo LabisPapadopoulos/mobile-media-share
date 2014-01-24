@@ -1,4 +1,4 @@
-package gr.uoa.di.std08169.mobile.media.share.shared;
+package gr.uoa.di.std08169.mobile.media.share.shared.user;
 
 /**
  * Auth h klash antiproswpeuei ena xrhsth kai einai sto 

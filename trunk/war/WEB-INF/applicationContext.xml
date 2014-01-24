@@ -8,47 +8,73 @@
 			</list>
 		</property>
 	</bean>
+	
 	<!-- Etoima beans - koinoxrhsta (singleton) -->
+	<!-- To bean dataSource metatrepetai apo to spring se java antikeimeno ston kwdika
+	static final org.apache.commons.dbcp.BasicDataSource dataSource = new org.apache.commons.dbcp.BasicDataSource();
+	//setters apo <property>
+	dataSource.setDriverClassName(${jdbc.driver});
+	dataSource.setUrl(${jdbc.url});
+	...
+	//close apo @destroy-method (tha klhthei otan to bean de xrhsimopoihtai pia)
+	dataSource.close();
+	-->
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" scope="singleton" destroy-method="close">
 		<!-- value: den einai bean, einai aplo property -->
 	    <property name="driverClassName" value="${jdbc.driver}" />
 		<property name="url" value="${jdbc.url}" />
 	</bean>
-	<!-- To bean dataSource metatrepetai apo to spring se java antikeimeno ston kwdika
-	static final org.apache.commons.dbcp.BasicDataSource dataSource = new org.apache.commons.dbcp.BasicDataSource();
-	dataSource.setDriverClassName(${jdbc.driver});
-	dataSource.setUrl(${jdbc.url});
 
-	...
-
-	dataSource.close();
-	-->
-	<bean id="mediaDir" class="java.io.File" scope="singleton">
-		<constructor-arg value="${media.dir}" />
-	</bean>
+	<!-- static final java.lang.Integer bufferSize = new java.lang.Integer(${buffer.size}); -->
 	<bean id="bufferSize" class="java.lang.Integer" scope="singleton">
 		<constructor-arg value="${buffer.size}" />
 	</bean>
-	<bean id="mediaService" class="gr.uoa.di.std08169.mobile.media.share.server.MediaServiceImpl" scope="singleton">
-		<!-- Epeidh exei setter dataSource kai tha parei bean me id to ref (etoimo dataSource) -->
-		<property name="dataSource" ref="dataSource" />
-		<!-- ref giati mhlame gia bean -->
-		<property name="mediaDir" ref="mediaDir" />
-		<property name="bufferSize" ref="bufferSize" />
-		<!-- To mediaService xrhsimopoiei to userService bean
-		<property name="userService" ref="userService" /> -->
-		<!-- Xrhsh tou googleCloudUserService san userService -->
-		<property name="userService" ref="googleCloudUserService" />
+
+	<!-- static final gr.uoa.di.std08169.mobile.media.share.server.jdbc.UserServiceImpl jdbcUserService = new 
+										gr.uoa.di.std08169.mobile.media.share.server.jdbc.UserServiceImpl(dataSource); -->
+	<bean id="jdbcUserService" class="gr.uoa.di.std08169.mobile.media.share.server.jdbc.UserServiceImpl" scope="singleton">
+		<!-- San orisma tha parei bean me id to ref (etoimo dataSource) -->
+		<constructor-arg ref="dataSource" />
 	</bean>
-	<bean id="userService" class="gr.uoa.di.std08169.mobile.media.share.server.UserServiceImpl" scope="singleton">
-		<!-- Epeidh exei setter dataSource kai tha parei bean me id to ref (etoimo dataSource) -->
-		<property name="dataSource" ref="dataSource" />
-	</bean>
-	<bean id="googleCloudUserService" class="gr.uoa.di.std08169.mobile.media.share.server.GoogleCloudDatastoreUserServiceImpl" scope="singleton">
+	
+	<!-- static final gr.uoa.di.std08169.mobile.media.share.server.gcd.UserServiceImpl gcdUserService = new 
+	gr.uoa.di.std08169.mobile.media.share.server.gcd.UserServiceImpl(${google.cloud.dataset}, ${google.cloud.account}, ${google.cloud.key.file}); -->
+	<bean id="gcdUserService" class="gr.uoa.di.std08169.mobile.media.share.server.gcd.UserServiceImpl" scope="singleton">
 		<!-- Orismata gia ton constuctor tou bean -->
 		<constructor-arg value="${google.cloud.dataset}" />
 		<constructor-arg value="${google.cloud.account}" />
 		<constructor-arg value="${google.cloud.key.file}" />
 	</bean>
+	
+	<!-- static final gr.uoa.di.std08169.mobile.media.share.server.proxies.UserServiceProxy userService = new 
+				gr.uoa.di.std08169.mobile.media.share.server.proxies.UserServiceProxy(${user.service}); -->
+	<!-- Oloi zhtane ena userService -->
+	<bean id="userService" class="gr.uoa.di.std08169.mobile.media.share.server.proxies.UserServiceProxy" scope="singleton">
+	    <constructor-arg ref="${user.service}" /> <!-- diavazei apo property to user service -->
+	</bean>
+	
+	<!-- static final gr.uoa.di.std08169.mobile.media.share.server.jdbc.MediaServiceImpl jdbcMediaService = new 
+	gr.uoa.di.std08169.mobile.media.share.server.jdbc.MediaServiceImpl(dataSource, ${media.dir}, ${buffer.size}, userService); -->
+	<bean id="jdbcMediaService" class="gr.uoa.di.std08169.mobile.media.share.server.jdbc.MediaServiceImpl" scope="singleton">
+		<!-- San orisma tha parei bean me id to ref (etoimo dataSource) -->
+		<constructor-arg ref="dataSource" />
+		<!-- value giati einai timh kai oxi kapoio allo bean -->
+		<constructor-arg value="${media.dir}" />
+		<constructor-arg value="${buffer.size}" />
+		<!-- To mediaService xrhsimopoiei to userService bean -->
+		<constructor-arg ref="userService" />
+	</bean>
+	
+	<!-- bean id="gcdMediaService" class="gr.uoa.di.std08169.mobile.media.share.server.gcd.MediaServiceImpl" scope="singleton">
+		...
+		<constructor-arg ref="userService" />
+		...
+	</bean -->
+	
+	<!-- static final gr.uoa.di.std08169.mobile.media.share.server.proxies.MediaServiceProxy mediaService = new 
+	gr.uoa.di.std08169.mobile.media.share.server.proxies.MediaServiceProxy(${media.service}); -->
+	<bean id="mediaService" class="gr.uoa.di.std08169.mobile.media.share.server.proxies.MediaServiceProxy" scope="singleton">
+	    <constructor-arg ref="${media.service}" />
+    </bean>
 </beans>
 

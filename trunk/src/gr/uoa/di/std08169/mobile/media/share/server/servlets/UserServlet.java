@@ -1,7 +1,7 @@
-package gr.uoa.di.std08169.mobile.media.share.server;
+package gr.uoa.di.std08169.mobile.media.share.server.servlets;
 
-import gr.uoa.di.std08169.mobile.media.share.client.services.UserService;
-import gr.uoa.di.std08169.mobile.media.share.client.services.UserServiceException;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceException;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -40,25 +40,6 @@ public class UserServlet extends HttpServlet {
 		//(to opoio to userService mhlaei me tin bash).
 		userService = (UserService) WebApplicationContextUtils.
 				getWebApplicationContext(getServletContext()).getBean("userService", UserService.class);
-	}
-	
-	//Tin doGet tha tin kaloun oles oi othones ektos apo tin login gia na doun an o xrhsths einai
-	//'hdh sundedemenos. H apantish tha einai to email tou xrhsth 'h tipota an den einai sundedemenos
-	/**
-	 * Epistrefei ton trexon logarismeno xrhsth
-	 */
-	@Override
-	public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
-		//gia na parsaristei to string tis apantishs se html
- 		response.setContentType("text/html");
-		final String email = (String) request.getSession().getAttribute("email");
-		if(email != null) {
-			response.getWriter().print(email);
-			LOGGER.info("Current user is " + email);
-		} else
-			LOGGER.info("User has not yet logged in");
-		//teleiwse h apantish
-		response.getWriter().close();
 	}
 	
 	/**

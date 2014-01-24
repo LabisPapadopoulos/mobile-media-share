@@ -1,4 +1,4 @@
-package gr.uoa.di.std08169.mobile.media.share.server;
+package gr.uoa.di.std08169.mobile.media.share.server.servlets;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -24,12 +24,13 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import gr.uoa.di.std08169.mobile.media.share.client.services.MediaService;
-import gr.uoa.di.std08169.mobile.media.share.client.services.MediaServiceException;
-import gr.uoa.di.std08169.mobile.media.share.client.services.UserService;
-import gr.uoa.di.std08169.mobile.media.share.client.services.UserServiceException;
-import gr.uoa.di.std08169.mobile.media.share.shared.Media;
-import gr.uoa.di.std08169.mobile.media.share.shared.User;
+import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaService;
+import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceException;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceException;
+import gr.uoa.di.std08169.mobile.media.share.server.ExtendedMediaService;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
 
 public class MediaServlet extends HttpServlet {
 	private static final File TMP_DIR = new File(System.getProperty("java.io.tmpdir"));

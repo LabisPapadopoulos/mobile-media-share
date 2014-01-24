@@ -1,4 +1,4 @@
-package gr.uoa.di.std08169.mobile.media.share.client.services;
+package gr.uoa.di.std08169.mobile.media.share.client.services.user;
 
 public class UserServiceException extends Exception {
 	//Epeidh einai serializable h klassh kai dhlwnei tin ekdosh logismikou

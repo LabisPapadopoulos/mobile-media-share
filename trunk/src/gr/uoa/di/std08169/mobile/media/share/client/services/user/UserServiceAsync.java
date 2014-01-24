@@ -1,9 +1,9 @@
-package gr.uoa.di.std08169.mobile.media.share.client.services;
+package gr.uoa.di.std08169.mobile.media.share.client.services.user;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-import gr.uoa.di.std08169.mobile.media.share.shared.User;
-import gr.uoa.di.std08169.mobile.media.share.shared.UserResult;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.UserResult;
 
 //Client gia UserService interface
 //Async: H apantish borei na arghsei na erthei giati 

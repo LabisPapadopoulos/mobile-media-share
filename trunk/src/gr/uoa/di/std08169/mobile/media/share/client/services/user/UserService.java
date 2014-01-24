@@ -1,10 +1,10 @@
-package gr.uoa.di.std08169.mobile.media.share.client.services;
+package gr.uoa.di.std08169.mobile.media.share.client.services.user;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
-import gr.uoa.di.std08169.mobile.media.share.shared.User;
-import gr.uoa.di.std08169.mobile.media.share.shared.UserResult;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.UserResult;
 
 //RemoteService: Epeidh o client tha ulopoihthei se javascript kai to back-end se java
 //To userService einai ena servlet pou orizetai sto web.xml kai xekinaei me to pou xekinaei

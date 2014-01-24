@@ -1,6 +1,7 @@
-package gr.uoa.di.std08169.mobile.media.share.server;
+package gr.uoa.di.std08169.mobile.media.share.server.servlets;
 
 import java.math.BigDecimal;
+
 import java.util.Date;
 import java.util.List;
 
@@ -8,11 +9,11 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
-import gr.uoa.di.std08169.mobile.media.share.client.services.MediaService;
-import gr.uoa.di.std08169.mobile.media.share.client.services.MediaServiceException;
-import gr.uoa.di.std08169.mobile.media.share.shared.Media;
-import gr.uoa.di.std08169.mobile.media.share.shared.MediaResult;
-import gr.uoa.di.std08169.mobile.media.share.shared.MediaType;
+import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaService;
+import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceException;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaResult;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
 
 //* extends RemoteServiceServlet: gia na borei na kaleitai mesw diktuou 
 //(Gia na ulopoihthei to UserServiceAsync)
@@ -34,7 +35,7 @@ public class MediaServiceServlet extends RemoteServiceServlet implements MediaSe
 		//Pairnei ena pragma (bean) pou to lene mediaService gia na kanei douleies gia media
 		//(to opoio to mediaService mhlaei me tin bash).
 		mediaService = (MediaService) WebApplicationContextUtils.
-				getWebApplicationContext(getServletContext()).getBean("mediaService", MediaServiceImpl.class);
+				getWebApplicationContext(getServletContext()).getBean("mediaService", MediaService.class);
 	}
 	
 	@Override

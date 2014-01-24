@@ -1,4 +1,4 @@
-package gr.uoa.di.std08169.mobile.media.share.shared;
+package gr.uoa.di.std08169.mobile.media.share.shared.user;
 
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.SerializationException;

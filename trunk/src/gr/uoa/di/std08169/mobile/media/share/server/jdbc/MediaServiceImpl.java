@@ -1,4 +1,4 @@
-package gr.uoa.di.std08169.mobile.media.share.server;
+package gr.uoa.di.std08169.mobile.media.share.server.jdbc;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,12 +23,13 @@ import javax.sql.DataSource;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.mime.MimeTypeException;
 
-import gr.uoa.di.std08169.mobile.media.share.client.services.MediaServiceException;
-import gr.uoa.di.std08169.mobile.media.share.client.services.UserService;
-import gr.uoa.di.std08169.mobile.media.share.client.services.UserServiceException;
-import gr.uoa.di.std08169.mobile.media.share.shared.Media;
-import gr.uoa.di.std08169.mobile.media.share.shared.MediaResult;
-import gr.uoa.di.std08169.mobile.media.share.shared.MediaType;
+import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceException;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceException;
+import gr.uoa.di.std08169.mobile.media.share.server.ExtendedMediaService;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaResult;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
 
 public class MediaServiceImpl implements ExtendedMediaService {
 	//epistrefontai ola ta public media, alla kai ta private tou kathe xrhsth
@@ -68,25 +69,15 @@ public class MediaServiceImpl implements ExtendedMediaService {
 												"WHERE id = ?;";
 	private static final Logger LOGGER = Logger.getLogger(MediaServiceImpl.class.getName());
 	
-	private DataSource dataSource;
-	private File mediaDir;
-	private int bufferSize;
-	private UserService userService;
+	private final DataSource dataSource;
+	private final File mediaDir;
+	private final int bufferSize;
+	private final UserService userService;
 	
-	//Setters gia ta beans
-	public void setDataSource(final DataSource dataSource) {
+	public MediaServiceImpl(final DataSource dataSource, final String mediaDir, final int bufferSize, final UserService userService) {
 		this.dataSource = dataSource;
-	}
-	
-	public void setMediaDir(final File mediaDir) {
-		this.mediaDir = mediaDir;
-	}
-	
-	public void setBufferSize(final int bufferSize) {
+		this.mediaDir = new File(mediaDir);
 		this.bufferSize = bufferSize;
-	}
-	
-	public void setUserService(final UserService userService) {
 		this.userService = userService;
 	}
 	
