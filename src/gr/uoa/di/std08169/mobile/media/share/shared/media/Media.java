@@ -1,4 +1,6 @@
-package gr.uoa.di.std08169.mobile.media.share.shared;
+package gr.uoa.di.std08169.mobile.media.share.shared.media;
+
+import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
 
 import java.math.BigDecimal;
 import java.util.Date;

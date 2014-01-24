@@ -1,8 +1,8 @@
-package gr.uoa.di.std08169.mobile.media.share.client.services;
+package gr.uoa.di.std08169.mobile.media.share.client.services.user;
 
 import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants;
 import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessages;
-import gr.uoa.di.std08169.mobile.media.share.shared.User;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.ui.SuggestOracle;

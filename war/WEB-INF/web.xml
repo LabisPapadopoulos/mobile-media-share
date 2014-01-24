@@ -5,28 +5,28 @@
 		<param-name>contextConfigLocation</param-name>
 		<param-value>/WEB-INF/applicationContext.xml</param-value>
 	</context-param>
-	<listener> 
+	<listener>
 		<!-- Xekinaei to spring me vash to arxeio pou vrisketai stin metavlhth perivallontos contextConfigLocation-->
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 	<servlet>
 		<!-- Gia upodoxh twn login twn xrhstwn -->
 		<servlet-name>userServlet</servlet-name>
-		<servlet-class>gr.uoa.di.std08169.mobile.media.share.server.UserServlet</servlet-class>
+		<servlet-class>gr.uoa.di.std08169.mobile.media.share.server.servlets.UserServlet</servlet-class>
  	</servlet>
 	<servlet>
 		<servlet-name>mediaServlet</servlet-name>
-		<servlet-class>gr.uoa.di.std08169.mobile.media.share.server.MediaServlet</servlet-class>
+		<servlet-class>gr.uoa.di.std08169.mobile.media.share.server.servlets.MediaServlet</servlet-class>
 	</servlet>
 	<servlet>
 		<servlet-name>mediaService</servlet-name> <!-- einai tou GWT -->
-		<servlet-class>gr.uoa.di.std08169.mobile.media.share.server.MediaServiceServlet</servlet-class>
+		<servlet-class>gr.uoa.di.std08169.mobile.media.share.server.servlets.MediaServiceServlet</servlet-class>
 	</servlet>
 	<!-- userService servlet pou einai tupou UserServiceImpl 
 	(to UserServiceImpl ulopoiei to UserService) -->
 	<servlet>
 		<servlet-name>userService</servlet-name> <!-- einai tou GWT -->
-		<servlet-class>gr.uoa.di.std08169.mobile.media.share.server.UserServiceServlet</servlet-class>
+		<servlet-class>gr.uoa.di.std08169.mobile.media.share.server.servlets.UserServiceServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 	    <!-- Denei sto url login to userServlet -->
@@ -65,4 +65,3 @@
 		</user-data-constraint>
 	</security-constraint>
 </web-app>
-

@@ -4,9 +4,9 @@ import java.io.InputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
-import gr.uoa.di.std08169.mobile.media.share.client.services.MediaService;
-import gr.uoa.di.std08169.mobile.media.share.client.services.MediaServiceException;
-import gr.uoa.di.std08169.mobile.media.share.shared.Media;
+import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaService;
+import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceException;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
 
 /**
  * ExtendedMediaService: Epekteinei to MediaService me methodous pou einai diathesimes

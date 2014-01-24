@@ -20,8 +20,8 @@ import com.google.gwt.user.client.ui.TextBox;
 
 import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants;
 import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessages;
-import gr.uoa.di.std08169.mobile.media.share.client.services.UserService;
-import gr.uoa.di.std08169.mobile.media.share.client.services.UserServiceAsync;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceAsync;
 
 public class NewUser implements ClickHandler, EntryPoint, KeyUpHandler {
 	//H create dhmiougrei dunamika resource (instance) tupou UserService

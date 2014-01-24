@@ -1,4 +1,4 @@
-package gr.uoa.di.std08169.mobile.media.share.server;
+package gr.uoa.di.std08169.mobile.media.share.server.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,10 +11,10 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
-import gr.uoa.di.std08169.mobile.media.share.client.services.UserService;
-import gr.uoa.di.std08169.mobile.media.share.client.services.UserServiceException;
-import gr.uoa.di.std08169.mobile.media.share.shared.User;
-import gr.uoa.di.std08169.mobile.media.share.shared.UserResult;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceException;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.UserResult;
 
 //UserDao
 public class UserServiceImpl implements UserService {
@@ -33,9 +33,9 @@ public class UserServiceImpl implements UserService {
 											"VALUES (?, md5(?), NULL, NULL);";
 	private static final Logger LOGGER = Logger.getLogger(UserServiceImpl.class.getName());
 	
-	private DataSource dataSource; //antiproswpeuei afhrimena mia phgh dedomenwn (mia vash)
-	
-	public void setDataSource(final DataSource dataSource) {
+	private final DataSource dataSource; //antiproswpeuei afhrimena mia phgh dedomenwn (mia vash)
+
+	public UserServiceImpl(final DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 	

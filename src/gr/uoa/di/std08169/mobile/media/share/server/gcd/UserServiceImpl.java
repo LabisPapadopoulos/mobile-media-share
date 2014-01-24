@@ -1,4 +1,4 @@
-package gr.uoa.di.std08169.mobile.media.share.server;
+package gr.uoa.di.std08169.mobile.media.share.server.gcd;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,20 +38,20 @@ import com.google.api.services.datastore.client.DatastoreHelper;
 import com.google.api.services.datastore.client.DatastoreOptions;
 import com.google.protobuf.ByteString;
 
-import gr.uoa.di.std08169.mobile.media.share.client.services.UserService;
-import gr.uoa.di.std08169.mobile.media.share.client.services.UserServiceException;
-import gr.uoa.di.std08169.mobile.media.share.shared.User;
-import gr.uoa.di.std08169.mobile.media.share.shared.UserResult;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceException;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.UserResult;
 
-public class GoogleCloudDatastoreUserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService {
 	private static final String MD5 = "MD5";
-	private static final Logger LOGGER = Logger.getLogger(GoogleCloudDatastoreUserServiceImpl.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(UserServiceImpl.class.getName());
 	
 	private final Datastore datastore;
 	
 	public static void main(String[] args) {
 		try {
-			final UserService us = new GoogleCloudDatastoreUserServiceImpl("mobile-media-share",
+			final UserService us = new UserServiceImpl("mobile-media-share",
 					"844662940292-897cju71t8u9jhe2l9tsslpgmthanc8r@developer.gserviceaccount.com",
 					"/home/labis/Downloads/de8bf38b6e98e7e8dc88227929e58ab64f611e46-privatekey.p12");
 			us.addUser("foo@bar.buz", "secret");
@@ -76,7 +76,7 @@ public class GoogleCloudDatastoreUserServiceImpl implements UserService {
 		}
 	}
 	
-	public GoogleCloudDatastoreUserServiceImpl(final String dataset, final String serviceAccount, final String keyFile) throws UserServiceException {
+	public UserServiceImpl(final String dataset, final String serviceAccount, final String keyFile) throws UserServiceException {
 		try {
 			//Gia kathe project h google dinei enan eikoniko logariasmo gia sundesh sto Google Data 
 			//Dhmiourgeia anagnwristikou eikonikou xrhsth
@@ -96,14 +96,14 @@ public class GoogleCloudDatastoreUserServiceImpl implements UserService {
 					//Dhlwnei se poio dataset (onoma vashs) tha sundethei me ta antistoixa username kai pistopoihtiko
 					create(new DatastoreOptions.Builder().dataset(dataset).credential(credential).build());
 		} catch (final GeneralSecurityException e) {
-			LOGGER.log(Level.WARNING, "Error initializing " + GoogleCloudDatastoreUserServiceImpl.class.getName(), e);
-			throw new UserServiceException("Error initializing " + GoogleCloudDatastoreUserServiceImpl.class.getName(), e);
+			LOGGER.log(Level.WARNING, "Error initializing " + UserServiceImpl.class.getName(), e);
+			throw new UserServiceException("Error initializing " + UserServiceImpl.class.getName(), e);
 		} catch (final IllegalArgumentException e) {
-			LOGGER.log(Level.WARNING, "Error initializing " + GoogleCloudDatastoreUserServiceImpl.class.getName(), e);
-			throw new UserServiceException("Error initializing " + GoogleCloudDatastoreUserServiceImpl.class.getName(), e);
+			LOGGER.log(Level.WARNING, "Error initializing " + UserServiceImpl.class.getName(), e);
+			throw new UserServiceException("Error initializing " + UserServiceImpl.class.getName(), e);
 		} catch (final IOException e) {
-			LOGGER.log(Level.WARNING, "Error initializing " + GoogleCloudDatastoreUserServiceImpl.class.getName(), e);
-			throw new UserServiceException("Error initializing " + GoogleCloudDatastoreUserServiceImpl.class.getName(), e);
+			LOGGER.log(Level.WARNING, "Error initializing " + UserServiceImpl.class.getName(), e);
+			throw new UserServiceException("Error initializing " + UserServiceImpl.class.getName(), e);
 		}
 	}
 

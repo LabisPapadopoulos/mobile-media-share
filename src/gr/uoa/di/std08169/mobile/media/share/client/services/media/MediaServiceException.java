@@ -1,4 +1,4 @@
-package gr.uoa.di.std08169.mobile.media.share.client.services;
+package gr.uoa.di.std08169.mobile.media.share.client.services.media;
 
 public class MediaServiceException extends Exception {
 	private static final long serialVersionUID = 1L;

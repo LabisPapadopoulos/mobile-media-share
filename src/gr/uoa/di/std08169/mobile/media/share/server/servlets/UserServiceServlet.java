@@ -1,11 +1,11 @@
-package gr.uoa.di.std08169.mobile.media.share.server;
+package gr.uoa.di.std08169.mobile.media.share.server.servlets;
 
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import gr.uoa.di.std08169.mobile.media.share.client.services.UserService;
-import gr.uoa.di.std08169.mobile.media.share.client.services.UserServiceException;
-import gr.uoa.di.std08169.mobile.media.share.shared.User;
-import gr.uoa.di.std08169.mobile.media.share.shared.UserResult;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceException;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.UserResult;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -29,7 +29,7 @@ public class UserServiceServlet extends RemoteServiceServlet implements UserServ
 		//Pairnei ena pragma (bean) pou to lene userService gia na kanei douleies gia xrhstes
 		//(to opoio to userService mhlaei me tin bash).
 		userService = (UserService) WebApplicationContextUtils.
-				getWebApplicationContext(getServletContext()).getBean("userService", UserServiceImpl.class);
+				getWebApplicationContext(getServletContext()).getBean("userService", UserService.class);
 	}
 	
 	@Override

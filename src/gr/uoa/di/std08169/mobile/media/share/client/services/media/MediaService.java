@@ -1,4 +1,4 @@
-package gr.uoa.di.std08169.mobile.media.share.client.services;
+package gr.uoa.di.std08169.mobile.media.share.client.services.media;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -7,9 +7,9 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
-import gr.uoa.di.std08169.mobile.media.share.shared.Media;
-import gr.uoa.di.std08169.mobile.media.share.shared.MediaResult;
-import gr.uoa.di.std08169.mobile.media.share.shared.MediaType;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaResult;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
 
 //Service gia diaxeirish arxeiwn
 @RemoteServiceRelativePath("../mediaService")
