@@ -40,7 +40,12 @@ public class UserOracle extends SuggestOracle {
 				//dinei tin lista me tous proteinomenous xrhstes
 				response.setSuggestions(users);
 				//dinei posa epipleon apotelesmata uparxoun
-				response.setMoreSuggestionsCount(result.getTotal() - result.getUsers().size());
+				if (result.getTotal() < 0)
+					//gia na xerei to suggestBox oti uparxoun epipleon apotelesmata
+					//alla den xeroume posa einai me akriveia 
+					response.setMoreSuggestions(true);
+				else
+					response.setMoreSuggestionsCount(result.getTotal() - result.getUsers().size());
 				//Dinei apantish sto erwthma mesw tou callback kai gemizei to suggestBox
 				callback.onSuggestionsReady(request, response);
 			}
