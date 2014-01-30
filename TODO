@@ -1,6 +1,5 @@
 validate user emails via messages
 DecimalFormat gia duration
-login servlet json
 list
 	title safeHtml column
 	type safeHtml column
@@ -9,23 +8,17 @@ list
 View media stin List Page
 Forgot Password? (login page)
 Edit		 (List page/Map page)
-New Photo page
+New Photo page ???
 New Video page
 My Account page
 Logout
 Footer
 reset maps in upload & new photo
-media service handle files
 breadcrumbs
 map edit & delete only if owner
-split media service impl in metadata store and data store
 transactions in media service
 
-.
-.
-.
 Anevasma media sto Google Cloud...
 
-newVideo
 nightly build to project ston okeano
 

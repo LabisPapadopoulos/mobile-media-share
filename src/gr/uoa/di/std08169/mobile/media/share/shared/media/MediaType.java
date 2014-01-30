@@ -21,7 +21,7 @@ public enum MediaType {
 		return mimeTypePrefix;
 	}
 	
-	private final String  mimeTypePrefix;
+	private final String mimeTypePrefix;
 	
 	private MediaType(final String mimeTypePrefix) {
 		this.mimeTypePrefix = mimeTypePrefix;
