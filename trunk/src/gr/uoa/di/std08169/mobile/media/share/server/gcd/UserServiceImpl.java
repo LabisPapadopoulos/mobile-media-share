@@ -109,7 +109,8 @@ public class UserServiceImpl implements UserService {
 			//Kind gia to entity pou tha gurisei to query, san: FROM User.class.getName()
 			getUsers.addKindBuilder().setName(User.class.getName());
 			//WHERE token = query
-			getUsers.setFilter(DatastoreHelper.makeFilter("token", PropertyFilter.Operator.EQUAL, DatastoreHelper.makeValue(query)));
+			getUsers.setFilter(DatastoreHelper.makeFilter("token", PropertyFilter.Operator.EQUAL,
+					DatastoreHelper.makeValue(Utilities.normalize(query))));
 			//Orio enos parapanw apotelesmatos (limit + 1) gia na doume an uparxoun kai alla
 			getUsers.setLimit(limit + 1);
 			final List<User> users = new ArrayList<User>();
@@ -127,7 +128,7 @@ public class UserServiceImpl implements UserService {
 				users.add(new User(email, name, photo));
 			}
 			LOGGER.info("Retrieved " + users.size() + " users (query: " + query + ", limit: " + limit + ")");
-			return new UserResult(users, (batch.getEntityResultCount() > limit) ? -1 : 0);
+			return new UserResult(users, (batch.getEntityResultCount() > limit) ? -1 : users.size());
 		} catch (final DatastoreException e) {
 			LOGGER.log(Level.WARNING, "Error retrieving users (query: " + query + ", limit: " + limit + ")", e);
 			throw new UserServiceException("Error retrieving users (query: " + query + ", limit: " + limit + ")", e);
@@ -256,11 +257,11 @@ public class UserServiceImpl implements UserService {
 				//ftiaxnoume lista apo values (me tis lexeis tou mail)
 				final List<Value> values = new ArrayList<Value>();
 				for (String token : EMAIL_REGEX.split(email))
-					values.add(Value.newBuilder().setStringValue(Utilities.normalize(token)).build());
+					values.add(DatastoreHelper.makeValue(Utilities.normalize(token)).build());
 				//san value vazoume oles tis times ths listas
-				entityBuilder.addProperty(Property.newBuilder().setName("token").setValue(Value.newBuilder().addAllListValue(values)));
+				entityBuilder.addProperty(Property.newBuilder().setName("token").setValue(DatastoreHelper.makeValue(values)));
 				//prosthikh tou pediou password me tin antistoixh timh
-				entityBuilder.addProperty(Property.newBuilder().setName("password").setValue(Value.newBuilder().setStringValue(
+				entityBuilder.addProperty(Property.newBuilder().setName("password").setValue(DatastoreHelper.makeValue(
 						//16adikh kwdikopoihsh gia apofugh periergwn xarakthrwn
 						Hex.encodeHexString(
 						//Kwdikopoihsh tou string password se MD5
