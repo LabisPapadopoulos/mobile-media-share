@@ -40,7 +40,7 @@
 	<!-- static final gr.uoa.di.std08169.mobile.media.share.server.gcd.UserServiceImpl gcdUserService = new 
 	gr.uoa.di.std08169.mobile.media.share.server.gcd.UserServiceImpl(${google.cloud.dataset}, ${google.cloud.account}, ${google.cloud.key.file}); -->
 	<bean id="gcdUserService" class="gr.uoa.di.std08169.mobile.media.share.server.gcd.UserServiceImpl" scope="singleton">
-		<!-- Orismata gia ton constuctor tou bean -->
+		<!-- Orismata gia ton constuctor tou bean, pou ta travaei apo to applicationContext.properties me ta ${...} -->
 		<constructor-arg value="${google.cloud.dataset}" />
 		<constructor-arg value="${google.cloud.account}" />
 		<constructor-arg value="${google.cloud.key.file}" />
@@ -64,12 +64,13 @@
 		<!-- To mediaService xrhsimopoiei to userService bean -->
 		<constructor-arg ref="userService" />
 	</bean>
-	
-	<!-- bean id="gcdMediaService" class="gr.uoa.di.std08169.mobile.media.share.server.gcd.MediaServiceImpl" scope="singleton">
-		...
+
+	<bean id="gcdMediaService" class="gr.uoa.di.std08169.mobile.media.share.server.gcd.MediaServiceImpl" scope="singleton">
+	    <constructor-arg value="${google.cloud.dataset}" />
+		<constructor-arg value="${google.cloud.account}" />
+		<constructor-arg value="${google.cloud.key.file}" />
 		<constructor-arg ref="userService" />
-		...
-	</bean -->
+	</bean>
 	
 	<!-- static final gr.uoa.di.std08169.mobile.media.share.server.proxies.MediaServiceProxy mediaService = new 
 	gr.uoa.di.std08169.mobile.media.share.server.proxies.MediaServiceProxy(${media.service}); -->
