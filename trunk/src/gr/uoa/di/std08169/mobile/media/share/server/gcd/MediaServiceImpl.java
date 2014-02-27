@@ -1,14 +1,5 @@
 package gr.uoa.di.std08169.mobile.media.share.server.gcd;
 
-import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceException;
-import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
-import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceException;
-import gr.uoa.di.std08169.mobile.media.share.server.ExtendedMediaService;
-import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
-import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaResult;
-import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
-import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,20 +15,32 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.mime.MimeTypeException;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.jackson.JacksonFactory;
+import com.google.api.client.util.DateTime;
 import com.google.api.services.datastore.DatastoreV1.BeginTransactionRequest;
 import com.google.api.services.datastore.DatastoreV1.CommitRequest;
 import com.google.api.services.datastore.DatastoreV1.Entity;
 import com.google.api.services.datastore.DatastoreV1.EntityResult;
 import com.google.api.services.datastore.DatastoreV1.Filter;
 import com.google.api.services.datastore.DatastoreV1.Key;
+import com.google.api.services.datastore.DatastoreV1.LookupRequest;
+import com.google.api.services.datastore.DatastoreV1.LookupResponse;
 import com.google.api.services.datastore.DatastoreV1.Property;
 import com.google.api.services.datastore.DatastoreV1.PropertyFilter;
 import com.google.api.services.datastore.DatastoreV1.Query;
+import com.google.api.services.datastore.DatastoreV1.ReadOptions;
+import com.google.api.services.datastore.DatastoreV1.RollbackRequest;
 import com.google.api.services.datastore.DatastoreV1.RunQueryRequest;
 import com.google.api.services.datastore.DatastoreV1.Value;
 import com.google.api.services.datastore.client.Datastore;
@@ -45,34 +48,66 @@ import com.google.api.services.datastore.client.DatastoreException;
 import com.google.api.services.datastore.client.DatastoreFactory;
 import com.google.api.services.datastore.client.DatastoreHelper;
 import com.google.api.services.datastore.client.DatastoreOptions;
+import com.google.api.services.drive.Drive;
 import com.google.protobuf.ByteString;
 
+import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceException;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceException;
+import gr.uoa.di.std08169.mobile.media.share.server.ExtendedMediaService;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaResult;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
+
 public class MediaServiceImpl implements ExtendedMediaService {
+	/*
+	 * see https://developers.google.com/drive/web/scopes (Google Drive scopes)
+	 */
+	private static final String DRIVE_SCOPE = "https://www.googleapis.com/auth/drive";
 	private static final Pattern WORD_REGEX = Pattern.compile("\\W+");
 	private static final Logger LOGGER = Logger.getLogger(MediaServiceImpl.class.getName());
 	
 	private final Datastore datastore;
+	private final Drive drive;
 	private final UserService userService;
 	
 	public MediaServiceImpl(final String dataset, final String serviceAccount, final String keyFile, final UserService userService) throws UserServiceException {
 		try {
 			//Gia kathe project h google dinei enan eikoniko logariasmo gia sundesh sto Google Data 
 			//Dhmiourgeia anagnwristikou eikonikou xrhsth
+
+			//Metaferei dedomena mesw http sto paraskhnio 
+			final HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport(); //https
+		    //Metatrepei dedomena se json gia na metaferthoun mesw http apo to transport
+			final JacksonFactory jsonFactory = new JacksonFactory();
+			
+			
+			//Scope gia n' anagnwrisei poies uphresies borei na sundethei o logariasmos xrhsth (serviceAccount)
+			//sto Google Datastore, Drive
+			final List<String> scopes = new ArrayList<String>();
+			scopes.addAll(DatastoreOptions.SCOPES);
+			scopes.add(DRIVE_SCOPE);
+			
 			final GoogleCredential credential = new GoogleCredential.Builder()
 				//zhtaei asfales sundesh me ssl
-		        .setTransport(GoogleNetHttpTransport.newTrustedTransport())
-		        .setJsonFactory(new JacksonFactory())
-		        //se poia domains epitrepetai na sundethei
-		        .setServiceAccountScopes(DatastoreOptions.SCOPES)
+		        .setTransport(transport)
+		        .setJsonFactory(jsonFactory)
+		        //se poia domains epitrepetai na sundethei (sto Datastore)
+		        .setServiceAccountScopes(scopes)
 		        //tou username tou eikonikou xrhsth
 		        .setServiceAccountId(serviceAccount)
 		        //pistopoihtiko tou eikonikou xrhsth
 		        .setServiceAccountPrivateKeyFromP12File(new File(keyFile))
 		        .build();
+			
 			//Sundesh me to cloud (Google Cloud Datastore)
 			datastore = DatastoreFactory.get().
 					//Dhlwnei se poio dataset (onoma vashs) tha sundethei me ta antistoixa username kai pistopoihtiko
-					create(new DatastoreOptions.Builder().dataset(dataset).credential(credential).build());
+					create(new DatastoreOptions.Builder().dataset(dataset).credential(credential).build());			
+			//Sundesh me to google drive
+			drive = new Drive.Builder(transport, jsonFactory, credential).build();
+			
 			this.userService = userService;
 		} catch (final GeneralSecurityException e) {
 			LOGGER.log(Level.WARNING, "Error initializing " + UserServiceImpl.class.getName(), e);
@@ -251,14 +286,14 @@ public class MediaServiceImpl implements ExtendedMediaService {
 			final Iterator<Media> i = media.iterator();
 			while (i.hasNext()) {
 				Media medium = i.next();
-				if (((minLatitude != null) && (medium.getLatitude().compareTo(minLatitude) < 0)) || // latitude < minlat
-						((maxLatitude != null) && (medium.getLatitude().compareTo(maxLatitude) > 0)) || // latitude > maxlat
-						((minLongitude != null) && (medium.getLongitude().compareTo(minLongitude) < 0)) || // longitude < minlng
-						((maxLongitude != null) && (medium.getLongitude().compareTo(maxLongitude) > 0)) || // longitude > maxlng
-						((createdFrom != null) && (medium.getCreated().compareTo(createdFrom) < 0)) || // created < createdFrom
-						((createdTo != null) && (medium.getCreated().compareTo(createdTo) > 0)) || // created > createdTo
-						((editedFrom != null) && (medium.getEdited().compareTo(editedFrom) < 0)) || // edited < editedFrom
-						((editedTo != null) && (medium.getEdited().compareTo(editedTo) > 0))) // edited > editedTo
+				if (((minLatitude != null) && (medium.getLatitude().compareTo(minLatitude) < 0)) || 		// latitude < minlat
+						((maxLatitude != null) && (medium.getLatitude().compareTo(maxLatitude) > 0)) || 	// latitude > maxlat
+						((minLongitude != null) && (medium.getLongitude().compareTo(minLongitude) < 0)) || 	// longitude < minlng
+						((maxLongitude != null) && (medium.getLongitude().compareTo(maxLongitude) > 0)) || 	// longitude > maxlng
+						((createdFrom != null) && (medium.getCreated().compareTo(createdFrom) < 0)) || 		// created < createdFrom
+						((createdTo != null) && (medium.getCreated().compareTo(createdTo) > 0)) || 			// created > createdTo
+						((editedFrom != null) && (medium.getEdited().compareTo(editedFrom) < 0)) || 		// edited < editedFrom
+						((editedTo != null) && (medium.getEdited().compareTo(editedTo) > 0))) 				// edited > editedTo
 					i.remove();
 			}
 			
@@ -298,6 +333,10 @@ public class MediaServiceImpl implements ExtendedMediaService {
 	 * "INSERT INTO Media (id, type, size, duration, \"user\", " +
 		"created, edited, title, latitude, longitude, public) " +
 		"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+		
+		
+	 * Save file se google drive kai ta metadedomena tou se google cloud datastore 
+	 * see https://developers.google.com/drive/web/examples/java#saving_new_files
 	 */
 	@Override
 	public void addMedia(final Media media, InputStream input) throws MediaServiceException { //Google Drive
@@ -308,6 +347,9 @@ public class MediaServiceImpl implements ExtendedMediaService {
 			final CommitRequest.Builder commitRequestBuilder = CommitRequest.newBuilder();
 			//Thetei to transaction sto commit
 			commitRequestBuilder.setTransaction(transaction);
+			//Dhmiourgeia mhnumatos gia pithano rollback tou transaction
+			final RollbackRequest.Builder rollbackRequestBuilder = RollbackRequest.newBuilder();
+			rollbackRequestBuilder.setTransaction(transaction);
 			final Entity.Builder entityBuilder = Entity.newBuilder(); 
 			//Orismos tou kleidiou tou pinaka (primary key)
 			entityBuilder.setKey(Key.newBuilder().addPathElement(
@@ -318,8 +360,8 @@ public class MediaServiceImpl implements ExtendedMediaService {
 			entityBuilder.addProperty(Property.newBuilder().setName("size").setValue(DatastoreHelper.makeValue(media.getSize())));
 			entityBuilder.addProperty(Property.newBuilder().setName("duration").setValue(DatastoreHelper.makeValue(media.getDuration())));
 			entityBuilder.addProperty(Property.newBuilder().setName("user").setValue(DatastoreHelper.makeValue(media.getUser().getEmail())));
-			entityBuilder.addProperty(Property.newBuilder().setName("created").setValue(DatastoreHelper.makeValue(media.getCreated().getTime())));
-			entityBuilder.addProperty(Property.newBuilder().setName("edited").setValue(DatastoreHelper.makeValue(media.getEdited().getTime())));
+			entityBuilder.addProperty(Property.newBuilder().setName("created").setValue(DatastoreHelper.makeValue(media.getCreated())));
+			entityBuilder.addProperty(Property.newBuilder().setName("edited").setValue(DatastoreHelper.makeValue(media.getEdited())));
 			entityBuilder.addProperty(Property.newBuilder().setName("title").setValue(DatastoreHelper.makeValue(media.getTitle())));
 			final List<Value> values = new ArrayList<Value>();
 			for (String token : WORD_REGEX.split(media.getTitle()))
@@ -330,13 +372,35 @@ public class MediaServiceImpl implements ExtendedMediaService {
 			entityBuilder.addProperty(Property.newBuilder().setName("longitude").setValue(DatastoreHelper.makeValue(media.getLongitude().doubleValue())));
 			entityBuilder.addProperty(Property.newBuilder().setName("public").setValue(DatastoreHelper.makeValue(media.isPublic())));
 			//Fortwsh sto transaction ena insert gia to entity pou ftiaxthte
-	        commitRequestBuilder.getMutationBuilder().addInsert(entityBuilder.build());
 	
 	        // add se google drive
-	        
-			datastore.commit(commitRequestBuilder.build());
-			LOGGER.info("Added media " + media);
+	        try {
+	        	//Google Drive arxeio
+	        	final com.google.api.services.drive.model.File driveFile = new com.google.api.services.drive.model.File();
+	        	driveFile.setId(media.getId());
+	        	driveFile.setMimeType(media.getType());
+	        	driveFile.setCreatedDate(new DateTime(media.getCreated()));
+	        	driveFile.setModifiedDate(new  DateTime(media.getEdited()));
+	        	driveFile.setTitle(media.getTitle());
+	        	//apothikeush tou id tou Google Drive sto Google Datastore gia to sugkekrimeno arxeio
+	        	entityBuilder.addProperty(Property.newBuilder().setName("driveId").setValue(DatastoreHelper.makeValue(
+	    	        	//apothikeush twn dedomenwn tou arxeiou sto google drive
+	    	        	//insert: minima gia apothikeush tou arxeiou
+	    	        	//execute: ektelei to insert
+	        			drive.files().insert(driveFile, new InputStreamContent(media.getType(), input)).execute().getId())));
+				commitRequestBuilder.getMutationBuilder().addInsert(entityBuilder.build());
+				datastore.commit(commitRequestBuilder.build());
+			} catch (final IOException e) { //apotuxia apothikeushs twn dedomenwn tou arxeiou sto google drive
+				datastore.rollback(rollbackRequestBuilder.build());
+				throw e;
+			} catch (final DatastoreException e) { //apotuxia apothikeushs twn metadedomenwn tou arxeiou sto google drive
+				drive.files().delete(media.getId());
+				throw e;
+			}
+	        LOGGER.info("Added media " + media);
 		} catch (final DatastoreException e) {
+			throw new MediaServiceException("Error adding media", e);
+		} catch (final IOException e) {
 			throw new MediaServiceException("Error adding media", e);
 		}
 	}
@@ -344,8 +408,75 @@ public class MediaServiceImpl implements ExtendedMediaService {
 	
 	@Override
 	public void getMedia(final String id, final HttpServletResponse response) throws MediaServiceException { //Google Drive
-		// TODO Auto-generated method stub
-		
+		try {
+			
+			// begin transaction
+			final ByteString transaction = datastore.beginTransaction(BeginTransactionRequest.newBuilder().build()).getTransaction();
+			// execute query
+			LookupResponse result = datastore.lookup(
+					// Dhmiougeia eperwthmatos (san prepare statement)
+					LookupRequest.newBuilder().addKey( //prosthikh key (sunthikh where) sto query
+					// prosthikh mias aplhs sunthikhs (sto where) opou na einai (setKind) "User" kai to onoma tou (setName) na einai to email
+					Key.newBuilder().addPathElement(Key.PathElement.newBuilder().setKind(Media.class.getName()).setName(id))
+					//Epiloges (setReadOptions) gia to pws tha diavasei to apotelesma (san ResultSet) mesw 
+													//tis ekteleshs tou transaction pou dhmiourghthike prin
+					).setReadOptions(ReadOptions.newBuilder().setTransaction(transaction).build()).build());
+			// commit me vash to arxiko transaction
+			datastore.commit(CommitRequest.newBuilder().setTransaction(transaction).build());
+			//Eggrafh (oti eferne to resultSet se rows)
+			final Entity entity = 
+				 //hasNext()
+				(result.getFoundCount() > 0) ?
+				// h prwth alliws null
+				result.getFound(0).getEntity() : null;
+			if (entity == null) {
+				LOGGER.warning("Error downloading media " + id);
+				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Not found"); // 404 Not found
+				return;
+			}
+			//Olo to row ektos apo to primary key tou entity.
+			//px: [password: md5 tou password, name: onoma tou xrhsth, photo: eikona xrhsth]
+			final Map<String, Value> properties = DatastoreHelper.getPropertyMap(entity);
+			final String title = properties.containsKey("title") ? DatastoreHelper.getString(properties.get("title")) : null;
+			final String type = properties.containsKey("type") ? DatastoreHelper.getString(properties.get("type")) : null;
+			final String driveId = properties.containsKey("driveId") ? DatastoreHelper.getString(properties.get("driveId")) : null;
+			if (driveId == null) {
+				LOGGER.warning("Error downloading media " + id);
+				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Not found"); // 404 Not found
+				return;
+			}
+			response.setContentType(type);
+			response.setHeader("Content-disposition", "attachment; filename=" + title +
+					//Vriskei tin epektash tou arxeiou kai tin prosthetei ston titlo tou arxeiou sto katevasma
+					TikaConfig.getDefaultConfig().getMimeRepository().forName(type).getExtension());
+			final byte[] buffer = new byte[1024];
+			final InputStream input = drive.getRequestFactory().buildGetRequest(
+					new GenericUrl(drive.files().get(driveId).execute().getDownloadUrl())).execute().getContent();
+			try {
+				final ServletOutputStream output = response.getOutputStream();
+				try {
+					int read = 0;
+					while (read != -1) {
+						read = input.read(buffer);
+						output.write(buffer, 0, read);
+					}
+				} finally {
+					output.close();
+				}
+			} finally {
+				input.close();
+			}
+			LOGGER.info("Downloaded media " + id);
+		} catch (final DatastoreException e) {
+			LOGGER.log(Level.WARNING, "Error downloading media " + id, e);
+			throw new MediaServiceException("Error downloading media " + id, e);	
+		} catch (final IOException e) {
+			LOGGER.log(Level.WARNING, "Error downloading media " + id, e);
+			throw new MediaServiceException("Error downloading media " + id, e);	
+		} catch (final MimeTypeException e) {
+			LOGGER.log(Level.WARNING, "Error downloading media " + id, e);
+			throw new MediaServiceException("Error downloading media " + id, e);	
+		}
 	}
 	
 	private Media parseMedia(final EntityResult result) throws UserServiceException {
