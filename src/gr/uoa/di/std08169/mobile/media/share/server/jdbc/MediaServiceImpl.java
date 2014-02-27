@@ -316,7 +316,7 @@ public class MediaServiceImpl implements ExtendedMediaService {
 		try {
 			final Media media = getMedia(id);
 			if (media == null) {
-				LOGGER.warning("Not found");
+				LOGGER.warning("Error downloading media " + id);
 				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Not found"); // 404 Not found
 				return;
 			}
@@ -337,12 +337,13 @@ public class MediaServiceImpl implements ExtendedMediaService {
 				input.close();
 				response.getOutputStream().close();
 			}
+			LOGGER.info("Downloaded media " + id);
 		} catch (final IOException e) {
-			LOGGER.log(Level.WARNING, "Error retrieving media " + id, e);
-			throw new MediaServiceException("Error retrieving media " + id, e);			
+			LOGGER.log(Level.WARNING, "Error downloading media " + id, e);
+			throw new MediaServiceException("Error downloading media " + id, e);			
 		} catch (final MimeTypeException e) {
-			LOGGER.log(Level.WARNING, "Error retrieving media " + id, e);
-			throw new MediaServiceException("Error retrieving media " + id, e);			
+			LOGGER.log(Level.WARNING, "Error downloading media " + id, e);
+			throw new MediaServiceException("Error downloading media " + id, e);			
 		}
 	}
 	
