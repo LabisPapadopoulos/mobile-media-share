@@ -6,7 +6,7 @@ package gr.uoa.di.std08169.mobile.media.share.shared.user;
  * @author labis
  *
  */
-public class User {
+public class User implements Comparable<User> {
 	private final String email;
 	private final String name;
 	private final String photo;
@@ -47,5 +47,12 @@ public class User {
 	@Override
 	public String toString() {
 		return email;
+	}
+
+	//comparable o user ws pros to email
+	//gia na taxinomoume media ws pros user (gia to GCD)
+	@Override
+	public int compareTo(final User user) {
+		return email.compareTo(user.email);
 	}
 }

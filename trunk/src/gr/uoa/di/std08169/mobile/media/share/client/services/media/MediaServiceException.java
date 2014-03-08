@@ -12,4 +12,12 @@ public class MediaServiceException extends Exception {
 		if (cause == null)
 			throw new IllegalArgumentException(MediaServiceException.class.getName() + " cause can not be null");
 	}
+	
+	public MediaServiceException(final String message) {
+		super(message);
+		if (message == null)
+			throw new IllegalArgumentException(MediaServiceException.class.getName() + " message can not be null");
+		if (message.isEmpty())
+			throw new IllegalArgumentException(MediaServiceException.class.getName() + " message can not be empty");
+	}
 }
