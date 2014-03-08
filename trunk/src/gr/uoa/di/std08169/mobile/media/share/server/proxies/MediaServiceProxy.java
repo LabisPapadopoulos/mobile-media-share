@@ -17,6 +17,7 @@ import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaResult;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
 
 //Ylopoiei ena mediaservice xrhsimopoiwntas ena allo mediaService. (Wrapper)
+//Ylopoiei kai mnhmh cache gia ta apotelesmata twn anazhthsewn gia ta media
 //Tha kaleitai o proxy kai to spring tha dialegei jdbcMediaService 'h gcdMediaService
 public class MediaServiceProxy implements ExtendedMediaService {
 	//abstract: den boroume na ftiaxoume auto to antikeimeno (einai san interface)
@@ -107,15 +108,7 @@ public class MediaServiceProxy implements ExtendedMediaService {
 		
 		@Override
 		public int hashCode() {
-			return currentUser.hashCode() +
-					((title == null) ? 0 : title.hashCode()) +
-					((type == null) ? 0 : type.hashCode()) + 
-					((user == null) ? 0 : user.hashCode()) + 
-					((createdFrom == null) ? 0 : createdFrom.hashCode()) +
-					((createdTo == null) ? 0 : createdTo.hashCode()) + 
-					((editedFrom == null) ? 0 : editedFrom.hashCode()) +
-					((editedTo == null) ? 0 : editedTo.hashCode()) +
-					((publik == null) ? 0 : publik.hashCode()) + 
+			return super.hashCode() + 
 					((start == null) ? 0 : start.hashCode()) + 
 					((length == null) ? 0 : length.hashCode()) +
 					((orderField == null) ? 0 : orderField.hashCode()) +
@@ -123,18 +116,55 @@ public class MediaServiceProxy implements ExtendedMediaService {
 		}
 	}
 	
-//	private class GetMediaAsListArguments {
-//		
-//	}
+	private class GetMediaAsListArguments extends GetMediaCommonArguments {
+		private final BigDecimal minLatitude;
+		private final BigDecimal minLongitude;
+		private final BigDecimal maxLatitude;
+		private final BigDecimal maxLongitude;
+		
+		private GetMediaAsListArguments(final String currentUser, final String title, final MediaType type, final String user, final Date createdFrom,
+				final Date createdTo, final Date editedFrom, final Date editedTo, final Boolean publik, final BigDecimal minLatitude,
+				final BigDecimal minLongitude, final BigDecimal maxLatitude, final BigDecimal maxLongitude) {
+			super(currentUser, title, type, user, createdFrom, createdTo, editedFrom, editedTo, publik);
+			this.minLatitude = minLatitude;
+			this.minLongitude = minLongitude;
+			this.maxLatitude = maxLatitude;
+			this.maxLongitude = maxLongitude;
+		}
+		
+		@Override
+		public boolean equals(final Object object) {
+			if (object instanceof GetMediaAsListArguments) {
+				final GetMediaAsListArguments arguments = (GetMediaAsListArguments) object;
+				return super.equals(arguments) &&
+						((minLatitude == null) ? (arguments.minLatitude == null) : minLatitude.equals(arguments.minLatitude)) &&
+						((minLongitude == null) ? (arguments.minLongitude == null) : minLongitude.equals(arguments.minLongitude)) &&
+						((maxLatitude == null) ? (arguments.maxLatitude == null) : maxLatitude.equals(arguments.maxLatitude)) &&
+						((maxLongitude == null) ? (arguments.maxLongitude == null) : maxLongitude.equals(arguments.maxLongitude));
+			} else
+				return false;
+
+		}
+		
+		@Override
+		public int hashCode() {
+			return super.hashCode() + 
+					((minLatitude == null) ? 0 : minLatitude.hashCode()) + 
+					((minLongitude == null) ? 0 : minLongitude.hashCode()) +
+					((maxLatitude == null) ? 0 : maxLatitude.hashCode()) +
+					((maxLongitude == null) ? 0 : maxLongitude.hashCode());
+		}
+	}
 	
 	private final ExtendedMediaService mediaService;
 	private final Map<GetMediaAsMediaResultArguments, MediaResult> getMediaAsMediaResultCache;
-//	private final Map<String, String> getMediaAsListCache;
+	private final Map<GetMediaAsListArguments, List<Media>> getMediaAsListCache;
 	private final Map<String, Media> getMediaAsMediaCache;
 
 	public MediaServiceProxy(final ExtendedMediaService mediaService) {
 		this.mediaService = mediaService;
 		getMediaAsMediaResultCache = Collections.synchronizedMap(new HashMap<GetMediaAsMediaResultArguments, MediaResult>());
+		getMediaAsListCache = Collections.synchronizedMap(new HashMap<GetMediaAsListArguments, List<Media>>());
 		getMediaAsMediaCache = Collections.synchronizedMap(new HashMap<String, Media>());
 	}
 
@@ -142,12 +172,13 @@ public class MediaServiceProxy implements ExtendedMediaService {
 	public MediaResult getMedia(final String currentUser, final String title, final MediaType type, final String user,
 			final Date createdFrom, final Date createdTo, final Date editedFrom, final Date editedTo, final Boolean publik,
 			final Integer start, final Integer length, final String orderField, final boolean ascending) throws MediaServiceException {
-		// TODO caching
-		final GetMediaAsMediaResultArguments arguments = new GetMediaAsMediaResultArguments(currentUser, title, type, user, createdFrom, createdTo, editedFrom, editedTo, publik, start, length, orderField, ascending);
+		final GetMediaAsMediaResultArguments arguments = new GetMediaAsMediaResultArguments(currentUser, title, type, user, createdFrom,
+				createdTo, editedFrom, editedTo, publik, start, length, orderField, ascending);
 		MediaResult result = getMediaAsMediaResultCache.get(arguments);
 		if (result == null) {
 			//Den borei na einai null, giati akoma kai an den vrei kati, tha epistrepsei to adeio (alla oxi null) apotelesma
-			result = mediaService.getMedia(currentUser, title, type, user, createdFrom, createdTo, editedFrom, editedTo, publik, start, length, orderField, ascending);
+			result = mediaService.getMedia(currentUser, title, type, user, createdFrom, createdTo, editedFrom, editedTo, publik, start,
+					length, orderField, ascending);
 			getMediaAsMediaResultCache.put(arguments, result);
 		}
 		return result;
@@ -157,8 +188,15 @@ public class MediaServiceProxy implements ExtendedMediaService {
 	public List<Media> getMedia(final String currentUser, final String title, final MediaType type, final String user, final Date createdFrom,
 			final Date createdTo, final Date editedFrom, final Date editedTo, final Boolean publik, final BigDecimal minLatitude,
 			final BigDecimal minLongitude, final BigDecimal maxLatitude, final BigDecimal maxLongitude) throws MediaServiceException {
-		// TODO caching
-		return mediaService.getMedia(currentUser, title, type, user, createdFrom, createdTo, editedFrom, editedTo, publik, minLatitude, minLongitude, maxLatitude, maxLongitude);
+		final GetMediaAsListArguments arguments = new GetMediaAsListArguments(currentUser, title, type, user, createdFrom, createdTo, editedFrom,
+				editedTo, publik, minLatitude, minLongitude, maxLatitude, maxLongitude);
+		List<Media> result = getMediaAsListCache.get(arguments);
+		if (result == null) {
+			result = mediaService.getMedia(currentUser, title, type, user, createdFrom, createdTo, editedFrom, editedTo, publik, minLatitude,
+					minLongitude, maxLatitude, maxLongitude);
+			getMediaAsListCache.put(arguments, result);
+		}
+		return result;
 	}
 
 	@Override
@@ -175,12 +213,17 @@ public class MediaServiceProxy implements ExtendedMediaService {
 	@Override
 	public void deleteMedia(final String id) throws MediaServiceException {
 		mediaService.deleteMedia(id);
+		getMediaAsMediaResultCache.clear();
+		getMediaAsListCache.clear();
 		getMediaAsMediaCache.remove(id);
 	}
 
 	@Override
 	public void addMedia(final Media media, final InputStream input) throws MediaServiceException {
 		mediaService.addMedia(media, input);
+		getMediaAsMediaResultCache.clear();
+		getMediaAsListCache.clear();
+		getMediaAsMediaCache.put(media.getId(), media);
 	}
 
 	@Override
