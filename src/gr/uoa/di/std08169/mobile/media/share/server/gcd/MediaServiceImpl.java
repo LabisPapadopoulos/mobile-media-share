@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -66,6 +67,17 @@ public class MediaServiceImpl implements ExtendedMediaService {
 	 */
 	private static final String DRIVE_SCOPE = "https://www.googleapis.com/auth/drive";
 	private static final Pattern WORD_REGEX = Pattern.compile("\\W+");
+	private static final String TITLE = "title";
+	private static final String TYPE = "type";
+	private static final String SIZE = "size";
+	private static final String DURATION = "duration";
+	//user se dipla autakia epeidh einai desmeumenh lexh gia tin ulopoihsh tis vashs
+	private static final String USER = "\"user\"";
+	private static final String CREATED = "created";
+	private static final String EDITED = "edited";
+	private static final String LATITUDE = "latitude";
+	private static final String LONGITUDE = "longitude";
+	private static final String PUBLIC = "public";
 	private static final Logger LOGGER = Logger.getLogger(MediaServiceImpl.class.getName());
 	
 	private final Datastore datastore;
@@ -142,68 +154,53 @@ public class MediaServiceImpl implements ExtendedMediaService {
 	public MediaResult getMedia(final String currentUser, final String title, final MediaType type, final String user,
 			final Date createdFrom, final Date createdTo, final Date editedFrom, final Date editedTo, final Boolean publik,
 			final Integer start, final Integer length, final String orderField, final boolean ascending) throws MediaServiceException {
-/*		try {
-			final Set<Media> media = new HashSet<Media>();
-			//Dhmiourgeia enos QueryBuilder gia to Query getPublicMedia
-			final Query.Builder getPublicMedia = Query.newBuilder();
-			//Kind gia to entity pou tha gurisei to query, san: FROM Media.class.getName()
-			getPublicMedia.addKindBuilder().setName(Media.class.getName());
-			//WHERE name = query
-//			typePrefix: audio/
-//			type: 		audio/mp3
-//			typePrefix exartatai amfimonoshmanta apo type			
-			if (type != null)
-				getPublicMedia.setFilter(DatastoreHelper.makeFilter("typePrefix", PropertyFilter.Operator.EQUAL, DatastoreHelper.makeValue(type.getMimeTypePrefix())));
-			if (user != null)
-				getPublicMedia.setFilter(DatastoreHelper.makeFilter("user", PropertyFilter.Operator.EQUAL, DatastoreHelper.makeValue(user)));
-			if(createdFrom != null)
-				getPublicMedia.setFilter(DatastoreHelper.makeFilter("created", PropertyFilter.Operator.GREATER_THAN_OR_EQUAL, DatastoreHelper.makeValue(createdFrom)));
-			if(createdTo != null)
-				getPublicMedia.setFilter(DatastoreHelper.makeFilter("created", PropertyFilter.Operator.LESS_THAN_OR_EQUAL, DatastoreHelper.makeValue(createdTo)));
-			if(editedFrom != null)
-				getPublicMedia.setFilter(DatastoreHelper.makeFilter("edited", PropertyFilter.Operator.GREATER_THAN_OR_EQUAL, DatastoreHelper.makeValue(editedFrom)));
-			if(editedTo != null)
-				getPublicMedia.setFilter(DatastoreHelper.makeFilter("edited", PropertyFilter.Operator.LESS_THAN_OR_EQUAL, DatastoreHelper.makeValue(editedTo)));
-			if(title != null)
-				getPublicMedia.setFilter(DatastoreHelper.makeFilter("titleTokens", PropertyFilter.Operator.EQUAL, DatastoreHelper.makeValue(Utilities.normalize(title))));
-			if(publik != null) { // ton noiazei to public
-				if (publik) //thelei na brei mono public
-					getPublicMedia.setFilter(DatastoreHelper.makeFilter("public", PropertyFilter.Operator.EQUAL, DatastoreHelper.makeValue(publik)));
-				else { // thelei na brei mono private, opote mono ta dika tou
-					getPublicMedia.setFilter(DatastoreHelper.makeFilter("public", PropertyFilter.Operator.EQUAL, DatastoreHelper.makeValue(false)));
-					getPublicMedia.setFilter(DatastoreHelper.makeFilter("user", PropertyFilter.Operator.EQUAL, DatastoreHelper.makeValue(currentUser)));
-				}
-			} else {
-//				public or mine
-//				! ((!public) and (!mine));
-				
+		
+		final List<Media> media = getMedia(currentUser, title, type, user, createdFrom, createdTo, editedFrom, editedTo, publik, null, null,
+				null, null);
+		Collections.sort(media, new Comparator<Media>() {
+			@Override
+			public int compare(final Media media1, final Media media2) {
+				int comparison = 0;
+				if (TITLE.equals(orderField))
+					//Gia ASC: to media1 einai megalutero apo to media2 an o titlos tou media1 einai megaluteros apo ton titlo tou media2 
+					comparison = media1.getTitle().compareTo(media2.getTitle());
+				else if (TYPE.equals(orderField))
+					comparison = media1.getType().compareTo(media2.getType());
+				else if (SIZE.equals(orderField))
+					comparison = Long.valueOf(media1.getSize() - media2.getSize()).intValue();
+				else if (DURATION.equals(orderField))
+					comparison = media1.getDuration() - media2.getDuration();
+				else if (USER.equals(orderField))
+					comparison = media1.getUser().compareTo(media2.getUser());
+				else if (CREATED.equals(orderField))
+					comparison = media1.getCreated().compareTo(media2.getCreated());
+				else if (EDITED.equals(orderField))
+					comparison = media1.getEdited().compareTo(media2.getEdited());
+				else if (LATITUDE.equals(orderField))
+					comparison = media1.getLatitude().compareTo(media2.getLatitude());
+				else if (LONGITUDE.equals(orderField))
+					comparison = media1.getLongitude().compareTo(media2.getLongitude());
+				else if (PUBLIC.equals(orderField)) //taxinomoume prwta ta private kai meta ta public
+					comparison = media1.isPublic() ? //to media1 einai public
+							//an kai to media2 einai public -> comparison = 0 (isa)
+							//alliws to media2 einai private -> comparison = 1 (prwta to media2)
+							(media2.isPublic() ? 0 : 1) :
+							//to media1 einai private
+							//an to media2 einai public -> comparison = -1 (prwta to media1)
+							//alliws kai to media2 einai private -> comparison = 0 (isa)
+							(media2.isPublic() ? -1 : 0);
+				else
+					comparison = 0;				
+				//se periptwsh DESC einai to antitheto (-1) tou ASC  
+				return comparison * (ascending ? 1 : -1);
 			}
-			for (EntityResult result : datastore.runQuery(RunQueryRequest.newBuilder().setQuery(getPublicMedia).build()).getBatch().getEntityResultList()) {
-				//Euresh twn pediwn tou antikeimenou
-				final Map<String, Value> properties = DatastoreHelper.getPropertyMap(result.getEntity());
-				final String id = result.getEntity().getKey().getPathElement(0).getName();
-				final String mimeType = properties.containsKey("type") ? DatastoreHelper.getString(properties.get("type")) : null;
-				final Long size = properties.containsKey("size") ? DatastoreHelper.getLong(properties.get("size")) : null;
-				final Integer duration = properties.containsKey("duration") ?  Long.valueOf(properties.get("duration").getIntegerValue()).intValue() : null;
-				final String username = properties.containsKey("user") ? DatastoreHelper.getString(properties.get("user")) : null;
-				final User _user = null; // TODO get user from username
-				final Date created = properties.containsKey("created") ? new Date(DatastoreHelper.getTimestamp(properties.get("created"))) : null;
-				final Date edited = properties.containsKey("edited") ? new Date(DatastoreHelper.getTimestamp(properties.get("edited"))) : null;
-				final String _title = properties.containsKey("title") ? DatastoreHelper.getString(properties.get("title")) : null;
-				final BigDecimal latitude = properties.containsKey("latitude") ? new BigDecimal(DatastoreHelper.getDouble(properties.get("latitude"))) : null;
-				final BigDecimal longitude = properties.containsKey("longitude") ? new BigDecimal(DatastoreHelper.getDouble(properties.get("longitude"))) : null;
-				final boolean _public = properties.containsKey("public") ? DatastoreHelper.getBoolean(properties.get("public")) : null;
-				media.add(new Media(id, mimeType, size, duration, _user, created, edited, _title, latitude, longitude, _public));
-			}
-			final List<Media> userList = new ArrayList<Media>();
-			userList.addAll(media);
-			LOGGER.info("Retrieved " + userList.size() + " users (query: " + query + ", limit: " + limit + ")");
-			return new UserResult(userList.subList(0, limit), media.size());
-		} catch (final DatastoreException e) {
-			LOGGER.log(Level.WARNING, "Error retrieving users (query: " + query + ", limit: " + limit + ")", e);
-			throw new UserServiceException("Error retrieving users (query: " + query + ", limit: " + limit + ")", e);
-		} */		
-		return null;
+		});
+		
+		final List<Media> result = (start >= media.size()) ? Collections.<Media>emptyList() :
+				((start + length <= media.size()) ? media.subList(start, start + length) : 
+				media.subList(start, media.size()));
+		LOGGER.info("Retrieved " + result.size() + " media");
+		return new MediaResult(result, media.size());
 	}
 
 	/*
@@ -276,9 +273,9 @@ public class MediaServiceImpl implements ExtendedMediaService {
 			}
 			final List<Media> media = new ArrayList<Media>();
 			for (EntityResult result : publicMedia)
-				media.add(parseMedia(result));
+				media.add(parseMedia(result.getEntity()));
 			for (EntityResult result : myPrivateMedia)
-				media.add(parseMedia(result));
+				media.add(parseMedia(result.getEntity()));
 
 			//Epeidh den upostirizei pollaples suntikes anisotitas sto idio Query, tha filtraroume meta
 			//Filtrarisma apotelesmatwn gia longitude, created, edited pou den boroun na boun sto filtro
@@ -315,8 +312,48 @@ public class MediaServiceImpl implements ExtendedMediaService {
 	 */
 	@Override
 	public Media getMedia(final String id) throws MediaServiceException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			//Dhmiourgeia tou transaction
+			final ByteString transaction = datastore.beginTransaction(BeginTransactionRequest.newBuilder().build()).getTransaction();
+			//Dhmiourgeia mhnumatos gia to commit tou transaction 
+			final CommitRequest.Builder commitRequestBuilder = CommitRequest.newBuilder();
+			//Thetei to transaction sto commit
+			commitRequestBuilder.setTransaction(transaction);
+			//Dhmiourgeia mhnumatos gia pithano rollback tou transaction
+			final RollbackRequest.Builder rollbackRequestBuilder = RollbackRequest.newBuilder();
+			rollbackRequestBuilder.setTransaction(transaction);
+			
+			// prosthikh mias aplhs sunthikhs (sto where) opou na einai (setKind) "Media" kai to onoma tou (setName) na einai to email
+			final Key.Builder key = Key.newBuilder().addPathElement(Key.PathElement.newBuilder().setKind(Media.class.getName()).setName(id));
+			
+			LookupResponse result = datastore.lookup(
+					// Dhmiougeia eperwthmatos (san prepare statement)
+					LookupRequest.newBuilder().addKey(key) //prosthikh key (sunthikh where) sto query
+					//Epiloges (setReadOptions) gia to pws tha diavasei to apotelesma (san ResultSet) mesw 
+													//tis ekteleshs tou transaction pou dhmiourghthike prin
+					.setReadOptions(ReadOptions.newBuilder().setTransaction(transaction).build()).build());
+			// commit me vash to arxiko transaction
+			datastore.commit(CommitRequest.newBuilder().setTransaction(transaction).build());
+			//Eggrafh (oti eferne to resultSet se rows)
+			final Entity entity = 
+				 //hasNext()
+				(result.getFoundCount() > 0) ?
+				// h prwth alliws null
+				result.getFound(0).getEntity() : null;
+			if (entity == null) {
+				LOGGER.info("Media " + id + " not found");
+				return null;
+			}
+			final Media media = parseMedia(entity);
+			LOGGER.info("Retrieved media " + id);
+			return media;
+		} catch (final DatastoreException e) {
+			LOGGER.log(Level.WARNING, "Error deleting media " + id, e);
+			throw new MediaServiceException("Error deleting media " + id, e);
+		} catch (final UserServiceException e) {
+			LOGGER.log(Level.WARNING, "Error deleting media " + id, e);
+			throw new MediaServiceException("Error deleting media " + id, e);
+		}
 	}
 
 	/*
@@ -325,8 +362,62 @@ public class MediaServiceImpl implements ExtendedMediaService {
 	 */
 	@Override
 	public void deleteMedia(final String id) throws MediaServiceException { //Google drive
-		// TODO Auto-generated method stub
-		
+		try {
+			//Dhmiourgeia tou transaction
+			final ByteString transaction = datastore.beginTransaction(BeginTransactionRequest.newBuilder().build()).getTransaction();
+			//Dhmiourgeia mhnumatos gia to commit tou transaction 
+			final CommitRequest.Builder commitRequestBuilder = CommitRequest.newBuilder();
+			//Thetei to transaction sto commit
+			commitRequestBuilder.setTransaction(transaction);
+			//Dhmiourgeia mhnumatos gia pithano rollback tou transaction
+			final RollbackRequest.Builder rollbackRequestBuilder = RollbackRequest.newBuilder();
+			rollbackRequestBuilder.setTransaction(transaction);
+			
+			// prosthikh mias aplhs sunthikhs (sto where) opou na einai (setKind) "Media" kai to onoma tou (setName) na einai to email
+			final Key.Builder key = Key.newBuilder().addPathElement(Key.PathElement.newBuilder().setKind(Media.class.getName()).setName(id));
+			
+			LookupResponse result = datastore.lookup(
+					// Dhmiougeia eperwthmatos (san prepare statement)
+					LookupRequest.newBuilder().addKey(key) //prosthikh key (sunthikh where) sto query
+					//Epiloges (setReadOptions) gia to pws tha diavasei to apotelesma (san ResultSet) mesw 
+													//tis ekteleshs tou transaction pou dhmiourghthike prin
+					.setReadOptions(ReadOptions.newBuilder().setTransaction(transaction).build()).build());
+			//Eggrafh (oti eferne to resultSet se rows)
+			final Entity entity = 
+				 //hasNext()
+				(result.getFoundCount() > 0) ?
+				// h prwth alliws null
+				result.getFound(0).getEntity() : null;
+			if (entity == null) {
+				LOGGER.warning("Error deleting media " + id + ": media not found");
+				throw new MediaServiceException("Error deleting media " + id + ": media not found");
+			}
+			final Map<String, Value> properties = DatastoreHelper.getPropertyMap(entity);
+			final String driveId = properties.containsKey("driveId") ? DatastoreHelper.getString(properties.get("driveId")) : null;
+			if (driveId == null) {
+				LOGGER.warning("Error deleting media " + id + ": media not found");
+				throw new MediaServiceException("Error deleting media " + id + ": media not found");
+			}
+			// delete media apo datastore
+			commitRequestBuilder.getMutationBuilder().addDelete(key);
+	        try {	        	
+	        	//delete: minima gia diagrafh tou arxeiou
+	        	//execute: ektelei to delete
+	        	//Diagrafh tou arxeiou apo to Google Drive		
+    			drive.files().delete(driveId).execute();
+				datastore.commit(commitRequestBuilder.build());
+			} catch (final IOException e) { //apotuxia diagrafhs twn dedomenwn tou arxeiou sto google drive
+				datastore.rollback(rollbackRequestBuilder.build());
+				throw e;
+			}
+	        LOGGER.info("Deleted media " + id);
+		} catch (final DatastoreException e) {
+			LOGGER.log(Level.WARNING, "Error deleting media " + id, e);
+			throw new MediaServiceException("Error deleting media " + id, e);
+		} catch (final IOException e) {
+			LOGGER.log(Level.WARNING, "Error deleting media " + id, e);
+			throw new MediaServiceException("Error deleting media " + id, e);
+		}
 	}
 
 	/*
@@ -374,33 +465,37 @@ public class MediaServiceImpl implements ExtendedMediaService {
 			//Fortwsh sto transaction ena insert gia to entity pou ftiaxthte
 	
 	        // add se google drive
+			String driveId = null;
 	        try {
 	        	//Google Drive arxeio
 	        	final com.google.api.services.drive.model.File driveFile = new com.google.api.services.drive.model.File();
-	        	driveFile.setId(media.getId());
 	        	driveFile.setMimeType(media.getType());
 	        	driveFile.setCreatedDate(new DateTime(media.getCreated()));
 	        	driveFile.setModifiedDate(new  DateTime(media.getEdited()));
 	        	driveFile.setTitle(media.getTitle());
+	        	//apothikeush twn dedomenwn tou arxeiou sto google drive
+	        	//insert: minima gia apothikeush tou arxeiou
+	        	//execute: ektelei to insert
+	        	driveId = drive.files().insert(driveFile, new InputStreamContent(media.getType(), input)).execute().getId();
 	        	//apothikeush tou id tou Google Drive sto Google Datastore gia to sugkekrimeno arxeio
-	        	entityBuilder.addProperty(Property.newBuilder().setName("driveId").setValue(DatastoreHelper.makeValue(
-	    	        	//apothikeush twn dedomenwn tou arxeiou sto google drive
-	    	        	//insert: minima gia apothikeush tou arxeiou
-	    	        	//execute: ektelei to insert
-	        			drive.files().insert(driveFile, new InputStreamContent(media.getType(), input)).execute().getId())));
+	        	entityBuilder.addProperty(Property.newBuilder().setName("driveId").setValue(DatastoreHelper.makeValue(driveId)));
+	        	//apothikeush sto Google Datastore 
 				commitRequestBuilder.getMutationBuilder().addInsert(entityBuilder.build());
 				datastore.commit(commitRequestBuilder.build());
 			} catch (final IOException e) { //apotuxia apothikeushs twn dedomenwn tou arxeiou sto google drive
 				datastore.rollback(rollbackRequestBuilder.build());
 				throw e;
 			} catch (final DatastoreException e) { //apotuxia apothikeushs twn metadedomenwn tou arxeiou sto google drive
-				drive.files().delete(media.getId());
+				if (driveId != null)
+					drive.files().delete(driveId);
 				throw e;
 			}
 	        LOGGER.info("Added media " + media);
 		} catch (final DatastoreException e) {
+			LOGGER.log(Level.WARNING, "Error adding media", e);
 			throw new MediaServiceException("Error adding media", e);
 		} catch (final IOException e) {
+			LOGGER.log(Level.WARNING, "Error adding media", e);
 			throw new MediaServiceException("Error adding media", e);
 		}
 	}
@@ -479,10 +574,10 @@ public class MediaServiceImpl implements ExtendedMediaService {
 		}
 	}
 	
-	private Media parseMedia(final EntityResult result) throws UserServiceException {
+	private Media parseMedia(final Entity entity) throws UserServiceException {
 		//Euresh twn pediwn tou antikeimenou
-		final Map<String, Value> properties = DatastoreHelper.getPropertyMap(result.getEntity());
-		final String id = result.getEntity().getKey().getPathElement(0).getName();
+		final Map<String, Value> properties = DatastoreHelper.getPropertyMap(entity);
+		final String id = entity.getKey().getPathElement(0).getName();
 		final String mimeType = properties.containsKey("type") ? DatastoreHelper.getString(properties.get("type")) : null;
 		final Long size = properties.containsKey("size") ? DatastoreHelper.getLong(properties.get("size")) : null;
 		final Integer duration = properties.containsKey("duration") ?  Long.valueOf(properties.get("duration").getIntegerValue()).intValue() : null;

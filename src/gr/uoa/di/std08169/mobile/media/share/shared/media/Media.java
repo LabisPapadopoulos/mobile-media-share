@@ -21,7 +21,6 @@ public class Media {
 	public Media(final String id, final String type, final long size, final int duration, final User user, 
 			final Date created, final Date edited, final String title, final BigDecimal latitude, 
 			final BigDecimal longitude, final boolean publik) {
-		
 		if (id == null)
 			throw new IllegalArgumentException(Media.class.getName() + " id can not be null");
 		if (id.isEmpty())

@@ -33,10 +33,15 @@ public class MediaServiceException_CustomFieldSerializer extends CustomFieldSeri
 	 */
 	public static MediaServiceException instantiate(final SerializationStreamReader reader) throws SerializationException {
 		final String message = reader.readString();
-		final Object cause = reader.readObject();
-		if (cause instanceof Throwable)
-			return new MediaServiceException(message, (Throwable) cause);
-		throw new SerializationException(MediaServiceException.class.getName() + " cause must be a throwable");
+		if (reader.readBoolean()) { // uparxei cause
+			final Object cause = reader.readObject();
+			if (cause instanceof Throwable)
+				return new MediaServiceException(message, (Throwable) cause);
+			//diavase kati to opoio den htan Throwable
+			throw new SerializationException(MediaServiceException.class.getName() + " cause must be a throwable");
+		}
+		//an den uparxei cause, gurnaei ena MediaServiceException pou exei mono message
+		return new MediaServiceException(message);
 	}
 	
 	/**
@@ -45,7 +50,12 @@ public class MediaServiceException_CustomFieldSerializer extends CustomFieldSeri
 	 */
 	public static void serialize(final SerializationStreamWriter writer, final MediaServiceException exception) throws SerializationException {
 		writer.writeString(exception.getMessage());
-		writer.writeObject(exception.getCause());
+		if (exception.getCause() == null)
+			writer.writeBoolean(false);
+		else {
+			writer.writeBoolean(true);
+			writer.writeObject(exception.getCause());
+		}
 	}
 
 	@Override
@@ -62,15 +72,23 @@ public class MediaServiceException_CustomFieldSerializer extends CustomFieldSeri
 	@Override
 	public MediaServiceException instantiateInstance(final SerializationStreamReader reader) throws SerializationException {
 		final String message = reader.readString();
-		final Object cause = reader.readObject();
-		if (cause instanceof Throwable)
-			return new MediaServiceException(message, (Throwable) cause);
-		throw new SerializationException(MediaServiceException.class.getName() + " cause must be a throwable");
+		if (reader.readBoolean()) {
+			final Object cause = reader.readObject();
+			if (cause instanceof Throwable)
+				return new MediaServiceException(message, (Throwable) cause);
+			throw new SerializationException(MediaServiceException.class.getName() + " cause must be a throwable");
+		}
+		return new MediaServiceException(message);
 	}
 	
 	@Override
 	public void serializeInstance(final SerializationStreamWriter writer, final MediaServiceException exception) throws SerializationException {
 		writer.writeString(exception.getMessage());
-		writer.writeObject(exception.getCause());
+		if (exception.getCause() == null)
+			writer.writeBoolean(false);
+		else {
+			writer.writeBoolean(true);
+			writer.writeObject(exception.getCause());
+		}
 	}
 }

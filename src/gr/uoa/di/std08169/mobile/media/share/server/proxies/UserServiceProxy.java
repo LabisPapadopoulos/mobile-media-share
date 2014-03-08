@@ -71,6 +71,9 @@ public class UserServiceProxy implements UserService {
 		return user;
 	}
 
+	/**
+	 * Den cacharetai gia logous asfaleias. Exallou xrhsimopoieitai mono apo to login mia fora gia kathe xrhsth.
+	 */
 	@Override
 	public boolean isValidUser(final String email, final String password) throws UserServiceException {
 		return userService.isValidUser(email, password);
