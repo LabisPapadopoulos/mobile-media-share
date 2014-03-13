@@ -365,7 +365,7 @@ public class Map implements CenterChangedHandler, ChangeHandler, ClickHandler, E
 			selectedMarkerImages.put(type, MarkerImage.create(MOBILE_MEDIA_SHARE_URLS.selectedImage(type.name().toLowerCase())));
 		}
 		Document.get().getBody().addClassName("bodyClass");
-		Document.get().getBody().appendChild(Header.newHeader());
+//		Document.get().getBody().appendChild(Header.newHeader());
 		int i = 1;
 		final FlowPanel flowPanel = new FlowPanel();
 		flowPanel.getElement().addClassName("search-filter");

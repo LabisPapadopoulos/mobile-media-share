@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    	xmlns:gg="urn:import:com.google.gwt.user.datepicker.client"
+    	xmlns:ggg="urn:import:com.google.gwt.user.cellview.client"
+    	xmlns:mms="urn:import:gr.uoa.di.std08169.mobile.media.share.client.html"> <!-- mms: mobile-media-share -->
+    	 <!-- gg:... import gia to DateBox -->
+    	
+    <ui:with field="constants" type="gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants" />
+	<g:HTMLPanel>
+		<mms:Header /> <!-- Import to header sth selida -->
+		<h1><ui:text from="{constants.list}" /></h1> <!-- Breadcrumb -->
+		<img src="./images/listLogo.png" class="listImage" alt="{constants.list}" />
+		<!-- InlineLabel -> span -->
+		<div><!-- controls -->
+			<p class="listLabelCol1">
+				<ui:text from="{constants.title}" />
+				<!-- To g einai Google Element kai den borei na tou prostethei klash -->
+				<g:TextBox ui:field="title" /><!-- To title einai tupou TextBox (exei ginei include panw sto g:...) -->
+				<br />
+				<ui:text from="{constants.createdFrom}" />
+				<gg:DateBox ui:field="createdFrom" />
+				<br />
+				<ui:text from="{constants.editedFrom}" />
+				<gg:DateBox ui:field="editedFrom" />
+				<br />
+				<ui:text from="{constants.publik}" />
+				<g:ListBox ui:field="publik" />
+			</p>
+			<p>
+				<ui:text from="{constants.user}" />
+				<g:SuggestBox ui:field="user" />
+				<br />
+				<ui:text from="{constants.createdTo}" />
+				<gg:DateBox ui:field="createdTo" />
+				<br />
+				<ui:text from="{constants.editedTo}" />
+				<gg:DateBox ui:field="editedTo" />
+				<br />
+				<ui:text from="{constants.pageSize}" />
+				<g:ListBox ui:field="pageSize" />
+			</p>
+			<p>
+			    <ui:text from="{constants.type}" />
+				<g:ListBox ui:field="type" />
+			</p>
+		</div><!-- controls -->
+		<div>
+		    <g:Button ui:field="download" text="{constants.download}" />
+		    <g:Button ui:field="edit" text="{constants.edit}" />
+   		    <g:Button ui:field="delete" text="{constants.delete}" />
+   		</div>
+		
+		<ggg:SimplePager ui:field="pager" location="CENTER" /> <!-- Stoixish sto kentro to text ston pager -->
+		<ggg:CellTable ui:field="mediaTable" />
+	</g:HTMLPanel>
+</ui:UiBinder>	

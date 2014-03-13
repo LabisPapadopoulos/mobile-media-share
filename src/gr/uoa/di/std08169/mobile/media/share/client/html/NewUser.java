@@ -137,7 +137,7 @@ public class NewUser implements ClickHandler, EntryPoint, KeyUpHandler {
 	@Override
 	public void onModuleLoad() {
 		Document.get().getBody().addClassName("bodyClass");
-		Document.get().getBody().appendChild(Header.newHeader());
+//		Document.get().getBody().appendChild(Header.newHeader());
 		final FlowPanel flowPanel = new FlowPanel();
 		flowPanel.getElement().addClassName("newUser");
 		int i = 0;
