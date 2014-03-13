@@ -59,7 +59,12 @@ public class MediaServiceServlet extends RemoteServiceServlet implements MediaSe
 	public Media getMedia(final String id) throws MediaServiceException {
 		return mediaService.getMedia(id);
 	}
-	
+
+	@Override
+	public void editMedia(Media media) throws MediaServiceException {
+		mediaService.editMedia(media);
+	}
+
 	@Override
 	public void deleteMedia(final String id) throws MediaServiceException {
 		mediaService.deleteMedia(id);
