@@ -211,23 +211,36 @@ public class MediaServiceProxy implements ExtendedMediaService {
 	}
 
 	@Override
-	public void deleteMedia(final String id) throws MediaServiceException {
-		mediaService.deleteMedia(id);
-		getMediaAsMediaResultCache.clear();
-		getMediaAsListCache.clear();
-		getMediaAsMediaCache.remove(id);
+	public void getMedia(final String id, final HttpServletResponse response) throws MediaServiceException {
+		mediaService.getMedia(id, response);
 	}
 
 	@Override
 	public void addMedia(final Media media, final InputStream input) throws MediaServiceException {
 		mediaService.addMedia(media, input);
+		//Katharismos twn 2 cache giati ta apotelesmata pou exoun meta tin prosthikh enos media einai 
+		//palia kai den boroume na xeroume pws tha ta ananewsoume logw twn periplokwn sunthikwn (theoritika ginetai
+		//alla tha ekane tin douleia enos media service kai tha htan para polu xronovoro opote protimame na ta 
+		//petaxoume ola kai na ta xanaferoume)
+		getMediaAsMediaResultCache.clear();
+		getMediaAsListCache.clear();
+		//Einai palia ta dedomena, alla gia kathe antikeimeno xexwrista ginetai enhmerwsh grhgora tis cache
+		getMediaAsMediaCache.put(media.getId(), media);
+	}
+	
+	@Override
+	public void editMedia(final Media media) throws MediaServiceException {
+		mediaService.editMedia(media);
 		getMediaAsMediaResultCache.clear();
 		getMediaAsListCache.clear();
 		getMediaAsMediaCache.put(media.getId(), media);
 	}
-
+	
 	@Override
-	public void getMedia(final String id, final HttpServletResponse response) throws MediaServiceException {
-		mediaService.getMedia(id, response);
+	public void deleteMedia(final String id) throws MediaServiceException {
+		mediaService.deleteMedia(id);
+		getMediaAsMediaResultCache.clear();
+		getMediaAsListCache.clear();
+		getMediaAsMediaCache.remove(id);
 	}
 }

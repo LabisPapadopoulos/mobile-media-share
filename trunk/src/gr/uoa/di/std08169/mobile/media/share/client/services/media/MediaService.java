@@ -23,6 +23,6 @@ public interface MediaService extends RemoteService {
 			final Date createdTo, final Date editedFrom, final Date editedTo, final Boolean publik, final BigDecimal minLatitude, 
 			final BigDecimal minLongitude, final BigDecimal maxLatitude, final BigDecimal maxLongitude) throws MediaServiceException;
 	public Media getMedia(final String id) throws MediaServiceException;
-//TODO	public void editMedia(final Media media) throws MediaServiceException;
+	public void editMedia(final Media media) throws MediaServiceException;
 	public void deleteMedia(final String id) throws MediaServiceException;
 }

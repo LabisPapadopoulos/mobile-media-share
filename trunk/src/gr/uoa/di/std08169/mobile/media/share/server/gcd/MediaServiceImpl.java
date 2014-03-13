@@ -322,184 +322,45 @@ public class MediaServiceImpl implements ExtendedMediaService {
 			//Dhmiourgeia mhnumatos gia pithano rollback tou transaction
 			final RollbackRequest.Builder rollbackRequestBuilder = RollbackRequest.newBuilder();
 			rollbackRequestBuilder.setTransaction(transaction);
-			
 			// prosthikh mias aplhs sunthikhs (sto where) opou na einai (setKind) "Media" kai to onoma tou (setName) na einai to email
 			final Key.Builder key = Key.newBuilder().addPathElement(Key.PathElement.newBuilder().setKind(Media.class.getName()).setName(id));
-			
-			LookupResponse result = datastore.lookup(
-					// Dhmiougeia eperwthmatos (san prepare statement)
-					LookupRequest.newBuilder().addKey(key) //prosthikh key (sunthikh where) sto query
-					//Epiloges (setReadOptions) gia to pws tha diavasei to apotelesma (san ResultSet) mesw 
-													//tis ekteleshs tou transaction pou dhmiourghthike prin
-					.setReadOptions(ReadOptions.newBuilder().setTransaction(transaction).build()).build());
-			// commit me vash to arxiko transaction
-			datastore.commit(CommitRequest.newBuilder().setTransaction(transaction).build());
-			//Eggrafh (oti eferne to resultSet se rows)
-			final Entity entity = 
-				 //hasNext()
-				(result.getFoundCount() > 0) ?
-				// h prwth alliws null
-				result.getFound(0).getEntity() : null;
-			if (entity == null) {
-				LOGGER.info("Media " + id + " not found");
-				return null;
-			}
-			final Media media = parseMedia(entity);
-			LOGGER.info("Retrieved media " + id);
-			return media;
-		} catch (final DatastoreException e) {
-			LOGGER.log(Level.WARNING, "Error deleting media " + id, e);
-			throw new MediaServiceException("Error deleting media " + id, e);
-		} catch (final UserServiceException e) {
-			LOGGER.log(Level.WARNING, "Error deleting media " + id, e);
-			throw new MediaServiceException("Error deleting media " + id, e);
-		}
-	}
-
-	/*
-	 * "DELETE FROM Media " +
-		"WHERE id = ?;";
-	 */
-	@Override
-	public void deleteMedia(final String id) throws MediaServiceException { //Google drive
-		try {
-			//Dhmiourgeia tou transaction
-			final ByteString transaction = datastore.beginTransaction(BeginTransactionRequest.newBuilder().build()).getTransaction();
-			//Dhmiourgeia mhnumatos gia to commit tou transaction 
-			final CommitRequest.Builder commitRequestBuilder = CommitRequest.newBuilder();
-			//Thetei to transaction sto commit
-			commitRequestBuilder.setTransaction(transaction);
-			//Dhmiourgeia mhnumatos gia pithano rollback tou transaction
-			final RollbackRequest.Builder rollbackRequestBuilder = RollbackRequest.newBuilder();
-			rollbackRequestBuilder.setTransaction(transaction);
-			
-			// prosthikh mias aplhs sunthikhs (sto where) opou na einai (setKind) "Media" kai to onoma tou (setName) na einai to email
-			final Key.Builder key = Key.newBuilder().addPathElement(Key.PathElement.newBuilder().setKind(Media.class.getName()).setName(id));
-			
-			LookupResponse result = datastore.lookup(
-					// Dhmiougeia eperwthmatos (san prepare statement)
-					LookupRequest.newBuilder().addKey(key) //prosthikh key (sunthikh where) sto query
-					//Epiloges (setReadOptions) gia to pws tha diavasei to apotelesma (san ResultSet) mesw 
-													//tis ekteleshs tou transaction pou dhmiourghthike prin
-					.setReadOptions(ReadOptions.newBuilder().setTransaction(transaction).build()).build());
-			//Eggrafh (oti eferne to resultSet se rows)
-			final Entity entity = 
-				 //hasNext()
-				(result.getFoundCount() > 0) ?
-				// h prwth alliws null
-				result.getFound(0).getEntity() : null;
-			if (entity == null) {
-				LOGGER.warning("Error deleting media " + id + ": media not found");
-				throw new MediaServiceException("Error deleting media " + id + ": media not found");
-			}
-			final Map<String, Value> properties = DatastoreHelper.getPropertyMap(entity);
-			final String driveId = properties.containsKey("driveId") ? DatastoreHelper.getString(properties.get("driveId")) : null;
-			if (driveId == null) {
-				LOGGER.warning("Error deleting media " + id + ": media not found");
-				throw new MediaServiceException("Error deleting media " + id + ": media not found");
-			}
-			// delete media apo datastore
-			commitRequestBuilder.getMutationBuilder().addDelete(key);
-	        try {	        	
-	        	//delete: minima gia diagrafh tou arxeiou
-	        	//execute: ektelei to delete
-	        	//Diagrafh tou arxeiou apo to Google Drive		
-    			drive.files().delete(driveId).execute();
+			try {
+				final LookupResponse result = datastore.lookup(
+						// Dhmiougeia eperwthmatos (san prepare statement)
+						LookupRequest.newBuilder().addKey(key) //prosthikh key (sunthikh where) sto query
+						//Epiloges (setReadOptions) gia to pws tha diavasei to apotelesma (san ResultSet) mesw 
+														//tis ekteleshs tou transaction pou dhmiourghthike prin
+						.setReadOptions(ReadOptions.newBuilder().setTransaction(transaction).build()).build());
+				// commit me vash to arxiko transaction
+				//Eggrafh (oti eferne to resultSet se rows)
+				final Entity entity = 
+					 //hasNext()
+					(result.getFoundCount() > 0) ?
+					// h prwth alliws null
+					result.getFound(0).getEntity() : null;
+				if (entity == null) {
+					datastore.commit(commitRequestBuilder.build());
+					LOGGER.info("Media " + id + " not found");
+					return null;
+				}
+				final Media media = parseMedia(entity);
 				datastore.commit(commitRequestBuilder.build());
-			} catch (final IOException e) { //apotuxia diagrafhs twn dedomenwn tou arxeiou sto google drive
+				LOGGER.info("Retrieved media " + id);
+				return media;
+			} catch (final DatastoreException e) {
 				datastore.rollback(rollbackRequestBuilder.build());
-				throw e;
+				LOGGER.log(Level.WARNING, "Error retrieving media " + id, e);
+				throw new MediaServiceException("Error retrieving media " + id, e);
+			} catch (final UserServiceException e) {
+				datastore.rollback(rollbackRequestBuilder.build());
+				LOGGER.log(Level.WARNING, "Error retrieving media " + id, e);
+				throw new MediaServiceException("Error retrieving media " + id, e);
 			}
-	        LOGGER.info("Deleted media " + id);
 		} catch (final DatastoreException e) {
-			LOGGER.log(Level.WARNING, "Error deleting media " + id, e);
-			throw new MediaServiceException("Error deleting media " + id, e);
-		} catch (final IOException e) {
-			LOGGER.log(Level.WARNING, "Error deleting media " + id, e);
-			throw new MediaServiceException("Error deleting media " + id, e);
+			LOGGER.log(Level.WARNING, "Error  retrieving media " + id, e);
+			throw new MediaServiceException("Error retrieving media " + id, e);
 		}
 	}
-
-	/*
-	 * "INSERT INTO Media (id, type, size, duration, \"user\", " +
-		"created, edited, title, latitude, longitude, public) " +
-		"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-		
-		
-	 * Save file se google drive kai ta metadedomena tou se google cloud datastore 
-	 * see https://developers.google.com/drive/web/examples/java#saving_new_files
-	 */
-	@Override
-	public void addMedia(final Media media, InputStream input) throws MediaServiceException { //Google Drive
-		try {
-			//Dhmiourgeia tou transaction
-			final ByteString transaction = datastore.beginTransaction(BeginTransactionRequest.newBuilder().build()).getTransaction();
-			//Dhmiourgeia mhnumatos gia to commit tou transaction 
-			final CommitRequest.Builder commitRequestBuilder = CommitRequest.newBuilder();
-			//Thetei to transaction sto commit
-			commitRequestBuilder.setTransaction(transaction);
-			//Dhmiourgeia mhnumatos gia pithano rollback tou transaction
-			final RollbackRequest.Builder rollbackRequestBuilder = RollbackRequest.newBuilder();
-			rollbackRequestBuilder.setTransaction(transaction);
-			final Entity.Builder entityBuilder = Entity.newBuilder(); 
-			//Orismos tou kleidiou tou pinaka (primary key)
-			entityBuilder.setKey(Key.newBuilder().addPathElement(
-					//san na anoikei ston pinaka Media me anagnwristiko to ID tou
-					Key.PathElement.newBuilder().setKind(Media.class.getName()).setName(media.getId())));
-			entityBuilder.addProperty(Property.newBuilder().setName("type").setValue(DatastoreHelper.makeValue(media.getType())));
-			entityBuilder.addProperty(Property.newBuilder().setName("typePrefix").setValue(DatastoreHelper.makeValue(MediaType.getMediaType(media.getType()).getMimeTypePrefix())));
-			entityBuilder.addProperty(Property.newBuilder().setName("size").setValue(DatastoreHelper.makeValue(media.getSize())));
-			entityBuilder.addProperty(Property.newBuilder().setName("duration").setValue(DatastoreHelper.makeValue(media.getDuration())));
-			entityBuilder.addProperty(Property.newBuilder().setName("user").setValue(DatastoreHelper.makeValue(media.getUser().getEmail())));
-			entityBuilder.addProperty(Property.newBuilder().setName("created").setValue(DatastoreHelper.makeValue(media.getCreated())));
-			entityBuilder.addProperty(Property.newBuilder().setName("edited").setValue(DatastoreHelper.makeValue(media.getEdited())));
-			entityBuilder.addProperty(Property.newBuilder().setName("title").setValue(DatastoreHelper.makeValue(media.getTitle())));
-			final List<Value> values = new ArrayList<Value>();
-			for (String token : WORD_REGEX.split(media.getTitle()))
-				values.add(DatastoreHelper.makeValue(Utilities.normalize(token)).build());
-			//san value vazoume oles tis times ths listas
-			entityBuilder.addProperty(Property.newBuilder().setName("titleToken").setValue(DatastoreHelper.makeValue(values)));
-			entityBuilder.addProperty(Property.newBuilder().setName("latitude").setValue(DatastoreHelper.makeValue(media.getLatitude().doubleValue())));
-			entityBuilder.addProperty(Property.newBuilder().setName("longitude").setValue(DatastoreHelper.makeValue(media.getLongitude().doubleValue())));
-			entityBuilder.addProperty(Property.newBuilder().setName("public").setValue(DatastoreHelper.makeValue(media.isPublic())));
-			//Fortwsh sto transaction ena insert gia to entity pou ftiaxthte
-	
-	        // add se google drive
-			String driveId = null;
-	        try {
-	        	//Google Drive arxeio
-	        	final com.google.api.services.drive.model.File driveFile = new com.google.api.services.drive.model.File();
-	        	driveFile.setMimeType(media.getType());
-	        	driveFile.setCreatedDate(new DateTime(media.getCreated()));
-	        	driveFile.setModifiedDate(new  DateTime(media.getEdited()));
-	        	driveFile.setTitle(media.getTitle());
-	        	//apothikeush twn dedomenwn tou arxeiou sto google drive
-	        	//insert: minima gia apothikeush tou arxeiou
-	        	//execute: ektelei to insert
-	        	driveId = drive.files().insert(driveFile, new InputStreamContent(media.getType(), input)).execute().getId();
-	        	//apothikeush tou id tou Google Drive sto Google Datastore gia to sugkekrimeno arxeio
-	        	entityBuilder.addProperty(Property.newBuilder().setName("driveId").setValue(DatastoreHelper.makeValue(driveId)));
-	        	//apothikeush sto Google Datastore 
-				commitRequestBuilder.getMutationBuilder().addInsert(entityBuilder.build());
-				datastore.commit(commitRequestBuilder.build());
-			} catch (final IOException e) { //apotuxia apothikeushs twn dedomenwn tou arxeiou sto google drive
-				datastore.rollback(rollbackRequestBuilder.build());
-				throw e;
-			} catch (final DatastoreException e) { //apotuxia apothikeushs twn metadedomenwn tou arxeiou sto google drive
-				if (driveId != null)
-					drive.files().delete(driveId);
-				throw e;
-			}
-	        LOGGER.info("Added media " + media);
-		} catch (final DatastoreException e) {
-			LOGGER.log(Level.WARNING, "Error adding media", e);
-			throw new MediaServiceException("Error adding media", e);
-		} catch (final IOException e) {
-			LOGGER.log(Level.WARNING, "Error adding media", e);
-			throw new MediaServiceException("Error adding media", e);
-		}
-	}
-
 	
 	@Override
 	public void getMedia(final String id, final HttpServletResponse response) throws MediaServiceException { //Google Drive
@@ -574,6 +435,192 @@ public class MediaServiceImpl implements ExtendedMediaService {
 		}
 	}
 	
+	/*
+	 * "INSERT INTO Media (id, type, size, duration, \"user\", " +
+		"created, edited, title, latitude, longitude, public) " +
+		"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+		
+		
+	 * Save file se google drive kai ta metadedomena tou se google cloud datastore 
+	 * see https://developers.google.com/drive/web/examples/java#saving_new_files
+	 */
+	@Override
+	public void addMedia(final Media media, InputStream input) throws MediaServiceException { //Google Drive
+		try {
+			//Dhmiourgeia tou transaction
+			final ByteString transaction = datastore.beginTransaction(BeginTransactionRequest.newBuilder().build()).getTransaction();
+			//Dhmiourgeia mhnumatos gia to commit tou transaction 
+			final CommitRequest.Builder commitRequestBuilder = CommitRequest.newBuilder();
+			//Thetei to transaction sto commit
+			commitRequestBuilder.setTransaction(transaction);
+			//Dhmiourgeia mhnumatos gia pithano rollback tou transaction
+			final RollbackRequest.Builder rollbackRequestBuilder = RollbackRequest.newBuilder();
+			rollbackRequestBuilder.setTransaction(transaction);
+			final Entity.Builder entityBuilder = Entity.newBuilder(); 
+			//Orismos tou kleidiou tou pinaka (primary key)
+			entityBuilder.setKey(Key.newBuilder().addPathElement(
+					//san na anoikei ston pinaka Media me anagnwristiko to ID tou
+					Key.PathElement.newBuilder().setKind(Media.class.getName()).setName(media.getId())));
+			entityBuilder.addProperty(Property.newBuilder().setName("type").setValue(DatastoreHelper.makeValue(media.getType())));
+			entityBuilder.addProperty(Property.newBuilder().setName("typePrefix").setValue(DatastoreHelper.makeValue(MediaType.getMediaType(media.getType()).getMimeTypePrefix())));
+			entityBuilder.addProperty(Property.newBuilder().setName("size").setValue(DatastoreHelper.makeValue(media.getSize())));
+			entityBuilder.addProperty(Property.newBuilder().setName("duration").setValue(DatastoreHelper.makeValue(media.getDuration())));
+			entityBuilder.addProperty(Property.newBuilder().setName("user").setValue(DatastoreHelper.makeValue(media.getUser().getEmail())));
+			entityBuilder.addProperty(Property.newBuilder().setName("created").setValue(DatastoreHelper.makeValue(media.getCreated())));
+			entityBuilder.addProperty(Property.newBuilder().setName("edited").setValue(DatastoreHelper.makeValue(media.getEdited())));
+			entityBuilder.addProperty(Property.newBuilder().setName("title").setValue(DatastoreHelper.makeValue(media.getTitle())));
+			final List<Value> values = new ArrayList<Value>();
+			for (String token : WORD_REGEX.split(media.getTitle()))
+				values.add(DatastoreHelper.makeValue(Utilities.normalize(token)).build());
+			//san value vazoume oles tis times ths listas
+			entityBuilder.addProperty(Property.newBuilder().setName("titleToken").setValue(DatastoreHelper.makeValue(values)));
+			entityBuilder.addProperty(Property.newBuilder().setName("latitude").setValue(DatastoreHelper.makeValue(media.getLatitude().doubleValue())));
+			entityBuilder.addProperty(Property.newBuilder().setName("longitude").setValue(DatastoreHelper.makeValue(media.getLongitude().doubleValue())));
+			entityBuilder.addProperty(Property.newBuilder().setName("public").setValue(DatastoreHelper.makeValue(media.isPublic())));
+			//Fortwsh sto transaction ena insert gia to entity pou ftiaxthte
+	        // add se google drive
+			String driveId = null;
+	        try {
+	        	//Google Drive arxeio
+	        	final com.google.api.services.drive.model.File driveFile = new com.google.api.services.drive.model.File();
+	        	driveFile.setMimeType(media.getType());
+	        	driveFile.setCreatedDate(new DateTime(media.getCreated()));
+	        	driveFile.setModifiedDate(new  DateTime(media.getEdited()));
+	        	driveFile.setTitle(media.getTitle());
+	        	//apothikeush twn dedomenwn tou arxeiou sto google drive
+	        	//insert: minima gia apothikeush tou arxeiou
+	        	//execute: ektelei to insert
+	        	driveId = drive.files().insert(driveFile, new InputStreamContent(media.getType(), input)).execute().getId();
+	        	//apothikeush tou id tou Google Drive sto Google Datastore gia to sugkekrimeno arxeio
+	        	entityBuilder.addProperty(Property.newBuilder().setName("driveId").setValue(DatastoreHelper.makeValue(driveId)));
+	        	//apothikeush sto Google Datastore 
+				commitRequestBuilder.getMutationBuilder().addInsert(entityBuilder.build());
+				datastore.commit(commitRequestBuilder.build());
+			} catch (final IOException e) { //apotuxia apothikeushs twn dedomenwn tou arxeiou sto google drive
+				datastore.rollback(rollbackRequestBuilder.build());
+				throw e;
+			} catch (final DatastoreException e) { //apotuxia apothikeushs twn metadedomenwn tou arxeiou sto google drive
+				if (driveId != null)
+					drive.files().delete(driveId);
+				throw e;
+			}
+	        LOGGER.info("Added media " + media);
+		} catch (final DatastoreException e) {
+			LOGGER.log(Level.WARNING, "Error adding media", e);
+			throw new MediaServiceException("Error adding media", e);
+		} catch (final IOException e) {
+			LOGGER.log(Level.WARNING, "Error adding media", e);
+			throw new MediaServiceException("Error adding media", e);
+		}
+	}
+
+	@Override
+	public void editMedia(Media media) throws MediaServiceException {
+		try {
+			//Dhmiourgeia tou transaction
+			final ByteString transaction = datastore.beginTransaction(BeginTransactionRequest.newBuilder().build()).getTransaction();
+			//Dhmiourgeia mhnumatos gia to commit tou transaction 
+			final CommitRequest.Builder commitRequestBuilder = CommitRequest.newBuilder();
+			//Thetei to transaction sto commit
+			commitRequestBuilder.setTransaction(transaction);
+			//Dhmiourgeia mhnumatos gia pithano rollback tou transaction
+			final RollbackRequest.Builder rollbackRequestBuilder = RollbackRequest.newBuilder();
+			rollbackRequestBuilder.setTransaction(transaction);
+			final Entity.Builder entityBuilder = Entity.newBuilder(); 
+			//Orismos tou kleidiou tou pinaka (primary key)
+			entityBuilder.setKey(Key.newBuilder().addPathElement(
+					//san na anoikei ston pinaka Media me anagnwristiko to ID tou
+					Key.PathElement.newBuilder().setKind(Media.class.getName()).setName(media.getId())));
+			entityBuilder.addProperty(Property.newBuilder().setName("edited").setValue(DatastoreHelper.makeValue(new Date())));
+			entityBuilder.addProperty(Property.newBuilder().setName("title").setValue(DatastoreHelper.makeValue(media.getTitle())));
+			final List<Value> values = new ArrayList<Value>();
+			for (String token : WORD_REGEX.split(media.getTitle()))
+				values.add(DatastoreHelper.makeValue(Utilities.normalize(token)).build());
+			//san value vazoume oles tis times ths listas
+			entityBuilder.addProperty(Property.newBuilder().setName("titleToken").setValue(DatastoreHelper.makeValue(values)));
+			entityBuilder.addProperty(Property.newBuilder().setName("latitude").setValue(DatastoreHelper.makeValue(media.getLatitude().doubleValue())));
+			entityBuilder.addProperty(Property.newBuilder().setName("longitude").setValue(DatastoreHelper.makeValue(media.getLongitude().doubleValue())));
+			entityBuilder.addProperty(Property.newBuilder().setName("public").setValue(DatastoreHelper.makeValue(media.isPublic())));
+			//Fortwsh sto transaction ena update gia to entity pou ftiaxthte
+			commitRequestBuilder.getMutationBuilder().addUpdate(entityBuilder.build());
+			try {
+				datastore.commit(commitRequestBuilder.build());
+		        LOGGER.info("Edited media " + media);
+			} catch (final DatastoreException e) { //apotuxia apothikeushs twn metadedomenwn tou arxeiou sto google drive
+				datastore.rollback(rollbackRequestBuilder.build());
+				LOGGER.log(Level.WARNING, "Error editing media " + media, e);
+				throw new MediaServiceException("Error editing media " + media, e);
+			}
+		} catch (final DatastoreException e) {
+			LOGGER.log(Level.WARNING, "Error editing media " + media, e);
+			throw new MediaServiceException("Error editing media " + media, e);
+		}
+	}
+	
+	/*
+	 * "DELETE FROM Media " +
+		"WHERE id = ?;";
+	 */
+	@Override
+	public void deleteMedia(final String id) throws MediaServiceException { //Google drive
+		try {
+			//Dhmiourgeia tou transaction
+			final ByteString transaction = datastore.beginTransaction(BeginTransactionRequest.newBuilder().build()).getTransaction();
+			//Dhmiourgeia mhnumatos gia to commit tou transaction 
+			final CommitRequest.Builder commitRequestBuilder = CommitRequest.newBuilder();
+			//Thetei to transaction sto commit
+			commitRequestBuilder.setTransaction(transaction);
+			//Dhmiourgeia mhnumatos gia pithano rollback tou transaction
+			final RollbackRequest.Builder rollbackRequestBuilder = RollbackRequest.newBuilder();
+			rollbackRequestBuilder.setTransaction(transaction);
+			
+			// prosthikh mias aplhs sunthikhs (sto where) opou na einai (setKind) "Media" kai to onoma tou (setName) na einai to email
+			final Key.Builder key = Key.newBuilder().addPathElement(Key.PathElement.newBuilder().setKind(Media.class.getName()).setName(id));
+			
+			LookupResponse result = datastore.lookup(
+					// Dhmiougeia eperwthmatos (san prepare statement)
+					LookupRequest.newBuilder().addKey(key) //prosthikh key (sunthikh where) sto query
+					//Epiloges (setReadOptions) gia to pws tha diavasei to apotelesma (san ResultSet) mesw 
+													//tis ekteleshs tou transaction pou dhmiourghthike prin
+					.setReadOptions(ReadOptions.newBuilder().setTransaction(transaction).build()).build());
+			//Eggrafh (oti eferne to resultSet se rows)
+			final Entity entity = 
+				 //hasNext()
+				(result.getFoundCount() > 0) ?
+				// h prwth alliws null
+				result.getFound(0).getEntity() : null;
+			if (entity == null) {
+				LOGGER.warning("Error deleting media " + id + ": media not found");
+				throw new MediaServiceException("Error deleting media " + id + ": media not found");
+			}
+			final Map<String, Value> properties = DatastoreHelper.getPropertyMap(entity);
+			final String driveId = properties.containsKey("driveId") ? DatastoreHelper.getString(properties.get("driveId")) : null;
+			if (driveId == null) {
+				LOGGER.warning("Error deleting media " + id + ": media not found");
+				throw new MediaServiceException("Error deleting media " + id + ": media not found");
+			}
+			// delete media apo datastore
+			commitRequestBuilder.getMutationBuilder().addDelete(key);
+	        try {	        	
+	        	//delete: minima gia diagrafh tou arxeiou
+	        	//execute: ektelei to delete
+	        	//Diagrafh tou arxeiou apo to Google Drive		
+    			drive.files().delete(driveId).execute();
+				datastore.commit(commitRequestBuilder.build());
+			} catch (final IOException e) { //apotuxia diagrafhs twn dedomenwn tou arxeiou sto google drive
+				datastore.rollback(rollbackRequestBuilder.build());
+				throw e;
+			}
+	        LOGGER.info("Deleted media " + id);
+		} catch (final DatastoreException e) {
+			LOGGER.log(Level.WARNING, "Error deleting media " + id, e);
+			throw new MediaServiceException("Error deleting media " + id, e);
+		} catch (final IOException e) {
+			LOGGER.log(Level.WARNING, "Error deleting media " + id, e);
+			throw new MediaServiceException("Error deleting media " + id, e);
+		}
+	}
+
 	private Media parseMedia(final Entity entity) throws UserServiceException {
 		//Euresh twn pediwn tou antikeimenou
 		final Map<String, Value> properties = DatastoreHelper.getPropertyMap(entity);

@@ -65,6 +65,13 @@ public class MediaServiceImpl implements ExtendedMediaService {
 	private static final String ADD_MEDIA = "INSERT INTO Media (id, type, size, duration, \"user\", " +
 											"created, edited, title, latitude, longitude, public) " +
 											"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+	private static final String EDIT_MEDIA = "UPDATE Media " +
+											 "SET edited = now(), " +
+										 		 "title = ?, " +
+												 "latitude = ?," +
+												 "longitude = ?," +
+												 "public = ? " +
+											 "WHERE id = ?;";
 	private static final String DELETE_MEDIA = "DELETE FROM Media " +
 												"WHERE id = ?;";
 	private static final Logger LOGGER = Logger.getLogger(MediaServiceImpl.class.getName());
@@ -408,6 +415,31 @@ public class MediaServiceImpl implements ExtendedMediaService {
 		} catch (final SQLException e) {
 			LOGGER.log(Level.WARNING, "Error adding media " + media, e);
 			throw new MediaServiceException("Error adding media " + media, e);
+		}
+	}
+	
+	@Override
+	public void editMedia(Media media) throws MediaServiceException {
+		try {
+			final Connection connection = dataSource.getConnection();
+			try {
+				final PreparedStatement editMedia = connection.prepareStatement(EDIT_MEDIA);
+				try {
+					editMedia.setString(1, media.getTitle());
+					editMedia.setBigDecimal(2, media.getLatitude());
+					editMedia.setBigDecimal(3, media.getLongitude());
+					editMedia.setBoolean(4, media.isPublic());
+					editMedia.setString(5, media.getId());//to UUID
+					editMedia.executeUpdate();
+				} finally {
+					editMedia.close();
+				}
+			} finally {
+				connection.close();
+			}
+		} catch (final SQLException e) {
+			LOGGER.log(Level.WARNING, "Error editing media " + media, e);
+			throw new MediaServiceException("Error editing media " + media, e);
 		}
 	}
 	

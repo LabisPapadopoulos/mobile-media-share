@@ -32,6 +32,7 @@
 			<arg value="-draftCompile" /> <!-- do not optimize -->
 			<arg line="-localWorkers 8" /> <!-- use 8 cores for compiling -->
 			<!-- Poio module xreiazetai compile -->
+			<arg value="gr.uoa.di.std08169.mobile.media.share.EditMedia" />
 			<arg value="gr.uoa.di.std08169.mobile.media.share.List" />
 			<arg value="gr.uoa.di.std08169.mobile.media.share.Login" />
 			<arg value="gr.uoa.di.std08169.mobile.media.share.Map" />
@@ -47,6 +48,7 @@
 	<target name="clean" description="Cleans this project">
 		<delete file="${ant.project.name}.war" failonerror="false" />
 		<delete dir="gwt-unitCache" failonerror="false" />
+		<delete dir="war/editMedia" failonerror="false" />
 		<delete dir="war/list" failonerror="false" />
 		<delete dir="war/login" failonerror="false" />  <!-- to out tou module -->
 		<delete dir="war/map" failonerror="false" />
