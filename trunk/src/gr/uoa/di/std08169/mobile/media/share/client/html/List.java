@@ -19,8 +19,6 @@ import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.HeadingElement;
-import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -35,6 +33,8 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.HasKeyboardPagingPolicy;
@@ -44,22 +44,79 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.InlineLabel;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-//AsyncDataProvider<Media>: fernei dedomena (Media)  
-public class List extends AsyncDataProvider<Media> implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHandler, 
+//Composite: Einai widget pou einai ftiagmeno me ui xml kai periexei allous widget mesa tou (g:..., gg:..., ...)
+public class List extends Composite implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHandler, 
 		SelectionChangeEvent.Handler, SelectionHandler<SuggestOracle.Suggestion>, ValueChangeHandler<Date> {
+	
+	//metatrepei to Ui xml se java antikeimeno
+	protected static interface ListUiBinder extends UiBinder<Widget, List> {}
+
+	private class ListDataProvider extends AsyncDataProvider<Media> {
+		//AsyncDataProvider<Media> fernei dedomena.
+		//Kaleitai otan xreiazetai na erthoun nea dedomena (p.x SortHandler, ChangeHandler)
+		@Override
+		protected void onRangeChanged(final HasData<Media> _) { // update list rows
+			final String currentUser = InputElement.as(Document.get().getElementById("email")).getValue();
+			final String title = List.this.title.getValue().trim().isEmpty() ? null : List.this.title.getValue().trim();
+			//MediaType epeidh einai ENUM me ena string epistrefetai ena instance
+			final MediaType type = List.this.type.getValue(List.this.type.getSelectedIndex()).isEmpty() ? null :
+					MediaType.valueOf(List.this.type.getValue(List.this.type.getSelectedIndex()));
+			final Date createdFrom = List.this.createdFrom.getValue();
+			final Date createdTo = List.this.createdTo.getValue();
+			final Date editedFrom = List.this.editedFrom.getValue();
+			final Date editedTo =  List.this.editedTo.getValue();
+			final Boolean publik = List.this.publik.getValue(List.this.publik.getSelectedIndex()).isEmpty() ? null : 
+				Boolean.valueOf(List.this.publik.getValue(List.this.publik.getSelectedIndex()));
+			pager.setPageSize(Integer.valueOf(pageSize.getValue(pageSize.getSelectedIndex())));
+			final int start = pager.getPageStart();
+			final int length = pager.getPageSize();
+			//Sortarisma ws pros to 1o stoixeio tis listas (an uparxei) opws legetai mesa sthn vash (getDataStoreName)
+			final String orderField = (mediaTable.getColumnSortList().size() == 0) ? null : 
+				mediaTable.getColumnSortList().get(0).getColumn().getDataStoreName();
+			final boolean ascending = (mediaTable.getColumnSortList().size() == 0) ? false : 
+				mediaTable.getColumnSortList().get(0).isAscending();
+			MEDIA_SERVICE.getMedia(currentUser, title, type, (selectedUser == null) ? null : selectedUser.getEmail(),
+					createdFrom, createdTo, editedFrom, editedTo, publik, start, length, orderField, ascending, 
+					new AsyncCallback<MediaResult>() {
+				@Override
+				public void onFailure(final Throwable throwable) {//se front-end ston browser
+					//Afou egine Failure, bainei adeia Lista apo Media
+					updateRowData(0, Collections.<Media>emptyList());
+					updateRowCount(0, false);
+					selectionModel.clear();
+					onSelectionChange(null);
+					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingMedia(throwable.getMessage()));
+				}
+
+				@Override
+				public void onSuccess(final MediaResult result) {
+					//deixnei ta kainouria dedomena pou efere h onRangeChanged
+					updateRowData(start, result.getMedia()); //h selida pou efere
+					//ananewnei sumfwna me tis sunolikes grammes pou sigoura gnwrizei ton arithmo (true)
+					updateRowCount(result.getTotal(), true);
+					selectionModel.clear(); //katharizei tin highlight grammh tou xrhsth
+					//kanei disable ta download, edit kai delete afou den einai kamia grammh epilegmenh
+					onSelectionChange(null);
+				}
+			});
+		}		
+	}
+
+	private static final ListUiBinder LIST_UI_BINDER = GWT.create(ListUiBinder.class); 
+	
 	private static final MobileMediaShareConstants MOBILE_MEDIA_SHARE_CONSTANTS =
 			//kanei automath ulopoihsh to GWT tou interface
 			GWT.create(MobileMediaShareConstants.class);
@@ -86,10 +143,6 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	private static final int MIN_PAGE_SIZE = 10;
 	private static final int MAX_PAGE_SIZE = 100;
 	private static final int PAGE_SIZE_STEP = 10;
-	private static final int TOP = 25;
-	private static final int TOP_STEP = 5;
-	private static final int LEFT_OFFSET = 100;
-	private static final int ALIGN_CENTER = 267;
 	private static final BigDecimal DEGREES_BASE = new BigDecimal(60);
 	private static final TextColumn<Media> TITLE = new TextColumn<Media>() { // TODO
 		@Override
@@ -219,160 +272,90 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	}
 
 	//Search
-	private final TextBox title;
-	private final ListBox type; //dropdown
-	private final SuggestBox user;
-	private final DateBox createdFrom;
-	private final DateBox createdTo;
-	private final DateBox editedFrom;
-	private final DateBox editedTo;
-	private final ListBox publik;
-	private final ListBox pageSize;
-	private final Button download;
-	private final Button edit;
-	private final Button delete;
-	private final SimplePager pager; //Gia pagination
+	//Protected kai oxi private gia na borei na tis xeiristei kai o UI Binder
+	//Oute final boroun na einai gia na tis arxikopoiei (UiField)
+	@UiField
+	protected TextBox title;
+	@UiField
+	protected ListBox type; //dropdown
+	//Parametros pros to annotation,
+	//auto to UiField den tha ftiaxtei apo to UiBinder
+	@UiField(provided = true)
+	protected SuggestBox user;
+	@UiField
+	protected DateBox createdFrom;
+	@UiField
+	protected DateBox createdTo;
+	@UiField
+	protected DateBox editedFrom;
+	@UiField
+	protected DateBox editedTo;
+	@UiField
+	protected ListBox publik;
+	@UiField
+	protected ListBox pageSize;
+	@UiField
+	protected Button download;
+	@UiField
+	protected Button edit;
+	@UiField
+	protected Button delete;
+	@UiField
+	protected SimplePager pager; //Gia pagination
+	@UiField
+	protected CellTable<Media> mediaTable; //Pinakas gia emfanish twn Media
+	
 	private final SingleSelectionModel<Media> selectionModel; //gia highlight kai epilogh grammhs
-	private final CellTable<Media> mediaTable; //Pinakas gia emfanish twn Media
+	private final ListDataProvider dataProvider;
 	private User selectedUser;
 	
 	public List() {
-		int i = 1;
-		int j = 0;
-		title = new TextBox();
-		title.addKeyUpHandler(this);
-		title.getElement().addClassName("listInputCol1");
-		title.getElement().setAttribute("style",
-				"top: " + (TOP * i) + "px;"); //25px
-		
+		//Den afhnoume ton UiBinder na dhmiourghsei to SuggestBox giati den xerei ti na valei gia UserOracle
+		//Prin na xekinhsei na stinei tin selida (me to initWidget) dhmiourgoume ola ta UiFields pou exoun provided = true
 		user = new SuggestBox(new UserOracle());
+		initWidget(LIST_UI_BINDER.createAndBindUi(this));
+		title.addKeyUpHandler(this);
 		user.addKeyUpHandler(this);
 		user.addSelectionHandler(this); //otan epilexei kati apo ta proteinomena
-		user.getElement().addClassName("listInputCol2");
-		user.getElement().setAttribute("style",
-				"top: " + (TOP * i) + "px;"); //25px
-		
-		type = new ListBox();
 		//(To ti fainetai, timh tou ti fainetai)
 		type.addItem(MOBILE_MEDIA_SHARE_CONSTANTS.anyType(), "");
 		//Prosthikh twn dunatwn tupwn arxeiwn
 		for (MediaType mediaType : MediaType.values())
 			type.addItem(MEDIA_TYPE_CONSTANTS.getString(mediaType.name()), mediaType.name());
 		type.addChangeHandler(this); //otan tou allaxei timh
-		type.getElement().addClassName("listInputType");
-		type.getElement().setAttribute("style",
-				"top: " + (TOP_STEP + TOP * i++) + "px;"); //25px
-	
-		// i = 2
-		j = 0;
 		final DateBox.Format dateBoxFormat = new DateBox.DefaultFormat(DATE_FORMAT);
-		createdFrom = new DateBox();
 		createdFrom.setFormat(dateBoxFormat);
 		//epistrefei null gia times pou den katalavainei
 		createdFrom.setFireNullValues(true);
 		createdFrom.addValueChangeHandler(this); //otan tha allaxei timh
 		//me kathe allagh tou textBox, enhmerwnetai o pinakas
 		createdFrom.getTextBox().addKeyUpHandler(this);
-		createdFrom.getElement().addClassName("listInputCol1");
-		createdFrom.getElement().setAttribute("style",
-				"top: " + (i * (TOP + TOP_STEP) + TOP_STEP) + "px;"); //65px
-		
-		createdTo = new DateBox();
 		createdTo.setFormat(dateBoxFormat);
 		createdTo.setFireNullValues(true);
 		createdTo.addValueChangeHandler(this); //otan tha allaxei timh
 		createdTo.getTextBox().addKeyUpHandler(this);
-		createdTo.getElement().addClassName("listInputCol2");
-		createdTo.getElement().setAttribute("style",
-				"top: " + (i * (TOP + TOP_STEP) + TOP_STEP) + "px;"); //35px
-		
-		// i = 2
-		j = 0;
-		editedFrom = new DateBox();
 		editedFrom.setFormat(dateBoxFormat);
 		editedFrom.setFireNullValues(true);
 		editedFrom.addValueChangeHandler(this); //otan tha allaxei timh
 		editedFrom.getTextBox().addKeyUpHandler(this);
-		editedFrom.getElement().addClassName("listInputCol1");
-		editedFrom.getElement().setAttribute("style",
-				"top: " + (i * (TOP + TOP) + TOP_STEP + TOP_STEP) + "px;"); //110px
-		
-		editedTo = new DateBox();
 		editedTo.setFormat(dateBoxFormat);
 		editedTo.setFireNullValues(true);
 		editedTo.addValueChangeHandler(this); //otan tha allaxei timh
 		editedTo.getTextBox().addKeyUpHandler(this);
-		editedTo.getElement().addClassName("listInputCol2");
-		editedTo.getElement().setAttribute("style",
-				"top: " + (i * (TOP + TOP) + TOP_STEP + TOP_STEP) + "px;"); //110px
-		
-		// i = 2
-		j = 0;
-		publik = new ListBox();
 		publik.addItem(MOBILE_MEDIA_SHARE_CONSTANTS.anyType(), "");
 		publik.addItem(MOBILE_MEDIA_SHARE_CONSTANTS.publik(), Boolean.TRUE.toString());
 		publik.addItem(MOBILE_MEDIA_SHARE_CONSTANTS._private(), Boolean.FALSE.toString());
 		publik.addChangeHandler(this);
-		publik.getElement().addClassName("listInputCol1");
-		publik.getElement().setAttribute("style",
-				"top: " + (i * (TOP + TOP + TOP) - TOP_STEP) + "px;"); //145px
-		
-		pageSize = new ListBox();
 		for(int p = MIN_PAGE_SIZE; p <= MAX_PAGE_SIZE; p += PAGE_SIZE_STEP)
 			pageSize.addItem(Integer.toString(p), Integer.toString(p));
 		pageSize.addChangeHandler(this);
-		pageSize.getElement().addClassName("listInputCol2");
-		pageSize.getElement().setAttribute("style",
-				"top: " + (i * (TOP + TOP + TOP) - TOP_STEP) + "px;"); //145px
-		
-		//i = 3
-		j = 1;
-		i++;
-		download = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.download());
 		download.setEnabled(false);
 		download.addClickHandler(this);
-		download.getElement().addClassName("listField");
-		download.getElement().addClassName("listButtons");
-		download.getElement().setAttribute("style",
-				//180px
-				"top: " + ((TOP * i) + (TOP * i) + TOP + TOP_STEP) + "px; " +
-				"left: " + ((LEFT_OFFSET * j++) + ALIGN_CENTER) + "px;"); //100px + ALIGN_CENTER
-		
-		
-		edit = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.edit());
 		edit.setEnabled(false);
 		edit.addClickHandler(this);
-		edit.getElement().addClassName("listField");
-		edit.getElement().addClassName("listButtons");
-		edit.getElement().setAttribute("style",
-				//180px
-				"top: " + ((TOP * i) + (TOP * i) + TOP + TOP_STEP) + "px; " +
-				"left: " + ((LEFT_OFFSET * j++) + ALIGN_CENTER) + "px;"); //200px + ALIGN_CENTER
-		
-		delete = new Button(MOBILE_MEDIA_SHARE_CONSTANTS.delete());
 		delete.setEnabled(false);
 		delete.addClickHandler(this);
-		delete.getElement().addClassName("listField");
-		delete.getElement().addClassName("listButtons");
-		delete.getElement().setAttribute("style",
-				//180px
-				"top: " + ((TOP * i) + (TOP * i++) + TOP + TOP_STEP) + "px; " +
-				"left: " + ((LEFT_OFFSET * j++) + ALIGN_CENTER) + "px;"); //300px + ALIGN_CENTER
-		
-		//i = 4
-		j = 1;
-		pager = new SimplePager();
 		pager.setPageSize(MIN_PAGE_SIZE);
-		pager.getElement().addClassName("pager");
-		pager.getElement().setAttribute("style",
-				//220px
-				"top: " + ((TOP * i) + (TOP * i) + (i * TOP_STEP)) + "px;");
-		
-		selectionModel = new SingleSelectionModel<Media>();
-		selectionModel.addSelectionChangeHandler(this);
-		mediaTable = new CellTable<Media>();
-//		mediaTable.getElement().setAttribute("style", "padding-top: " + ((TOP + TOP) * i) + "px;"); //200px; TODO
-		mediaTable.setSelectionModel(selectionModel);
 		//gia na allazei selida o xrhsths kai me ta velakia (dexia-aristera)
 		mediaTable.setKeyboardPagingPolicy(HasKeyboardPagingPolicy.KeyboardPagingPolicy.CHANGE_PAGE);
 		//gia na allazei grammh o xrhsths kai me ta velakia (panw-katw)
@@ -395,15 +378,19 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 		mediaTable.getColumnSortList().push(TITLE);
 		//o pager selidopoiei tin lista
 		pager.setDisplay(mediaTable);
+		selectionModel = new SingleSelectionModel<Media>();
+		selectionModel.addSelectionChangeHandler(this);
+		mediaTable.setSelectionModel(selectionModel);
 		//O AsyncDataProvider tha vazei dedomena stin lista (table)
-		addDataDisplay(mediaTable);
+		dataProvider = new ListDataProvider();
+		dataProvider.addDataDisplay(mediaTable);
 		selectedUser = null;
 	}
 
 	//Gia allagh ston typo h sto megethos selidas apo ton xrhsth
 	@Override
 	public void onChange(final ChangeEvent _) {
-		onRangeChanged(null);
+		dataProvider.onRangeChanged(null);
 	}
 	
 	@Override
@@ -415,7 +402,6 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.edit(URL.encodeQueryString(selectionModel.getSelectedObject().getId())));
 		else if ((clickEvent.getSource() == delete) &&
 				Window.confirm(MOBILE_MEDIA_SHARE_CONSTANTS.areYouSureYouWantToDeleteThisMedia())) {
-			
 			//Diagrafh tou arxeiou apo tin vash
 			MEDIA_SERVICE.deleteMedia(selectionModel.getSelectedObject().getId(),
 					new AsyncCallback<Void>() {
@@ -431,7 +417,7 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 					//apenergopoiountai ta koubia (download, edit, delete)
 					onSelectionChange(null);
 					//fernei nea dedomena ston pinaka
-					onRangeChanged(null);
+					dataProvider.onRangeChanged(null);
 				}
 			});
 		}
@@ -449,140 +435,13 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 				//h timh tou suggest box de symfwnei me to dialegmeno xrhsth
 				(!new UserSuggestion(selectedUser).getReplacementString().equals(user.getValue())))
 			selectedUser = null; // dialexe ton kanena
-		onRangeChanged(null);
+		dataProvider.onRangeChanged(null);
 	}
 	
 	@Override
 	public void onModuleLoad() { // set up HTML
-		Document.get().getBody().addClassName("bodyClass");
-		Document.get().getBody().appendChild(Header.newHeader());
-		final HeadingElement breadcrumb = Document.get().createHElement(1);
-		breadcrumb.appendChild(Document.get().createTextNode(MOBILE_MEDIA_SHARE_CONSTANTS.list()));
-		Document.get().getBody().appendChild(breadcrumb);
-		final ImageElement uploadImage = Document.get().createImageElement();
-		uploadImage.setSrc("./images/listLogo.png");
-		uploadImage.setClassName("listImage");
-		uploadImage.setAlt("List Image");
-		Document.get().getBody().appendChild(uploadImage);
-		int i = 1;
-		final FlowPanel flowPanel = new FlowPanel();
-		flowPanel.getElement().addClassName("search-filter");
-		final InlineLabel titleLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.title());
-		titleLabel.getElement().addClassName("listLabelCol1");
-		titleLabel.getElement().setAttribute("style", 
-				"top: " + (TOP + TOP_STEP + TOP_STEP * i) + "px;"); //35px
-		flowPanel.add(titleLabel);
-		flowPanel.add(title);
-		final InlineLabel userLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.user());
-		userLabel.getElement().addClassName("listLabelCol2");
-		userLabel.getElement().setAttribute("style", 
-				"top: " + (TOP + TOP_STEP + TOP_STEP * i) + "px;");
-		flowPanel.add(userLabel);
-		flowPanel.add(user);
-		final InlineLabel typeLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.type());
-		typeLabel.getElement().addClassName("listLabelType");
-		typeLabel.getElement().setAttribute("style", 
-				"top: " + (TOP + TOP_STEP + TOP_STEP * i++) + "px;");
-		flowPanel.add(typeLabel);
-		flowPanel.add(type);
-		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
-		//i = 2
-		final InlineLabel createdFromLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.createdFrom());
-		createdFromLabel.getElement().addClassName("listLabelCol1");
-		createdFromLabel.getElement().setAttribute("style", 
-				"top: " + (TOP + TOP * i) + "px;"); //75px
-		flowPanel.add(createdFromLabel);
-		flowPanel.add(createdFrom);
-		final InlineLabel createdToLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.createdTo());
-		createdToLabel.getElement().addClassName("listLabelCol2");
-		createdToLabel.getElement().setAttribute("style", 
-				"top: " + (TOP + TOP * i++) + "px;"); //75px
-		flowPanel.add(createdToLabel);
-		flowPanel.add(createdTo);
-		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
-		//i = 3
-		final InlineLabel editedFromLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.editedFrom());
-		editedFromLabel.getElement().addClassName("listLabelCol1");
-		editedFromLabel.getElement().setAttribute("style", 
-				"top: " + ((TOP + TOP * i) + (TOP_STEP * i) + TOP_STEP) + "px;"); //120px
-		flowPanel.add(editedFromLabel);
-		flowPanel.add(editedFrom);
-		final InlineLabel editedToLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.editedTo());
-		editedToLabel.getElement().addClassName("listLabelCol2");
-		editedToLabel.getElement().setAttribute("style",
-				"top: " + ((TOP + TOP * i) + (TOP_STEP * i++) + TOP_STEP) + "px;"); //120px
-		flowPanel.add(editedToLabel);
-		flowPanel.add(editedTo);
-		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
-		final InlineLabel publicLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.publik());
-		publicLabel.getElement().addClassName("listLabelCol1");
-		publicLabel.getElement().setAttribute("style", 
-				"top: " + (TOP + TOP + TOP * i) + "px;"); //150px
-		flowPanel.add(publicLabel);
-		flowPanel.add(publik);
-		final InlineLabel pageSizeLabel = new InlineLabel(MOBILE_MEDIA_SHARE_CONSTANTS.pageSize());
-		pageSizeLabel.getElement().addClassName("listLabelCol2");
-		pageSizeLabel.getElement().setAttribute("style", 
-				"top: " + (TOP + TOP + TOP * i) + "px;");
-		flowPanel.add(pageSizeLabel);
-		flowPanel.add(pageSize);
-		flowPanel.getElement().appendChild(Document.get().createBRElement()); //<br />
-		flowPanel.add(download);
-		flowPanel.add(edit);
-		flowPanel.add(delete);
-		flowPanel.add(pager);
-		flowPanel.add(mediaTable);
-		RootPanel.get().add(flowPanel);
-		onRangeChanged(null);
-	}
-	
-	//AsyncDataProvider<Media> fernei dedomena.
-	//Kaleitai otan xreiazetai na erthoun nea dedomena (p.x SortHandler, ChangeHandler)
-	@Override
-	protected void onRangeChanged(final HasData<Media> _) { // update list rows
-		final String currentUser = InputElement.as(Document.get().getElementById("email")).getValue();
-		final String title = this.title.getValue().trim().isEmpty() ? null : this.title.getValue().trim();
-		//MediaType epeidh einai ENUM me ena string epistrefetai ena instance
-		final MediaType type = this.type.getValue(this.type.getSelectedIndex()).isEmpty() ? null :
-				MediaType.valueOf(this.type.getValue(this.type.getSelectedIndex()));
-		final Date createdFrom = this.createdFrom.getValue();
-		final Date createdTo = this.createdTo.getValue();
-		final Date editedFrom = this.editedFrom.getValue();
-		final Date editedTo =  this.editedTo.getValue();
-		final Boolean publik = this.publik.getValue(this.publik.getSelectedIndex()).isEmpty() ? null : 
-			Boolean.valueOf(this.publik.getValue(this.publik.getSelectedIndex()));
-		pager.setPageSize(Integer.valueOf(pageSize.getValue(pageSize.getSelectedIndex())));
-		final int start = pager.getPageStart();
-		final int length = pager.getPageSize();
-		//Sortarisma ws pros to 1o stoixeio tis listas (an uparxei) opws legetai mesa sthn vash (getDataStoreName)
-		final String orderField = (mediaTable.getColumnSortList().size() == 0) ? null : 
-			mediaTable.getColumnSortList().get(0).getColumn().getDataStoreName();
-		final boolean ascending = (mediaTable.getColumnSortList().size() == 0) ? false : 
-			mediaTable.getColumnSortList().get(0).isAscending();
-		MEDIA_SERVICE.getMedia(currentUser, title, type, (selectedUser == null) ? null : selectedUser.getEmail(),
-				createdFrom, createdTo, editedFrom, editedTo, publik, start, length, orderField, ascending, 
-				new AsyncCallback<MediaResult>() {
-			@Override
-			public void onFailure(final Throwable throwable) {//se front-end ston browser
-				//Afou egine Failure, bainei adeia Lista apo Media
-				updateRowData(0, Collections.<Media>emptyList());
-				updateRowCount(0, false);
-				selectionModel.clear();
-				onSelectionChange(null);
-				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingMedia(throwable.getMessage()));
-			}
-
-			@Override
-			public void onSuccess(final MediaResult result) {
-				//deixnei ta kainouria dedomena pou efere h onRangeChanged
-				updateRowData(start, result.getMedia()); //h selida pou efere
-				//ananewnei sumfwna me tis sunolikes grammes pou sigoura gnwrizei ton arithmo (true)
-				updateRowCount(result.getTotal(), true);
-				selectionModel.clear(); //katharizei tin highlight grammh tou xrhsth
-				//kanei disable ta download, edit kai delete afou den einai kamia grammh epilegmenh
-				onSelectionChange(null);
-			}
-		});
+		RootPanel.get().add(this); //prosthikh sth selida (tin jsp) tou widget
+		dataProvider.onRangeChanged(null);
 	}
 	
 	//Otan dialegei o xrhsths sugkekrimenh protash
@@ -590,7 +449,7 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 	public void onSelection(final SelectionEvent<SuggestOracle.Suggestion> selectionEvent) { // selecting a user
 		selectedUser = (selectionEvent.getSelectedItem() instanceof UserSuggestion) ? 
 				((UserSuggestion) selectionEvent.getSelectedItem()).getUser() : null;
-		onRangeChanged(null); //fernei dedomena gi' auton (epilegmeno) ton xrhsth
+		dataProvider.onRangeChanged(null); //fernei dedomena gi' auton (epilegmeno) ton xrhsth
 	}
 	
 	@Override
@@ -607,6 +466,6 @@ public class List extends AsyncDataProvider<Media> implements ChangeHandler, Cli
 
 	@Override
 	public void onValueChange(final ValueChangeEvent<Date> _) { // changing created from, created to, edited from or edited to values
-		onRangeChanged(null);
+		dataProvider.onRangeChanged(null);
 	}
 }

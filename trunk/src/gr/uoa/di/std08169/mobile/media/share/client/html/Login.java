@@ -110,7 +110,7 @@ public class Login implements ClickHandler, EntryPoint, KeyUpHandler {
 	@Override
 	public void onModuleLoad() { //molis fortwthei to module (h javascript), molis to zhthsei kapoia selida
 		Document.get().getBody().addClassName("bodyClass");
-		Document.get().getBody().appendChild(Header.newHeader());
+//		Document.get().getBody().appendChild(Header.newHeader());
 		int i = 0;
 		//Travaei olh tin selida: RootPanel.get()
 		//InlineLabel gia na fainetai stin idia grammh

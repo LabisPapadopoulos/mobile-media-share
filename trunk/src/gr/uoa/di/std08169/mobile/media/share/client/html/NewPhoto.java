@@ -204,7 +204,7 @@ public class NewPhoto implements ClickHandler, EntryPoint, GoogleMap.ClickHandle
 		});
 		Document.get().getBody().addClassName("bodyClass");
 		//Apo to DOM prosthetei komvo (to header me olous tous upokomvous pou exei mesa)
-		Document.get().getBody().appendChild(Header.newHeader());
+//		Document.get().getBody().appendChild(Header.newHeader());
 		final FlowPanel flowPanel = new FlowPanel();
 		int i = 1;
 		//Video element: oti tha deixnei h camera

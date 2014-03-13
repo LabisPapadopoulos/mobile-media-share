@@ -197,7 +197,7 @@ public class Upload implements ChangeHandler, ClickHandler, EntryPoint, GoogleMa
 		});
 		Document.get().getBody().addClassName("bodyClass");
 		//Apo to DOM prosthetei komvo (to header me olous tous upokomvous pou exei mesa)
-		Document.get().getBody().appendChild(Header.newHeader());
+//		Document.get().getBody().appendChild(Header.newHeader()); TODO
 		final ImageElement uploadImage = Document.get().createImageElement();
 		uploadImage.setSrc("./images/uploadLogo.png");
 		uploadImage.setClassName("uploadImage");
