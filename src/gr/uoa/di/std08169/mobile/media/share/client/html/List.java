@@ -115,8 +115,7 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 		}		
 	}
 
-	private static final ListUiBinder LIST_UI_BINDER = GWT.create(ListUiBinder.class); 
-	
+	private static final ListUiBinder LIST_UI_BINDER = GWT.create(ListUiBinder.class);
 	private static final MobileMediaShareConstants MOBILE_MEDIA_SHARE_CONSTANTS =
 			//kanei automath ulopoihsh to GWT tou interface
 			GWT.create(MobileMediaShareConstants.class);

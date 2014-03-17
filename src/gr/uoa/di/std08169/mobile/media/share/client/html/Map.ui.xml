@@ -2,15 +2,14 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
     	xmlns:g="urn:import:com.google.gwt.user.client.ui"
     	xmlns:gg="urn:import:com.google.gwt.user.datepicker.client"
-    	xmlns:ggg="urn:import:com.google.gwt.user.cellview.client"
     	xmlns:mms="urn:import:gr.uoa.di.std08169.mobile.media.share.client.html"> <!-- mms: mobile-media-share -->
     	 <!-- gg:... import gia to DateBox -->
     	
     <ui:with field="constants" type="gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants" />
 	<g:HTMLPanel>
 		<mms:Header /> <!-- Import to header sth selida -->
-		<h1><ui:text from="{constants.list}" /></h1> <!-- Breadcrumb -->
-		<img src="./images/listLogo.png" class="listImage" alt="{constants.list}" />
+		<h1><ui:text from="{constants.map}" /></h1> <!-- Breadcrumb -->
+		<img src="./images/map.svg" class="headerImage" alt="{constants.map}" />
 		<!-- InlineLabel -> span -->
 		<div><!-- controls -->
 			<p class="listLabelCol1">
@@ -36,9 +35,6 @@
 				<br />
 				<ui:text from="{constants.editedTo}" />
 				<gg:DateBox ui:field="editedTo" />
-				<br />
-				<ui:text from="{constants.pageSize}" />
-				<g:ListBox ui:field="pageSize" />
 			</p>
 			<p>
 			    <ui:text from="{constants.type}" />
@@ -50,7 +46,6 @@
 		    <g:Button ui:field="edit" text="{constants.edit}" />
    		    <g:Button ui:field="delete" text="{constants.delete}" />
    		</p>
-		<ggg:SimplePager ui:field="pager" location="CENTER" /> <!-- Stoixish sto kentro to text ston pager -->
-		<ggg:CellTable ui:field="mediaTable" />
+		<div ui:field="mapContainer" class="map"></div>
 	</g:HTMLPanel>
 </ui:UiBinder>	

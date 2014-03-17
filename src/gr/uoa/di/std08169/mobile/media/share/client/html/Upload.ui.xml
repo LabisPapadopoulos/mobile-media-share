@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    	xmlns:mms="urn:import:gr.uoa.di.std08169.mobile.media.share.client.html"> <!-- mms: mobile-media-share -->
+    	 <!-- gg:... import gia to DateBox -->
+    <ui:with field="constants" type="gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants" />
+	<g:HTMLPanel>
+		<mms:Header /> <!-- Import to header sth selida -->
+		<h1><ui:text from="{constants.upload}" /></h1> <!-- Breadcrumb -->
+		<img src="./images/uploadLogo.png" class="headerImage" alt="{constants.upload}" />
+		<!-- InlineLabel -> span -->
+		<form action="./mediaServlet" enctype="multipart/form-data" method="post" target="_self" class="uploadForm"><!-- controls -->
+		    <p>
+		        <ui:text from="{constants.file}" />
+		        <g:FileUpload ui:field="file" name="file" />
+		        <br />
+				<ui:text from="{constants.title}" />
+				<!-- To g einai Google Element kai den borei na tou prostethei klash -->
+				<g:TextBox ui:field="title" name="title" /><!-- To title einai tupou TextBox (exei ginei include panw sto g:...) -->
+				<br />
+				<ui:text from="{constants.publik}" />
+				<g:CheckBox name="public" />
+				<g:Hidden ui:field="latitude" name="latitude" />
+				<g:Hidden ui:field="longitude" name="longitude" />
+				<g:Hidden ui:field="locale" name="locale" />
+				<br />
+				<ui:text from="{constants.latitude}" />/<ui:text from="{constants.longitude}" />
+			</p>
+			<div ui:field="mapContainer" class="map"></div>
+			<p>
+			    <g:SubmitButton ui:field="ok" text="{constants.ok}" />
+			    <g:ResetButton ui:field="reset" text="{constants.reset}" />
+	   		</p>
+		</form><!-- controls -->
+	</g:HTMLPanel>
+</ui:UiBinder>	
