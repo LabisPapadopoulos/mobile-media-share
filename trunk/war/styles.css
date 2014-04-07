@@ -1,10 +1,7 @@
-html {
+div.content {
 	background-color: white;
 	background-image: url('./images/body-bg.png');
 	background-repeat:repeat;
-}
-
-body.bodyClass {
 	padding-top: 10px;
 	padding-right: 20px;
 	padding-bottom: 10px;
