@@ -76,6 +76,9 @@ public interface MobileMediaShareConstants extends Constants {
 	@DefaultStringValue("Latitude")
 	public String latitude();
 	
+	@DefaultStringValue("Latitude/Longitude")
+	public String latitudeLongitude();
+	
 	@DefaultStringValue("List")
 	public String list();
 	
