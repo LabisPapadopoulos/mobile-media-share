@@ -13,20 +13,24 @@
 		    <p>
 		        <ui:text from="{constants.file}" />
 		        <g:FileUpload ui:field="file" name="file" />
-		        <br />
+			</p>
+			<p>
 				<ui:text from="{constants.title}" />
 				<!-- To g einai Google Element kai den borei na tou prostethei klash -->
 				<g:TextBox ui:field="title" name="title" /><!-- To title einai tupou TextBox (exei ginei include panw sto g:...) -->
-				<br />
+			</p>
+			<p>
 				<ui:text from="{constants.publik}" />
 				<g:CheckBox name="public" />
-				<g:Hidden ui:field="latitude" name="latitude" />
-				<g:Hidden ui:field="longitude" name="longitude" />
-				<g:Hidden ui:field="locale" name="locale" />
-				<br />
+			</p>
+			<p>
 				<ui:text from="{constants.latitude}" />/<ui:text from="{constants.longitude}" />
+				<g:InlineLabel ui:field="latitudeLongitude" />
 			</p>
 			<div ui:field="mapContainer" class="map"></div>
+			<g:Hidden ui:field="latitude" name="latitude" />
+			<g:Hidden ui:field="longitude" name="longitude" />
+			<g:Hidden ui:field="locale" name="locale" />
 			<p>
 			    <g:SubmitButton ui:field="ok" text="{constants.ok}" />
 			    <g:ResetButton ui:field="reset" text="{constants.reset}" />
