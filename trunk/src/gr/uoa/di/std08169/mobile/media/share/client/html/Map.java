@@ -214,7 +214,9 @@ public class Map extends Composite implements CenterChangedHandler, ChangeHandle
 			//Anoigei neo tab pou tha trexei tin doGet gia na katevei to arxeio
 			Window.open(MOBILE_MEDIA_SHARE_URLS.download(URL.encodeQueryString(markers.get(selectedMarker).getId())), "_blank", "");
 		else if (clickEvent.getSource() == edit)
-			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.edit(URL.encodeQueryString(markers.get(selectedMarker).getId())));
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.editMedia(URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()), 
+					//stelnei ws parametro to id tou media pou dialexe o xrhsths
+					URL.encodeQueryString(markers.get(selectedMarker).getId())));
 		else if ((clickEvent.getSource() == delete) &&
 				Window.confirm(MOBILE_MEDIA_SHARE_CONSTANTS.areYouSureYouWantToDeleteThisMedia())) {			
 			//Diagrafh tou arxeiou apo tin vash

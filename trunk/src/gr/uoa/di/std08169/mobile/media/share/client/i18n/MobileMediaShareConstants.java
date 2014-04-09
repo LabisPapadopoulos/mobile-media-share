@@ -64,6 +64,9 @@ public interface MobileMediaShareConstants extends Constants {
 	@DefaultStringValue("Edited To")
 	public String editedTo();
 	
+	@DefaultStringValue("Edit Media")
+	public String editMedia();
+
 	@DefaultStringValue("Email")
 	public String email();
 	

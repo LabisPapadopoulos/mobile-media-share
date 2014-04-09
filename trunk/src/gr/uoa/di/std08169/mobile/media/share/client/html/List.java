@@ -32,6 +32,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -398,7 +399,8 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 			//Anoigei neo tab pou tha trexei tin doGet gia na katevei to arxeio
 			Window.open(MOBILE_MEDIA_SHARE_URLS.download(URL.encodeQueryString(selectionModel.getSelectedObject().getId())), "_blank", "");
 		else if (clickEvent.getSource() == edit)
-			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.edit(URL.encodeQueryString(selectionModel.getSelectedObject().getId())));
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.editMedia(URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
+					URL.encodeQueryString(selectionModel.getSelectedObject().getId())));
 		else if ((clickEvent.getSource() == delete) &&
 				Window.confirm(MOBILE_MEDIA_SHARE_CONSTANTS.areYouSureYouWantToDeleteThisMedia())) {
 			//Diagrafh tou arxeiou apo tin vash
