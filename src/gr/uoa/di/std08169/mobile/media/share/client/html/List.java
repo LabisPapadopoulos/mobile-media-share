@@ -199,35 +199,13 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 	private static final TextColumn<Media> LATITUDE = new TextColumn<Media>() { //BigDecimal latitude
 		@Override
 		public String getValue(final Media media) {
-			// 1 moira = 60 prwta lepta
-			// 1 prwto lepto = 60 deutera
-			// to divideAndRemainder kanei tin diairesh kai epistefei:
-			// temp1[0]: phliko
-			// temp1[1]: upoloipo
-			final BigDecimal[] temp1 = media.getLatitude().multiply(DEGREES_BASE).multiply(DEGREES_BASE).divideAndRemainder(DEGREES_BASE);
-			final int seconds = temp1[1].intValue();
-			final BigDecimal[] temp2 = temp1[0].divideAndRemainder(DEGREES_BASE);
-			final int minutes = temp2[1].intValue();
-			final int degrees = temp2[0].intValue();
-			//an einai arnhtiko-> einai notia, alliws voreia
-			return (media.getLatitude().compareTo(BigDecimal.ZERO) < 0) ?
-					MOBILE_MEDIA_SHARE_MESSAGES.latitudeFormatSouth(degrees, minutes, seconds) :
-					MOBILE_MEDIA_SHARE_MESSAGES.latitudeFormatNorth(degrees, minutes, seconds);
+			return formatLatitude(media.getLatitude());
 		}
 	};
 	private static final TextColumn<Media> LONGITUDE = new TextColumn<Media>() { //BigDecimal longitude
 		@Override
 		public String getValue(final Media media) {
-			
-			final BigDecimal[] temp1 = media.getLongitude().multiply(DEGREES_BASE).multiply(DEGREES_BASE).divideAndRemainder(DEGREES_BASE);
-			final int seconds = temp1[1].intValue();
-			final BigDecimal[] temp2 = temp1[0].divideAndRemainder(DEGREES_BASE);
-			final int minutes = temp2[1].intValue();
-			final int degrees = temp2[0].intValue();
-			//an einai arnhtiko-> einai notia, alliws voreia
-			return (media.getLongitude().compareTo(BigDecimal.ZERO) < 0) ?
-					MOBILE_MEDIA_SHARE_MESSAGES.longitudeFormatWest(degrees, minutes, seconds) :
-					MOBILE_MEDIA_SHARE_MESSAGES.longitudeFormatEast(degrees, minutes, seconds);
+			return formatLongitude(media.getLongitude());
 		}
 	};
 	private static final TextColumn<Media> PUBLIC = new TextColumn<Media>() { //boolean publik //TODO
@@ -308,6 +286,37 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 	private final SingleSelectionModel<Media> selectionModel; //gia highlight kai epilogh grammhs
 	private final ListDataProvider dataProvider;
 	private User selectedUser;
+	
+	public static String formatLatitude(final BigDecimal latitude) {
+		// 1 moira = 60 prwta lepta
+		// 1 prwto lepto = 60 deutera
+		// to divideAndRemainder kanei tin diairesh kai epistefei:
+		// temp1[0]: phliko
+		// temp1[1]: upoloipo
+		final BigDecimal[] temp1 = latitude.multiply(DEGREES_BASE).multiply(DEGREES_BASE).divideAndRemainder(DEGREES_BASE);
+		final int seconds = temp1[1].intValue();
+		final BigDecimal[] temp2 = temp1[0].divideAndRemainder(DEGREES_BASE);
+		final int minutes = temp2[1].intValue();
+		final int degrees = temp2[0].intValue();
+		//an einai arnhtiko-> einai notia, alliws voreia
+		return (latitude.compareTo(BigDecimal.ZERO) < 0) ?
+				MOBILE_MEDIA_SHARE_MESSAGES.latitudeFormatSouth(-degrees, -minutes, -seconds) :
+				MOBILE_MEDIA_SHARE_MESSAGES.latitudeFormatNorth(degrees, minutes, seconds);
+	}
+	
+	public static String formatLongitude(final BigDecimal longitude) {
+		
+		final BigDecimal[] temp1 = longitude.multiply(DEGREES_BASE).multiply(DEGREES_BASE).divideAndRemainder(DEGREES_BASE);
+		final int seconds = temp1[1].intValue();
+		final BigDecimal[] temp2 = temp1[0].divideAndRemainder(DEGREES_BASE);
+		final int minutes = temp2[1].intValue();
+		final int degrees = temp2[0].intValue();
+		//an einai arnhtiko-> einai notia, alliws voreia
+		return (longitude.compareTo(BigDecimal.ZERO) < 0) ?
+				MOBILE_MEDIA_SHARE_MESSAGES.longitudeFormatWest(-degrees, -minutes, -seconds) :
+				MOBILE_MEDIA_SHARE_MESSAGES.longitudeFormatEast(degrees, minutes, seconds);
+	}
+
 	
 	public List() {
 		//Den afhnoume ton UiBinder na dhmiourghsei to SuggestBox giati den xerei ti na valei gia UserOracle

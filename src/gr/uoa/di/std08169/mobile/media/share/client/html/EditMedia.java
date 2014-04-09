@@ -22,6 +22,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -54,6 +55,8 @@ public class EditMedia extends Composite implements ClickHandler, EntryPoint, Go
 	@UiField
 	protected CheckBox publik;
 	@UiField
+	protected InlineLabel latitudeLongitude;
+	@UiField
 	protected DivElement map;
 	@UiField
 	protected Button ok;
@@ -73,6 +76,8 @@ public class EditMedia extends Composite implements ClickHandler, EntryPoint, Go
 	
 	@Override
 	public void handle(final MouseEvent event) { // click sto xarth
+		latitudeLongitude.setText("(" + List.formatLatitude(new BigDecimal(event.getLatLng().lat())) + ", " + 
+				List.formatLongitude(new BigDecimal(event.getLatLng().lng())) + ")");
 		googleMap.setCenter(event.getLatLng());
 		marker.setPosition(event.getLatLng());
 	}
@@ -107,9 +112,11 @@ public class EditMedia extends Composite implements ClickHandler, EntryPoint, Go
 		} else if (clickEvent.getSource() == reset) {
 			title.setValue(media.getTitle());
 			publik.setValue(media.isPublic());
+			latitudeLongitude.setText("(" + List.formatLatitude(media.getLatitude()) + ", " + List.formatLongitude(media.getLongitude()) + ")");
 			//Antikeimeno (javascript) pou periexei suntetagmenes xarth
 			final LatLng latLng = LatLng.create(media.getLatitude().doubleValue(), media.getLongitude().doubleValue());
 			googleMap.setCenter(latLng);
+			googleMap.setZoom(Map.GOOGLE_MAPS_ZOOM);
 			marker.setPosition(latLng);
 		}
 		

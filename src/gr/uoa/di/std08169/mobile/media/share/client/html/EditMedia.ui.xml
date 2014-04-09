@@ -17,6 +17,7 @@
 		</p>
 		<p>
 			<ui:text from="{constants.latitudeLongitude}" />
+			<g:InlineLabel ui:field="latitudeLongitude" />
 		</p>
 		<div ui:field="map" class="mediaMap"></div>
 		<p>

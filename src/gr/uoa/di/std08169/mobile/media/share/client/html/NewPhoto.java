@@ -24,6 +24,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Hidden;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.ResetButton;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SubmitButton;
@@ -63,6 +64,8 @@ public class NewPhoto extends Composite implements ClickHandler, EntryPoint, Goo
 	@UiField
 	protected TextBox title;
 	@UiField
+	protected InlineLabel latitudeLongitude;
+	@UiField
 	protected DivElement map;
 	@UiField
 	protected Hidden latitude;
@@ -73,7 +76,10 @@ public class NewPhoto extends Composite implements ClickHandler, EntryPoint, Goo
 	@UiField
 	protected SubmitButton ok;
 	@UiField
-	protected ResetButton reset;	
+	protected ResetButton reset;
+	private BigDecimal defaultLatitude;
+	private BigDecimal defaultLongitude;
+	private GoogleMap googleMap;
 	private Marker marker;
 		
 	public NewPhoto() {		
@@ -90,11 +96,16 @@ public class NewPhoto extends Composite implements ClickHandler, EntryPoint, Goo
 	//Apo ton ClickListener tou GoogleMap (GoogleMap.ClickHandler) 
 	@Override
 	public void handle(final MouseEvent event) {
+		//enhmerwsh etiketas
+		latitudeLongitude.setText("(" + List.formatLatitude(new BigDecimal(event.getLatLng().lat())) + ", " +
+				List.formatLongitude(new BigDecimal(event.getLatLng().lng())) + ")");
+		//enhmerwsh xarth
+		googleMap.setCenter(event.getLatLng());
 		//orismos theshs marker
 		marker.setPosition(event.getLatLng());
 		//orismos timwn twn latitude and longitude
 		latitude.setValue(new BigDecimal(event.getLatLng().lat()).toString());
-		longitude.setValue(new BigDecimal(event.getLatLng().lng()).toString());		
+		longitude.setValue(new BigDecimal(event.getLatLng().lng()).toString());
 	}
 	
 	@Override
@@ -118,6 +129,14 @@ public class NewPhoto extends Composite implements ClickHandler, EntryPoint, Goo
 			canvas.setHeight(0);
 			photo.setValue(null);
 			title.setValue(null);
+			latitudeLongitude.setText("(" + List.formatLatitude(defaultLatitude) + ", " + List.formatLongitude(defaultLongitude) + ")");
+			final LatLng latLng = LatLng.create(defaultLatitude.doubleValue(), defaultLongitude.doubleValue()); 
+			googleMap.setCenter(latLng);
+			googleMap.setZoom(Map.GOOGLE_MAPS_ZOOM);
+			marker.setPosition(latLng);
+			//orismos timwn twn latitude and longitude
+			latitude.setValue(defaultLatitude.toString());
+			longitude.setValue(defaultLongitude.toString());
 			ok.setEnabled(false);
 		} 
 	}
@@ -142,9 +161,8 @@ public class NewPhoto extends Composite implements ClickHandler, EntryPoint, Goo
 		final MapOptions options = MapOptions.create(); //Dhmiourgeia antikeimenou me Factory (xwris constructor)
 		//Default na fenetai xarths apo dorhforo (Hybrid)
 		options.setMapTypeId(MapTypeId.HYBRID);
-		options.setZoom(Map.GOOGLE_MAPS_ZOOM);
 		//Dhmiourgei ton xarth me tis panw ruthmiseis kai to vazei sto mapDiv
-		final GoogleMap googleMap = GoogleMap.create(map, options);
+		googleMap = GoogleMap.create(map, options);
 		googleMap.addClickListener(this);
 		final MarkerOptions markerOptions = MarkerOptions.create();
 		markerOptions.setMap(googleMap);
@@ -155,25 +173,16 @@ public class NewPhoto extends Composite implements ClickHandler, EntryPoint, Goo
 			@Override
 			public void onFailure(final PositionError error) {
 				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingYourLocation(error.getMessage()));
-				final LatLng latLng = LatLng.create(Map.GOOGLE_MAPS_LATITUDE, Map.GOOGLE_MAPS_LONGITUDE); 
-				googleMap.setCenter(latLng);
-				marker.setPosition(latLng);
-				//orismos timwn twn latitude and longitude
-				latitude.setValue(new BigDecimal(latLng.lat()).toString());
-				longitude.setValue(new BigDecimal(latLng.lng()).toString());
+				defaultLatitude = new BigDecimal(Map.GOOGLE_MAPS_LATITUDE);
+				defaultLongitude = new BigDecimal(Map.GOOGLE_MAPS_LONGITUDE);
+				reset.click();
 			}
 
 			@Override
 			public void onSuccess(final Position position) {
-				//Kentrarei o xarths sto shmeio pou vrethike o xrhsths (Latitude, Longitude)
-										//Coordinates: pairnei tis suntetagmenes tis theshs
-				final LatLng latLng = LatLng.create(position.getCoordinates().getLatitude(),
-						position.getCoordinates().getLongitude());
-				googleMap.setCenter(latLng);
-				marker.setPosition(latLng);
-				//orismos timwn twn latitude and longitude
-				latitude.setValue(new BigDecimal(latLng.lat()).toString());
-				longitude.setValue(new BigDecimal(latLng.lng()).toString());
+				defaultLatitude = new BigDecimal(position.getCoordinates().getLatitude());
+				defaultLongitude = new BigDecimal(position.getCoordinates().getLongitude());
+				reset.click();
 			}
 		});
 		initializeVideo();

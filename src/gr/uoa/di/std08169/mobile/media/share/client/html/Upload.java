@@ -23,6 +23,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.Hidden;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.ResetButton;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SubmitButton;
@@ -57,19 +58,23 @@ public class Upload extends Composite implements ChangeHandler, ClickHandler, En
 	@UiField
 	protected TextBox title;
 	@UiField
+	protected InlineLabel latitudeLongitude;
+	@UiField
+	protected DivElement mapContainer;
+	@UiField
 	protected Hidden latitude;
 	@UiField
 	protected Hidden longitude;
 	@UiField
 	protected Hidden locale;
 	@UiField
-	protected DivElement mapContainer;
-	@UiField
 	protected SubmitButton ok;
 	@UiField
 	protected ResetButton reset;
-	
+	private GoogleMap googleMap;
 	private Marker marker;
+	private BigDecimal defaultLatitude;
+	private BigDecimal defaultLongitude;
 	
 	public Upload() {
 		initWidget(UPLOAD_UI_BINDER.createAndBindUi(this));
@@ -83,6 +88,10 @@ public class Upload extends Composite implements ChangeHandler, ClickHandler, En
 	//Otan o xrhsths pataei panw ston xarth
 	@Override
 	public void handle(final MouseEvent event) {
+		//enhmerwsh twn pediwn latitude, longitude, googleMap, marker 
+		latitudeLongitude.setText("(" + List.formatLatitude(new BigDecimal(event.getLatLng().lat())) + ", " +
+				List.formatLongitude(new BigDecimal(event.getLatLng().lng())) + ")");
+		googleMap.setCenter(event.getLatLng());
 		//orismos theshs marker
 		marker.setPosition(event.getLatLng());
 		//orismos timwn twn latitude and longitude
@@ -91,8 +100,17 @@ public class Upload extends Composite implements ChangeHandler, ClickHandler, En
 	}
 	
 	@Override
-	public void onClick(final ClickEvent clickEvent) {
-			ok.setEnabled(false);
+	public void onClick(final ClickEvent clickEvent) { //Reset Button
+		latitudeLongitude.setText("(" + List.formatLatitude(defaultLatitude) + ", " + List.formatLongitude(defaultLongitude) + ")");
+		final LatLng latLng = LatLng.create(defaultLatitude.doubleValue(), defaultLongitude.doubleValue());
+		googleMap.setCenter(latLng);
+		googleMap.setZoom(Map.GOOGLE_MAPS_ZOOM);
+		//orismos theshs marker
+		marker.setPosition(latLng);
+		//orismos timwn twn latitude and longitude (gia ta hidden pedia)
+		latitude.setValue(defaultLatitude.toString());
+		longitude.setValue(defaultLongitude.toString());
+		ok.setEnabled(false);
 	}
 
 	//Otan allaxei timh tou file field
@@ -129,7 +147,7 @@ public class Upload extends Composite implements ChangeHandler, ClickHandler, En
 		options.setMapTypeId(MapTypeId.HYBRID);
 		options.setZoom(Map.GOOGLE_MAPS_ZOOM);
 		//Dhmiourgei ton xarth me tis panw ruthmiseis kai to vazei sto mapDiv
-		final GoogleMap googleMap = GoogleMap.create(mapContainer, options);
+		googleMap = GoogleMap.create(mapContainer, options);
 		googleMap.addClickListener(this);
 		final MarkerOptions markerOptions = MarkerOptions.create();
 		markerOptions.setMap(googleMap);
@@ -140,25 +158,16 @@ public class Upload extends Composite implements ChangeHandler, ClickHandler, En
 			@Override
 			public void onFailure(final PositionError error) {
 				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingYourLocation(error.getMessage()));
-				final LatLng latLng = LatLng.create(Map.GOOGLE_MAPS_LATITUDE, Map.GOOGLE_MAPS_LONGITUDE); 
-				googleMap.setCenter(latLng);
-				marker.setPosition(latLng);
-				//orismos timwn twn latitude and longitude
-				latitude.setValue(new BigDecimal(latLng.lat()).toString());
-				longitude.setValue(new BigDecimal(latLng.lng()).toString());
+				defaultLatitude = new BigDecimal(Map.GOOGLE_MAPS_LATITUDE);
+				defaultLongitude = new BigDecimal(Map.GOOGLE_MAPS_LONGITUDE);
+				reset.click();
 			}
 
 			@Override
 			public void onSuccess(final Position position) {
-				//Kentrarei o xarths sto shmeio pou vrethike o xrhsths (Latitude, Longitude)
-										//Coordinates: pairnei tis suntetagmenes tis theshs
-				final LatLng latLng = LatLng.create(position.getCoordinates().getLatitude(),
-						position.getCoordinates().getLongitude());
-				googleMap.setCenter(latLng);
-				marker.setPosition(latLng);
-				//orismos timwn twn latitude and longitude
-				latitude.setValue(new BigDecimal(latLng.lat()).toString());
-				longitude.setValue(new BigDecimal(latLng.lng()).toString());
+				defaultLatitude = new BigDecimal(position.getCoordinates().getLatitude());
+				defaultLongitude = new BigDecimal(position.getCoordinates().getLongitude());
+				reset.click();
 			}
 		});
 	}
