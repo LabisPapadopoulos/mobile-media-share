@@ -6,8 +6,8 @@ public interface MobileMediaShareUrls extends Messages {
 	@DefaultMessage("./mediaServlet?id={0}")
 	public String download(final String id);
 	
-	@DefaultMessage("./edit.jsp?id={0}")
-	public String edit(final String id);
+	@DefaultMessage("./editMedia.jsp?locale={0}&id={1}")
+	public String editMedia(final String locale, final String id);
 	
 	//sensor: an exei sensora h suskeuh pou fortwnetai o xarths
 	@DefaultMessage("sensor=true&language={0}")
