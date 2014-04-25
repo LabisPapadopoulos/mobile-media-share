@@ -97,6 +97,9 @@ public interface MobileMediaShareConstants extends Constants {
 	@DefaultStringValue("Map")
 	public String map();
 	
+	@DefaultStringValue("media not found")
+	public String mediaNotFound();
+	
 	@DefaultStringValue("Mobile Media Share")
 	public String mobileMediaShare();
 	
@@ -111,6 +114,9 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("New Video")
 	public String newVideo();
+	
+	@DefaultStringValue("no media ID specified")
+	public String noMediaIdSpecified();
 	
 	@DefaultStringValue("not supported")
 	public String notSupported();
@@ -161,4 +167,7 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("User")
 	public String user();
+	
+	@DefaultStringValue("You are here:")
+	public String youAreHere();
 }
