@@ -9,6 +9,9 @@ public interface MobileMediaShareUrls extends Messages {
 	@DefaultMessage("./editMedia.jsp?locale={0}&id={1}")
 	public String editMedia(final String locale, final String id);
 	
+	@DefaultMessage("./forgotPassword.html?locale={0}")
+	public String forgotPassword(final String locale);
+	
 	//sensor: an exei sensora h suskeuh pou fortwnetai o xarths
 	@DefaultMessage("sensor=true&language={0}")
 	public String googleMapsOptions(final String locale);
