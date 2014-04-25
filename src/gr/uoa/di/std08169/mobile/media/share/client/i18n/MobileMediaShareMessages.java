@@ -6,6 +6,15 @@ import com.google.gwt.i18n.client.Messages;
 //Messages: Gia mhnumata me parametrous 
 @LocalizableResource.DefaultLocale("en")
 public interface MobileMediaShareMessages extends Messages {
+	@DefaultMessage("{0}h {1}m {2}s")
+	public String durationFormatHoursMinutesSeconds(final int hours, final int minutes, final int seconds);
+	
+	@DefaultMessage("{0}m {1}s")
+	public String durationFormatMinutesSeconds(final int minutes, final int seconds);
+	
+	@DefaultMessage("{0}s")
+	public String durationFormatSeconds(final int seconds);
+	
 	@DefaultMessage("{0}@...")
 	public String emailFormat(final String email);
 	
@@ -19,8 +28,14 @@ public interface MobileMediaShareMessages extends Messages {
 	@DefaultMessage("Error deleting media: {0}")
 	public String errorDeletingMedia(final String message);
 	
+	@DefaultMessage("Error editing media: {0}")
+	public String errorEditingMedia(final String message);
+	
 	@DefaultMessage("Error retrieving media: {0}")
 	public String errorRetrievingMedia(final String message);
+	
+	@DefaultMessage("Error retrieving media: {0}")
+	public String errorRetrievingMedium(final String message);
 	
 	@DefaultMessage("Error retrieving your location: {0}")
 	public String errorRetrievingYourLocation(final String message);
