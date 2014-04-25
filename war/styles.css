@@ -1,24 +1,78 @@
-div.content {
+span.APPLICATION {
+	background-image: url('./images/markersSmall/application.svg');
+	background-repeat: no-repeat;
+	background-origin: border-box;
+	background-clip: border-box;
+	padding-left: 16px;
+}
+
+span.AUDIO {
+	background-image: url('./images/markersSmall/audio.svg');
+	background-repeat: no-repeat;
+	background-origin: border-box;
+	background-clip: border-box;
+	padding-left: 16px;
+}
+
+span.IMAGE {
+	background-image: url('./images/markersSmall/image.svg');
+	background-repeat: no-repeat;
+	background-origin: border-box;
+	background-clip: border-box;
+	padding-left: 16px;
+}
+
+span.TEXT {
+	background-image: url('./images/markersSmall/text.svg');
+	background-repeat: no-repeat;
+	background-origin: border-box;
+	background-clip: border-box;
+	padding-left: 16px;
+}
+
+span.VIDEO {
+	background-image: url('./images/markersSmall/video.svg');
+	background-repeat: no-repeat;
+	background-origin: border-box;
+	background-clip: border-box;
+	padding-left: 16px;
+}
+
+span.public {
+	background-image: url('./images/public.png');
+	background-repeat: no-repeat;
+	background-origin: border-box;
+	background-clip: border-box;
+	padding-left: 16px;
+}
+
+span.private {
+	background-image: url('./images/private.png');
+	background-repeat: no-repeat;
+	background-origin: border-box;
+	background-clip: border-box;
+	padding-left: 16px;
+}
+
+body {
 	background-color: white;
 	background-image: url('./images/body-bg.png');
 	background-repeat:repeat;
+}
+
+div.content {
 	padding-top: 10px;
 	padding-right: 20px;
 	padding-bottom: 10px;
 	padding-left: 20px;
-	//background-color: rgb(225, 231, 238);
 	background-color: whitesmoke;
 	margin-right: auto;
 	margin-left: auto;
-	/*width: 850px;*/
 	width: 1000px;
 	min-height: 400px;
 	border: 1px solid black;
 	border-radius: 15px;
-/*	-moz-border-radius: 15px;*/
 	box-shadow: 3px 3px 3px black;
-/*	-moz-box-shadow: 3px 3px 3px black;
-	-webkit-box-shadow: 3px 3px 3px black;*/
 }
 
 /* header */
@@ -27,28 +81,21 @@ div.header {
 }
 
 /* logo */
+img.uoa_logo {
+	width: 115px;
+	float: left;
+}
+
 div.logo {
-	/* clear: both; */
+	width: 770px;
+	float: left;
 	padding-bottom: 10px;
 }
 
 img.logo {
-/*
-	float: left;
-	height: 128px;
-	width: 128px;
-	margin-bottom: 20px;
-	margin-left: 40px; */
-	width: 720px;
+	width: 880px;
 	box-shadow: 0 0 15px #888;
 }
-
-/*
-h1 {
-	float: right;
-	margin-right: 10px;
-}
-*/
 
 /* menu */
 div.menu {
@@ -56,7 +103,13 @@ div.menu {
 	padding-bottom: 30px;
 }
 
-a.map, a.list, a.newPhoto, a.newVideo, a.upload, a.myAccount, a.logout {
+a.map, 
+a.list, 
+a.newPhoto, 
+a.newVideo, 
+a.upload, 
+a.myAccount, 
+a.logout {
 	border: 1px solid grey;
 	border-radius: 5px;
 	margin: 2px;
@@ -72,11 +125,28 @@ a.logout {
 	margin-left: 20px;
 }
 
-a.map:hover, a.list:hover, a.newPhoto:hover, a.newVideo:hover, a.upload:hover, a.myAccount:hover, a.logout:hover {
+a.map:hover, 
+a.list:hover, 
+a.newPhoto:hover, 
+a.newVideo:hover, 
+a.upload:hover, 
+a.myAccount:hover, 
+a.logout:hover,
+button:hover{
 	background-color: #dee7f0;
 }
 
-img.mapImg, img.listImg, img.newPhotoImg, img.newVideoImg, img.uploadImg, img.myAccountImg, img.logoutImg {
+.gwt-Button:hover {
+	background: #dee7f0;
+}
+
+img.mapImg, 
+img.listImg, 
+img.newPhotoImg, 
+img.newVideoImg, 
+img.uploadImg, 
+img.myAccountImg, 
+img.logoutImg {
 	margin: 1px;
 	padding-right: 5px;
 	width: 35px;
@@ -104,6 +174,11 @@ a.locale_el {
 	top: 50px;
 }
 
+a.locale_el:hover {
+	-webkit-transform: scale(1.25);
+	transform: scale(1.25);
+}
+
 a.locale_en {
 	margin: 5px;
 	margin-left: 75px;
@@ -111,6 +186,399 @@ a.locale_en {
 	top: 50px;
 }
 
+a.locale_en:hover {
+	-webkit-transform: scale(1.25);
+	transform: scale(1.25);
+}
+
+/*login page*/
+.loginForm {
+	width: 290px;
+	position: relative;
+	left: 356px;
+}
+
+.loginForm input {
+	width: 170px;
+	float: right;
+	margin-bottom: 5px;
+}
+
+.loginForm span {
+	float: left;
+	clear: both;
+	padding-top: 10px;
+}
+
+p.loginBtn {
+	float: left;
+	clear: both;
+	margin-top: 10px;
+}
+
+p.newUserBtn {
+	float: left;
+	position: relative;
+	left: 188px;
+	margin-top: 10px;
+}
+
+p.forgotPasswordLink {
+	clear: both;
+	padding-top: 25px;
+}
+
+form.loginForm button {
+	position: absolute;
+	width: 100px;
+	height: 28px;
+}
+
+/*newUser page*/
+div.content.newUser {
+	height: 430px;
+}
+
+.content.newUser span {
+	float: left;
+	clear: both;
+	padding-top: 10px;
+}
+
+.content.newUser p {
+	width: 410px;
+	position: relative;
+	left: 315px;
+}
+
+.content.newUser input {
+	width: 170px;
+	float: right;
+	margin-bottom: 5px;
+}
+
+p.okBtn {
+	clear: both;
+	float: left;
+	width: 100px!important;
+	margin-right: 55px;
+	margin-top: 10px;
+}
+
+p.resetBtn,
+p.cancelBtn {
+	float: left;
+	width: 100px!important;
+	margin-right: 55px;
+	margin-top: 10px;
+}
+
+p.okBtn button,
+p.resetBtn button,
+p.cancelBtn button {
+	width: 100px;
+	height: 26px;
+}
+
+/*Map, List*/
+/*breadcrumbs*/
+.content.mapPage h3,
+.content.listPage h3,
+.content.editMediaPage h3,
+.content.uploadPage h3,
+.content.newPhotoPage h3 {
+	float: left;
+	font-size: 18px;
+	font-weight: normal;
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+.controls {
+	float: left;
+	margin-left: 60px;
+}
+
+.leftColum {
+	width: 310px;
+	float: left;
+	font-size: 14px;
+	margin-right: 20px;
+}
+
+.centerColum {
+	width: 310px;
+	float: left;
+	font-size: 14px;
+	margin-right: 20px;
+}
+
+.rightColum {
+	width: auto;
+	float: right;
+	width: 210px;
+	font-size: 14px;
+	margin-bottom: 0px;
+}
+
+.mapButtons {
+	clear: both;
+	padding-top: 20px;
+	margin-bottom: 10px;
+}
+
+.listButtons {
+	clear: both;
+	padding-top: 0px;
+	margin-top: 0px;
+}
+
+.content.mapPage .leftColum span,
+.content.mapPage .centerColum span,
+.content.listPage .leftColum span,
+.content.listPage .centerColum span {
+	float: left;
+	clear: both;
+	padding-top: 8px;
+}
+
+.content.mapPage .rightColum span,
+.content.listPage .rightColum span {
+	float: left;
+	clear: both;
+	padding-top: 2px;
+	margin-top: 5px;
+}
+
+.content.mapPage .rightColum select,
+.content.listPage .rightColum select {
+	float: right;
+	width: 145px;
+	margin-bottom: 10px;
+	height: 26px;
+}
+
+.content.mapPage input,
+.content.listPage input {
+	width: 170px;
+	float: right;
+	margin-bottom: 10px;
+}
+
+.mapButtons button,
+.listButtons button {
+	width: 100px;
+}
+
+div.map {
+	top: 20px;
+	width: 800px;
+	height: 600px;
+	left: 100px;
+	margin-bottom: 40px;
+}
+
+.content.listPage select {
+	float: right;
+	width: 180px;
+	height: 26px;
+}
+
+img.listImage {
+	float: right;
+	height: 170px;
+}
+
+div.content.listPage > table:nth-child(5) {
+	position: relative;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	margin-bottom: 10px;
+	left: 410px;
+}
+
+/*------------*/
+
+/*Edit page*/
+div.content.editMediaPage {
+	height: 990px;
+}
+/*first p element - tilte*/
+.content.editMediaPage > p:nth-child(3) {
+	padding-top: 30px;
+}
+
+.content.editMediaPage > p:nth-child(3) > input {
+	position: relative;
+	left: 65px;
+	width: 200px;
+}
+
+/*public checkbox*/
+div.content.editMediaPage > p:nth-child(4) > span.gwt-CheckBox {
+	position: relative;
+	left: 46px;
+}
+
+.content.editMediaPage p {
+	clear: both;
+	position: relative;
+	left: 180px;
+	margin: 10px;
+	float: left;
+	width: 460px;
+	text-align: left;
+	margin-left: 0px;
+	margin-right: 0px;
+}
+
+div.mediaMap {
+	width: 640px;
+	height: 480px;
+	left: 180px;
+	top: 30px;
+	margin-bottom: 40px;
+}
+
+div.content.editMediaPage > p.editMediaButtons {
+	position: relative;
+	left: 415px;
+}
+
+div.content.editMediaPage > p.editMediaButtons button {
+	width: 100px;
+}
+
+div.content.editMediaPage img.editMediaFile {
+	height: 180px;
+	float: right;
+	position: relative;
+	top: -125px;
+	right: 180px;
+}
+/*---*/
+
+/*upload page*/
+div.content.uploadPage {
+	height: 1100px;
+}
+
+.content.uploadPage .uploadImage {
+	height: 120px;
+	position: relative;
+	left: 530px;
+}
+
+
+div.content.uploadPage > form > p:nth-child(1) > span, /*file*/
+div.content.uploadPage > form > p:nth-child(2) > span, /*title*/
+div.content.uploadPage > form > p:nth-child(3) > span { /*public*/
+	float: left;
+	width: 100px;
+	text-align: left;
+	margin-top: 5px;
+}
+
+div.content.uploadPage > form > p:nth-child(1), /*file*/
+div.content.uploadPage > form > p:nth-child(2), /*title*/
+div.content.uploadPage > form > p:nth-child(3) { /*public*/
+	width: 400px;
+	float: left;
+	margin: 2px;
+	clear: both;
+	position: relative;
+	left: 280px;
+}
+
+/*latitude / longitude*/
+div.content.uploadPage > form > p:nth-child(4) {
+	clear: both;
+	width: auto;
+	position: relative;
+	left: 280px;
+	float: left;
+	margin-top: 10px;
+}
+
+div.content.uploadPage > form > p:nth-child(4) > span:nth-child(1) {
+	padding-right: 5px;
+}
+
+div.content.uploadPage > form input {
+	float: left;
+	margin-bottom: 5px;
+}
+
+div.content.uploadPage span {
+	float: left;
+}
+
+p.uploadButtons button {
+	width: 100px;
+	height: 26px;
+}
+
+/*---*/
+
+/*New Photo page*/
+div.content.newPhotoPage > form > p:nth-child(5) > span, /*title*/
+div.content.newPhotoPage > form > p:nth-child(6) > span { /*public*/
+	float: left;
+	width: 100px;
+	text-align: left;
+	margin-top: 5px;
+}
+
+div.content.newPhotoPage > form > p:nth-child(3), /*capture photo*/
+div.content.newPhotoPage > form > p:nth-child(5), /*title*/
+div.content.newPhotoPage > form > p:nth-child(6) { /*public*/
+	width: 400px;
+	float: left;
+	margin: 2px;
+	clear: both;
+	position: relative;
+	left: 312px;
+}
+
+div.content.newPhotoPage > form > p:nth-child(3) { /*capture photo*/
+	margin-top: 20px;
+	margin-bottom: 20px;
+	position: relative;
+	left: 300px;
+}
+
+div.content.newPhotoPage > form > p:nth-child(6) > input { /*public checkbox*/
+	float: left;
+	position: relative;
+	left: 0px;
+	margin-top: 8px;
+}
+
+div.content.newPhotoPage > form > p:nth-child(7) { /*latitude / longitude*/
+	clear: both;
+	width: auto;
+	position: relative;
+	left: 312px;
+	float: left;
+	margin-top: 12px;
+	margin-bottom: 0px;
+}
+
+div.content.newPhotoPage > form input {
+	float: left;
+	margin-bottom: 5px;
+}
+
+p.newPhotoButtons {
+	padding-top: 20px;
+}
+
+p.newPhotoButtons button {
+	width: 100px;
+	height: 26px;
+}
+
+/*----*/
 form {
 	clear: both;
 	text-align: center;
@@ -122,20 +590,11 @@ form.uploadForm {
 	top: -100px;
 }
 
-span.label {
-	position: absolute;
-	right: 55%;
-}
-
 input.field, span.field {
 	position: absolute;
 	left: 46%;
 }
 
-form button {
-	position: absolute;
-	width: 90px;
-}
 
 .newUser {
 	clear: both;
@@ -145,62 +604,9 @@ form button {
 	position: relative;
 }
 
-.newUserButtons, .listButtons {
-	margin-right: 10px;
-	width: 90px;
-}
-/*list -- Search -- */
-
-.search-filter {
-	position: relative;
-	padding-bottom: 50px;
-}
-
-.listField {
-	position: absolute;
-}
-
-.listLabelCol1 {
-	position: absolute;
-	right: 81%; /* me dexia stoixish */
-}
-
-.listInputCol1 {
-	position: absolute;
-	left: 20%;
-}
-
-.listLabelCol2 {
-	position: absolute;
-	right: 51%;
-}
-
-.listInputCol2 {
-	position: absolute;
-	left: 51%;
-}
-
-.listLabelType {
-	position: absolute;
-	left: 71%;
-}
-
-.listInputType {
-	position: absolute;
-	left: 76%;
-}
-
 .pager {
 	position: absolute;
 	left: 42.5%;
-}
-
-img.listImage {
-	float: right;
-	height: 200px;
-	padding-top: 40px;
-	padding-bottom: 20px;
-	padding-right: 50px;
 }
 
 p {
@@ -218,25 +624,6 @@ p {
 
 .foto {
 	text-align: center;
-}
-
-div.map {
-/*	position: relative;
-	top: 180px;
-//	padding-top: 100px; */
-	top: 20px;
-	width: 800px;
-	height: 600px;
-	left: 100px;
-	/* margin-bottom: 80px; */
-}
-
-div.mediaMap {
-	width: 640px;
-	height: 480px;
-	left: 180px;
-	top: 80px;
-	margin-bottom: 180px;
 }
 
 .photo {
