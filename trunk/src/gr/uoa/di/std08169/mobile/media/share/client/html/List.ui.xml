@@ -1,56 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-    	xmlns:g="urn:import:com.google.gwt.user.client.ui"
-    	xmlns:gg="urn:import:com.google.gwt.user.datepicker.client"
-    	xmlns:ggg="urn:import:com.google.gwt.user.cellview.client"
-    	xmlns:mms="urn:import:gr.uoa.di.std08169.mobile.media.share.client.html"> <!-- mms: mobile-media-share -->
-    	 <!-- gg:... import gia to DateBox -->
-    	
-    <ui:with field="constants" type="gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants" />
-	<g:HTMLPanel>
-		<mms:Header /> <!-- Import to header sth selida -->
-		<h1><ui:text from="{constants.list}" /></h1> <!-- Breadcrumb -->
-		<img src="./images/listLogo.png" class="listImage" alt="{constants.list}" />
-		<!-- InlineLabel -> span -->
-		<div><!-- controls -->
-			<p class="listLabelCol1">
-				<ui:text from="{constants.title}" />
-				<!-- To g einai Google Element kai den borei na tou prostethei klash -->
-				<g:TextBox ui:field="title" /><!-- To title einai tupou TextBox (exei ginei include panw sto g:...) -->
-				<br />
-				<ui:text from="{constants.createdFrom}" />
-				<gg:DateBox ui:field="createdFrom" />
-				<br />
-				<ui:text from="{constants.editedFrom}" />
-				<gg:DateBox ui:field="editedFrom" />
-				<br />
-				<ui:text from="{constants.publik}" />
-				<g:ListBox ui:field="publik" />
+		xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:gg="urn:import:com.google.gwt.user.datepicker.client"
+		xmlns:ggg="urn:import:com.google.gwt.user.cellview.client"
+		xmlns:mms="urn:import:gr.uoa.di.std08169.mobile.media.share.client.html"> <!-- mms: mobile-media-share -->
+	<!-- gg:... import gia to DateBox -->
+	<ui:with field="constants" type="gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants" />
+	<g:HTMLPanel ui:field="htmlPanel">
+		<div class="content listPage">
+			<mms:Header /> <!-- Import to header sth selida -->
+			<!-- Breadcrumb -->
+			<h3><ui:text from="{constants.youAreHere}" />&nbsp;<ui:text from="{constants.list}" /></h3>
+			<!-- InlineLabel -> span -->
+			<div class="controls"><!-- controls -->
+				<p class="leftColum">
+					<span class="label"><ui:text from="{constants.title}" /></span>
+					<!-- To g einai Google Element kai den borei na tou prostethei klash -->
+					<g:TextBox ui:field="title" /><!-- To title einai tupou TextBox (exei ginei include panw sto g:...) -->
+					<span class="label"><ui:text from="{constants.createdFrom}" /></span>
+					<gg:DateBox ui:field="createdFrom" />
+					<span class="label"><ui:text from="{constants.editedFrom}" /></span>
+					<gg:DateBox ui:field="editedFrom" />
+					<span class="label"><ui:text from="{constants.publik}" /></span>
+					<g:ListBox ui:field="publik" />
+				</p>
+				<p class="centerColum">
+					<span class="label"><ui:text from="{constants.user}" /></span>
+					<g:SuggestBox ui:field="user" />
+					<span class="label"><ui:text from="{constants.createdTo}" /></span>
+					<gg:DateBox ui:field="createdTo" />
+					<span class="label"><ui:text from="{constants.editedTo}" /></span>
+					<gg:DateBox ui:field="editedTo" />
+					<span class="label"><ui:text from="{constants.pageSize}" /></span>
+					<g:ListBox ui:field="pageSize" />
+				</p>
+				<p class="rightColum">
+					<span class="label"><ui:text from="{constants.type}" /></span>
+					<g:ListBox ui:field="type" />
+				</p>
+				<img src="./images/listLogo.png" class="listImage" alt="{constants.list}" />
+			</div><!-- controls -->
+			<p class="listButtons">
+				<g:Button ui:field="download" text="{constants.download}" />
+				<g:Button ui:field="edit" text="{constants.edit}" />
+				<g:Button ui:field="delete" text="{constants.delete}" />
 			</p>
-			<p>
-				<ui:text from="{constants.user}" />
-				<g:SuggestBox ui:field="user" />
-				<br />
-				<ui:text from="{constants.createdTo}" />
-				<gg:DateBox ui:field="createdTo" />
-				<br />
-				<ui:text from="{constants.editedTo}" />
-				<gg:DateBox ui:field="editedTo" />
-				<br />
-				<ui:text from="{constants.pageSize}" />
-				<g:ListBox ui:field="pageSize" />
-			</p>
-			<p>
-			    <ui:text from="{constants.type}" />
-				<g:ListBox ui:field="type" />
-			</p>
-		</div><!-- controls -->
-		<p>
-		    <g:Button ui:field="download" text="{constants.download}" />
-		    <g:Button ui:field="edit" text="{constants.edit}" />
-   		    <g:Button ui:field="delete" text="{constants.delete}" />
-   		</p>
-		<ggg:SimplePager ui:field="pager" location="CENTER" /> <!-- Stoixish sto kentro to text ston pager -->
-		<ggg:CellTable ui:field="mediaTable" />
+			<ggg:SimplePager ui:field="pager" location="CENTER" /> <!-- Stoixish sto kentro to text ston pager -->
+			<ggg:CellTable ui:field="mediaTable" />
+		</div>
 	</g:HTMLPanel>
-</ui:UiBinder>	
+</ui:UiBinder>
+
