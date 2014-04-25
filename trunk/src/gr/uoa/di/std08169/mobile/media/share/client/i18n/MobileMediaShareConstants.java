@@ -46,6 +46,9 @@ public interface MobileMediaShareConstants extends Constants {
 	@DefaultStringValue("Delete")
 	public String delete();
 	
+	@DefaultStringValue("Department of Informatics & Telecommunications, University of Athens")
+	public String di();
+	
 	@DefaultStringValue("Download")
 	public String download();
 	

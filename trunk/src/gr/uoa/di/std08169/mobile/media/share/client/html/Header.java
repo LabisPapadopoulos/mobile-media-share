@@ -33,6 +33,9 @@ public class Header extends Composite {
 	protected DivElement banner;
 	
 	@UiField
+	protected AnchorElement di; //<a></a>
+
+	@UiField
 	protected AnchorElement mapLink; //<a></a>
 	
 	@UiField
@@ -58,6 +61,7 @@ public class Header extends Composite {
 		initWidget(HEADER_UI_BINDER.createAndBindUi(this));
 		//Gia pragmata pou theloun periexomeno
 		//redirect sto map kai krataei kai tin glwssa
+		di.setHref(MOBILE_MEDIA_SHARE_URLS.di(LocaleInfo.getCurrentLocale().getLocaleName()));
 		mapLink.setHref(MOBILE_MEDIA_SHARE_URLS.map(LocaleInfo.getCurrentLocale().getLocaleName()));
 		listLink.setHref(MOBILE_MEDIA_SHARE_URLS.list(LocaleInfo.getCurrentLocale().getLocaleName()));
 		newPhotoLink.setHref(MOBILE_MEDIA_SHARE_URLS.newPhoto(LocaleInfo.getCurrentLocale().getLocaleName()));
