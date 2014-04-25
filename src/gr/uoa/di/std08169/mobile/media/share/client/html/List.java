@@ -4,18 +4,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 
-import gr.uoa.di.std08169.mobile.media.share.client.i18n.MediaTypeConstants;
-import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants;
-import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessages;
-import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaService;
-import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceAsync;
-import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserOracle;
-import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserSuggestion;
-import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
-import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaResult;
-import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
-import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
-
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
@@ -34,9 +23,13 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.HasKeyboardPagingPolicy;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
@@ -57,6 +50,18 @@ import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+
+import gr.uoa.di.std08169.mobile.media.share.client.i18n.MediaTypeConstants;
+import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants;
+import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessages;
+import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaService;
+import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceAsync;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserOracle;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserSuggestion;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaResult;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
 
 //Composite: Einai widget pou einai ftiagmeno me ui xml kai periexei allous widget mesa tou (g:..., gg:..., ...)
 public class List extends Composite implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHandler, 
@@ -143,18 +148,34 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 	private static final int MIN_PAGE_SIZE = 10;
 	private static final int MAX_PAGE_SIZE = 100;
 	private static final int PAGE_SIZE_STEP = 10;
+	private static final int DURATION_BASE = 60;
 	private static final BigDecimal DEGREES_BASE = new BigDecimal(60);
-	private static final TextColumn<Media> TITLE = new TextColumn<Media>() { // TODO
+	//Ena geniko column pou pairnei Media kai deixnei SafeHtml. Ws orisma pairnei ena Cell gia SafeHtmlCell
+	private static final Column<Media, SafeHtml> TITLE = new Column<Media, SafeHtml>(new SafeHtmlCell()) {
 		@Override
-		public String getValue(final Media media) {
-			return media.getTitle();
+		public SafeHtml getValue(final Media media) {
+			//Dhmiourgeitai Builder pou kanei append pragmata. (San StringBuilder)
+			final SafeHtmlBuilder html = new SafeHtmlBuilder();
+			//* Oti einai hdh safe (me to trusted string 'h me allo builder), to vazei opws einai
+			html.append(SafeHtmlUtils.fromTrustedString("<a href=\"" +
+					MOBILE_MEDIA_SHARE_URLS.editMedia(LocaleInfo.getCurrentLocale().getLocaleName(), media.getId()) + "\">"));
+			//* Oti den einai safe, to kanei upoxrewtika escape gia na mhn exei tags, p.x. <br /> -> &lt;br /&gt;
+			html.appendEscaped(media.getTitle());
+			//Append mia aplh stathera pou elegxetai se compile time
+			html.appendHtmlConstant("</a>");
+			return html.toSafeHtml();
 		}
 	};
-	private static final TextColumn<Media> TYPE = new TextColumn<Media>() { // TODO
+	private static final Column<Media, SafeHtml> TYPE = new Column<Media, SafeHtml>(new SafeHtmlCell()) {
 		@Override
-		public String getValue(final Media media) {
-			return (MediaType.getMediaType(media.getType()) == null) ? "" : 
-				MEDIA_TYPE_CONSTANTS.getString(MediaType.getMediaType(media.getType()).name());
+		public SafeHtml getValue(final Media media) {
+			final SafeHtmlBuilder html = new SafeHtmlBuilder();
+			if (MediaType.getMediaType(media.getType()) != null) {
+				html.append(SafeHtmlUtils.fromTrustedString("<span class=\"" + MediaType.getMediaType(media.getType()).name() + "\">"));
+				html.appendEscaped(MEDIA_TYPE_CONSTANTS.getString(MediaType.getMediaType(media.getType()).name()));
+				html.appendHtmlConstant("</span>");
+			}
+			return html.toSafeHtml();
 		}
 	};
 	private static final TextColumn<Media> SIZE = new TextColumn<Media>() {
@@ -169,10 +190,12 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 				return SIZE_MEGABYTES_FORMAT.format(media.getSize() / 1024.0f / 1024.0f);
 		}
 	};
-	private static final TextColumn<Media> DURATION = new TextColumn<Media>() { // TODO
+	private static final TextColumn<Media> DURATION = new TextColumn<Media>() {
 		@Override
 		public String getValue(final Media media) {
-			return Integer.toString(media.getDuration());
+			final MediaType mediaType = MediaType.getMediaType(media.getType());
+			return ((mediaType == MediaType.AUDIO) || (mediaType == MediaType.VIDEO)) ?
+					formatDuration(media.getDuration()) : "-";
 		}
 	};
 	private static final TextColumn<Media> USER = new TextColumn<Media>() {
@@ -208,10 +231,19 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 			return formatLongitude(media.getLongitude());
 		}
 	};
-	private static final TextColumn<Media> PUBLIC = new TextColumn<Media>() { //boolean publik //TODO
+	private static final Column<Media, SafeHtml> PUBLIC = new Column<Media, SafeHtml>(new SafeHtmlCell()) { //boolean publik
 		@Override
-		public String getValue(final Media media) {
-			return media.isPublic() ? MOBILE_MEDIA_SHARE_CONSTANTS.publik() : MOBILE_MEDIA_SHARE_CONSTANTS._private();
+		public SafeHtml getValue(final Media media) {
+			final SafeHtmlBuilder html = new SafeHtmlBuilder();
+			if (media.isPublic()) {
+				html.appendHtmlConstant("<span class=\"public\">");
+				html.appendEscaped(MOBILE_MEDIA_SHARE_CONSTANTS.publik());
+			} else {
+				html.appendHtmlConstant("<span class=\"private\">");
+				html.appendEscaped(MOBILE_MEDIA_SHARE_CONSTANTS._private());
+			}
+			html.appendHtmlConstant("</span>");
+			return html.toSafeHtml();
 		}
 	};
 
@@ -287,6 +319,15 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 	private final ListDataProvider dataProvider;
 	private User selectedUser;
 	
+	public static String formatDuration(final int duration) {
+		final int seconds = duration % DURATION_BASE;
+		final int minutes = (duration / DURATION_BASE) % DURATION_BASE; //p.x se 63 lepta -> krataei 3 lepta
+		final int hours = duration / DURATION_BASE / DURATION_BASE;
+		return (hours > 0) ? MOBILE_MEDIA_SHARE_MESSAGES.durationFormatHoursMinutesSeconds(hours, minutes, seconds) :
+				((minutes > 0) ? MOBILE_MEDIA_SHARE_MESSAGES.durationFormatMinutesSeconds(minutes, seconds) :
+				MOBILE_MEDIA_SHARE_MESSAGES.durationFormatSeconds(seconds));
+	}
+	
 	public static String formatLatitude(final BigDecimal latitude) {
 		// 1 moira = 60 prwta lepta
 		// 1 prwto lepto = 60 deutera
@@ -305,7 +346,6 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 	}
 	
 	public static String formatLongitude(final BigDecimal longitude) {
-		
 		final BigDecimal[] temp1 = longitude.multiply(DEGREES_BASE).multiply(DEGREES_BASE).divideAndRemainder(DEGREES_BASE);
 		final int seconds = temp1[1].intValue();
 		final BigDecimal[] temp2 = temp1[0].divideAndRemainder(DEGREES_BASE);

@@ -1,16 +1,5 @@
 package gr.uoa.di.std08169.mobile.media.share.client.html;
 
-import gr.uoa.di.std08169.mobile.media.share.client.i18n.MediaTypeConstants;
-import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants;
-import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessages;
-import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaService;
-import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceAsync;
-import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserOracle;
-import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserSuggestion;
-import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
-import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
-import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
-
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
@@ -63,6 +52,17 @@ import com.google.maps.gwt.client.Marker;
 import com.google.maps.gwt.client.MarkerImage;
 import com.google.maps.gwt.client.MarkerOptions;
 import com.google.maps.gwt.client.MouseEvent;
+
+import gr.uoa.di.std08169.mobile.media.share.client.i18n.MediaTypeConstants;
+import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants;
+import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessages;
+import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaService;
+import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceAsync;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserOracle;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserSuggestion;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
 
 public class Map extends Composite implements CenterChangedHandler, ChangeHandler, ClickHandler, EntryPoint, KeyUpHandler,
 		Marker.ClickHandler, SelectionHandler<Suggestion>, ValueChangeHandler<Date>, Runnable,
