@@ -1,17 +1,12 @@
-validate user emails via messages
-DecimalFormat gia duration
-list
-	title safeHtml column
-	type safeHtml column
-	duration textColumn format
-	public safeHtml column
+map double click, list double click
+show pages
 View media stin List Page
-Forgot Password? (login page)
 New Video page
 My Account page
-Logout
 Footer
-breadcrumbs
+
+user roles: user, admin, NULL (pending)
+userServlet: edit password, reset password, create user (validate email), delete user
 
 nightly build to project ston okeano
 timeout exception otan kanoume new photo apo capture
