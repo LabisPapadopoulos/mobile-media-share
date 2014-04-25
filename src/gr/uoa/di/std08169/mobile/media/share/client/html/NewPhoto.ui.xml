@@ -1,39 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-    	xmlns:g="urn:import:com.google.gwt.user.client.ui"
-    	xmlns:mms="urn:import:gr.uoa.di.std08169.mobile.media.share.client.html"> <!-- mms: mobile-media-share -->
-    <ui:with field="constants" type="gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants" />
+		xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:mms="urn:import:gr.uoa.di.std08169.mobile.media.share.client.html"> <!-- mms: mobile-media-share -->
+	<ui:with field="constants" type="gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants" />
 	<g:HTMLPanel>
-		<mms:Header /> <!-- Import to header sth selida -->
-		<h1><ui:text from="{constants.newPhoto}" /></h1> <!-- Breadcrumb -->
-		<img src="./images/newPhoto.svg" class="headerImage" alt="{constants.newPhoto}" />
-		<form method="post" action="./mediaServlet" enctype="multipart/form-data" target="_self">
-			<video ui:field="video" style="display:block;" class="photo" />
-		    <canvas ui:field="canvas" style="display:none;" class="photo" />
-		    <p>
-		    	<g:Button ui:field="capture" text="{constants.capturePhoto}" />
-	    	</p>
-		    <g:Hidden ui:field="photo" name="photo" />
-		    <p>
-			    <ui:text from="{constants.title}" />
-			    <g:TextBox ui:field="title" name="title" />
-		    </p>
-		    <p>
-			    <ui:text from="{constants.publik}" />
-			    <input type="checkbox" name="public" class="field" />
-			</p>
-			<p>
-				<ui:text from="{constants.latitudeLongitude}" />
-				<g:InlineLabel ui:field="latitudeLongitude" />
-			</p>
-			<div ui:field="map" class="mediaMap"></div>
-			<g:Hidden ui:field="latitude" name="latitude" />
-			<g:Hidden ui:field="longitude" name="longitude" />
-			<g:Hidden ui:field="locale" name="locale" />
-			<p>
-				<g:SubmitButton ui:field="ok" text="{constants.ok}" />
-				<g:ResetButton ui:field="reset" text="{constants.reset}" />
-			</p>
-		</form>
+		<div class="content newPhotoPage">
+			<mms:Header /> <!-- Import to header sth selida -->
+			<!-- Breadcrumb -->
+			<h3><ui:text from="{constants.youAreHere}" />&nbsp;<ui:text from="{constants.newPhoto}" /></h3>
+			<form method="post" action="./mediaServlet" enctype="multipart/form-data" target="_self">
+				<video ui:field="video" style="display:block;" class="photo" />
+				<canvas ui:field="canvas" style="display:none;" class="photo" />
+				<p><g:Button ui:field="capture" text="{constants.capturePhoto}" /></p>
+				<g:Hidden ui:field="photo" name="photo" />
+				<p>
+					<span class="label"><ui:text from="{constants.title}" /></span>
+					<g:TextBox ui:field="title" name="title" />
+				</p>
+				<p>
+					<span class="label"><ui:text from="{constants.publik}" /></span>
+					<input type="checkbox" name="public" class="field" />
+				</p>
+				<p>
+					<span class="label"><ui:text from="{constants.latitudeLongitude}" /></span>
+					<g:InlineLabel ui:field="latitudeLongitude" />
+				</p>
+				<div ui:field="map" class="mediaMap"></div>
+				<g:Hidden ui:field="latitude" name="latitude" />
+				<g:Hidden ui:field="longitude" name="longitude" />
+				<g:Hidden ui:field="locale" name="locale" />
+				<p class="newPhotoButtons">
+					<g:SubmitButton ui:field="ok" text="{constants.ok}" />
+					<g:ResetButton ui:field="reset" text="{constants.reset}" />
+				</p>
+			</form>
+		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>	
