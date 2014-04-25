@@ -1,7 +1,5 @@
 package gr.uoa.di.std08169.mobile.media.share.client.html;
 
-import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants;
-
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
@@ -32,10 +30,6 @@ public class Login extends Composite implements ClickHandler, EntryPoint, KeyUpH
 	
 	private static final LoginUiBinder LOGIN_UI_BINDER = 
 			GWT.create(LoginUiBinder.class);
-	
-	private static final MobileMediaShareConstants MOBILE_MEDIA_SHARE_CONSTANTS =
-			//kanei automath ulopoihsh to GWT tou interface
-			GWT.create(MobileMediaShareConstants.class);
 	private static final MobileMediaShareUrls MOBILE_MEDIA_SHARE_URLS =
 			GWT.create(MobileMediaShareUrls.class);
 	
