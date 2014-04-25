@@ -1,28 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-    	xmlns:g="urn:import:com.google.gwt.user.client.ui"
-    	xmlns:mms="urn:import:gr.uoa.di.std08169.mobile.media.share.client.html"> <!-- mms: mobile-media-share -->
-    <ui:with field="constants" type="gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants" />
-	<g:HTMLPanel>
-		<mms:Header /> <!-- Import to header sth selida -->
-		<h1><ui:text from="{constants.editMedia}" /></h1> <!-- Breadcrumb -->
-		<img src="./images/edit.svg" class="headerImage" alt="{constants.editMedia}" />
-		<p>
-		    <ui:text from="{constants.title}" />
-		    <g:TextBox ui:field="title" />
-	    </p>
-	    <p>
-		    <ui:text from="{constants.publik}" />
-		    <g:CheckBox ui:field="publik" />
-		</p>
-		<p>
-			<ui:text from="{constants.latitudeLongitude}" />
-			<g:InlineLabel ui:field="latitudeLongitude" />
-		</p>
-		<div ui:field="map" class="mediaMap"></div>
-		<p>
-			<g:Button ui:field="ok" text="{constants.ok}" />
-			<g:Button ui:field="reset" text="{constants.reset}" />
-		</p>
+		xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:mms="urn:import:gr.uoa.di.std08169.mobile.media.share.client.html"> <!-- mms: mobile-media-share -->
+	<ui:with field="constants" type="gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants" />
+	<g:HTMLPanel ui:field="htmlPanel">
+		<div class="content editMediaPage">
+			<mms:Header /> <!-- Import to header sth selida -->
+			<!-- Breadcrumb -->
+			<h3><ui:text from="{constants.youAreHere}" />&nbsp;<ui:text from="{constants.editMedia}" /></h3>
+			<p>
+				<span class="label"><ui:text from="{constants.title}" /></span>
+				<g:TextBox ui:field="title" />
+			</p>
+			<p>
+				<span class="label"><ui:text from="{constants.publik}" /></span>
+				<g:CheckBox ui:field="publik" />
+			</p>
+			<p>
+				<span class="label"><ui:text from="{constants.latitudeLongitude}" /></span>
+				<g:InlineLabel ui:field="latitudeLongitude" />
+			</p>
+			<img src="./images/dbEdit.jpg" class="editMediaFile" alt="{constants.edit}" />
+			<div ui:field="map" class="mediaMap"></div>
+			<p class="editMediaButtons">
+				<g:Button ui:field="ok" text="{constants.ok}" />
+				<g:Button ui:field="reset" text="{constants.reset}" />
+			</p>
+		</div>
 	</g:HTMLPanel>
-</ui:UiBinder>	
+</ui:UiBinder>
+

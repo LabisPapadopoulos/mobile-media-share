@@ -35,18 +35,23 @@ import com.google.maps.gwt.client.MarkerImage;
 import com.google.maps.gwt.client.MarkerOptions;
 import com.google.maps.gwt.client.MouseEvent;
 
+import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants;
+import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessages;
 import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceAsync;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
 
 public class EditMedia extends Composite implements ClickHandler, EntryPoint, GoogleMap.ClickHandler, KeyUpHandler, Runnable {
-
 	//To interface ftiaxnei ena widget me vash to EditMedia
 	protected static interface EditMediaUiBinder extends UiBinder<Widget, EditMedia> {}
 	
 	private static final EditMediaUiBinder EDIT_MEDIA_UI_BINDER = GWT.create(EditMediaUiBinder.class);
+	private static final MobileMediaShareConstants MOBILE_MEDIA_SHARE_CONSTANTS = 
+			GWT.create(MobileMediaShareConstants.class);
 	private static final MobileMediaShareUrls MOBILE_MEDIA_SHARE_URLS =
 			GWT.create(MobileMediaShareUrls.class);
+	private static final MobileMediaShareMessages MOBILE_MEDIA_SHARE_MESSAGES =
+			GWT.create(MobileMediaShareMessages.class);
 	
 	private static final MediaServiceAsync MEDIA_SERVICE = GWT.create(MediaService.class);
 	
@@ -94,7 +99,7 @@ public class EditMedia extends Composite implements ClickHandler, EntryPoint, Go
 			MEDIA_SERVICE.editMedia(media, new AsyncCallback<Void>() {
 				@Override
 				public void onFailure(final Throwable throwable) {
-					Window.alert("Den borw na kanw edit"); // TODO
+					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorEditingMedia(throwable.getMessage()));
 					//redirect sto map
 					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
 							//me to antistoixo locale 
@@ -152,11 +157,11 @@ public class EditMedia extends Composite implements ClickHandler, EntryPoint, Go
 		markerOptions.setMap(googleMap);
 		markerOptions.setIcon(MarkerImage.create(Upload.MARKER_URL));
 		marker = Marker.create(markerOptions);
-		
 		//psaxnei antikeimeno gia na kentrarei o xarths kai na fortwsei h forma
 		final String id = Window.Location.getParameter("id");
 		if (id == null) {
-			Window.alert("Dwse ID enos Media");// TODO
+			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingMedium(
+					MOBILE_MEDIA_SHARE_CONSTANTS.noMediaIdSpecified()));
 			//redirect sto map
 			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
 					//me to antistoixo locale 
@@ -166,7 +171,7 @@ public class EditMedia extends Composite implements ClickHandler, EntryPoint, Go
 			MEDIA_SERVICE.getMedia(id, new AsyncCallback<Media>() {
 				@Override
 				public void onFailure(final Throwable throwable) {
-					Window.alert("To media den boresa na to psaxw"); // TODO
+					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingMedium(throwable.getMessage()));
 					//redirect sto map
 					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
 							//me to antistoixo locale 
@@ -176,7 +181,8 @@ public class EditMedia extends Composite implements ClickHandler, EntryPoint, Go
 				@Override
 				public void onSuccess(final Media media) {
 					if (media == null) {
-						Window.alert("To Media den yparxei"); // TODO
+						Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorEditingMedia(
+								MOBILE_MEDIA_SHARE_CONSTANTS.mediaNotFound()));
 						//redirect sto map
 						Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
 								//me to antistoixo locale 
@@ -188,7 +194,8 @@ public class EditMedia extends Composite implements ClickHandler, EntryPoint, Go
 						//Click sto reset gia na parei times forma, xarths kai marker
 						reset.click();
 					} else { // to media vrethike alla den anhkei sto xrhsth
-						Window.alert("To Media den einai diko sou"); // TODO
+						Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorEditingMedia(
+								MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
 						//redirect sto map
 						Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
 								//me to antistoixo locale 
