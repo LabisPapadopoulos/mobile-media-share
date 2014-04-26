@@ -170,7 +170,10 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("User")
 	public String user();
-	
+
+	@DefaultStringValue("View Media")
+	public String viewMedia();
+
 	@DefaultStringValue("You are here:")
 	public String youAreHere();
 }

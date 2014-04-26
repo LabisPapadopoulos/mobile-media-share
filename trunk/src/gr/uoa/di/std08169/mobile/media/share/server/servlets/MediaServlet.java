@@ -41,6 +41,7 @@ public class MediaServlet extends HttpServlet {
 	private static final Logger LOGGER = Logger.getLogger(MediaServlet.class.getName());
 	//tmp directory me to opoio exei xekinhsei h JVM kai ekei tha dexetai o tomcat ta arxeia pou anevazoun oi xrhstes
 
+	//Service gia apostolh twn dedomenwn tou media
 	private ExtendedMediaService mediaService; //Java Bean
 	private int bufferSize;
 	private UserService userService;

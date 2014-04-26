@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+		xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:mms="urn:import:gr.uoa.di.std08169.mobile.media.share.client.html"> <!-- mms: mobile-media-share -->
+	<ui:with field="constants" type="gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants" />
+	<g:HTMLPanel ui:field="htmlPanel">
+		<div class="content viewMediaPage">
+			<mms:Header /> <!-- Import to header sth selida -->
+			<!-- Breadcrumb -->
+			<h3><ui:text from="{constants.youAreHere}" />&nbsp;<ui:text from="{constants.viewMedia}" /></h3>
+			<div ui:field="content" class="mediaContent"></div>
+			<p class="viewMediaButtons">
+				<g:Button ui:field="download" text="{constants.download}" />
+				<g:Button ui:field="edit" text="{constants.edit}" />
+				<g:Button ui:field="delete" text="{constants.delete}" />
+			</p>
+			<p>
+				<span class="label"><ui:text from="{constants.title}" /></span>
+				<g:InlineLabel ui:field="title" />
+			</p>
+			<p>
+				<span class="label"><ui:text from="{constants.type}" /></span>
+				<g:InlineHTML ui:field="type" />
+			</p>
+			<p>
+				<span class="label"><ui:text from="{constants.size}" /></span>
+				<g:InlineLabel ui:field="size" />
+			</p>
+			<p>
+				<span class="label"><ui:text from="{constants.duration}" /></span>
+				<g:InlineLabel ui:field="duration" />
+			</p>
+			<p>
+				<span class="label"><ui:text from="{constants.user}" /></span>
+				<g:InlineLabel ui:field="user" />
+			</p>
+			<p>
+				<span class="label"><ui:text from="{constants.created}" /></span>
+				<g:InlineLabel ui:field="created" />
+			</p>
+			<p>
+				<span class="label"><ui:text from="{constants.edited}" /></span>
+				<g:InlineLabel ui:field="edited" />
+			</p>
+			<p>
+				<span class="label"><ui:text from="{constants.publik}" /></span>
+				<g:InlineHTML ui:field="publik" />
+			</p>
+			<p>
+				<span class="label"><ui:text from="{constants.latitudeLongitude}" /></span>
+				<g:InlineLabel ui:field="latitudeLongitude" />
+			</p>
+			<img src="./images/view.jpg" class="viewMediaFile" alt="{constants.viewMedia}" />
+			<div ui:field="map" class="mediaMap"></div>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder>

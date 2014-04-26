@@ -40,6 +40,9 @@ public interface MobileMediaShareMessages extends Messages {
 	@DefaultMessage("Error retrieving your location: {0}")
 	public String errorRetrievingYourLocation(final String message);
 	
+	@DefaultMessage("Error viewing media: {0}")
+	public String errorViewingMedia(final String message);
+	
 	@DefaultMessage("{0}° {1}′ {2}″ N")
 	public String latitudeFormatNorth(final int degrees, final int minutes, final int seconds);
 

@@ -54,4 +54,7 @@ public interface MobileMediaShareUrls extends Messages {
 
 	@DefaultMessage("./upload.jsp?locale={0}")
 	public String upload(final String locale);
+
+	@DefaultMessage("./viewMedia.jsp?locale={0}&id={1}")
+	public String viewMedia(final String locale, final String id);
 }
