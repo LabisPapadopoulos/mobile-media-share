@@ -43,8 +43,6 @@ import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.maps.gwt.client.GoogleMap;
-import com.google.maps.gwt.client.GoogleMap.CenterChangedHandler;
-import com.google.maps.gwt.client.GoogleMap.ZoomChangedHandler;
 import com.google.maps.gwt.client.LatLng;
 import com.google.maps.gwt.client.MapOptions;
 import com.google.maps.gwt.client.MapTypeId;
@@ -64,11 +62,32 @@ import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
 import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
 
-public class Map extends Composite implements CenterChangedHandler, ChangeHandler, ClickHandler, EntryPoint, KeyUpHandler,
-		Marker.ClickHandler, SelectionHandler<Suggestion>, ValueChangeHandler<Date>, Runnable,
-		ZoomChangedHandler {
+public class Map extends Composite implements ChangeHandler, ClickHandler, EntryPoint, GoogleMap.CenterChangedHandler, 
+		GoogleMap.ZoomChangedHandler, KeyUpHandler, Marker.ClickHandler, SelectionHandler<Suggestion>, ValueChangeHandler<Date>,
+		Runnable {
 	//Epistrefei widget pou mesa tou tha exei ena map
 	protected static interface MapUiBinder extends UiBinder<Widget, Map> {}
+	
+	private class DoubleClickHandler implements Marker.DblClickHandler {
+		@Override
+		public void handle(final MouseEvent event) {
+			// xedialexe to selected marker
+			if (selectedMarker != null) {
+				selectedMarker.setIcon(markerImages.get(MediaType.getMediaType(markers.get(selectedMarker).getType())));
+			}
+			//Se epilegmeno antikeimeno bainei h pio megalh tou eikona 
+			for (java.util.Map.Entry<Marker, Media> marker : markers.entrySet()) {
+				if (marker.getKey().getPosition().equals(event.getLatLng())) { // autos o marker dialexthke
+//					marker.getKey().setIcon(selectedMarkerImages.get(MediaType.getMediaType(marker.getValue().getType())));
+//					selectedMarker = marker.getKey();
+//					download.setEnabled(true);
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.viewMedia(LocaleInfo.getCurrentLocale().getLocaleName(),
+							marker.getValue().getId()));
+					return;
+				}
+			}	
+		}
+	}
 	
 	public static final String GOOGLE_MAPS_API = "maps";
 	public static final String GOOGLE_MAPS_VERSION = "3";
@@ -367,6 +386,7 @@ public class Map extends Composite implements CenterChangedHandler, ChangeHandle
 					//vriskei tin katallhlh eikona gia sugkekrimeno tupo antikeimenou apo to hashMap
 					marker.setIcon(markerImages.get(MediaType.getMediaType(media.getType())));
 					marker.addClickListener(Map.this);
+					marker.addDblClickListener(Map.this.new DoubleClickHandler());
 					markers.put(marker, media);
 				}
 				selectedMarker = null;

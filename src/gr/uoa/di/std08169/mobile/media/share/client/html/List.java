@@ -121,6 +121,86 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 		}		
 	}
 
+	public static final Column<Media, SafeHtml> TYPE = new Column<Media, SafeHtml>(new SafeHtmlCell()) {
+		@Override
+		public SafeHtml getValue(final Media media) {
+			final SafeHtmlBuilder html = new SafeHtmlBuilder();
+			if (MediaType.getMediaType(media.getType()) != null) {
+				html.append(SafeHtmlUtils.fromTrustedString("<span class=\"" + MediaType.getMediaType(media.getType()).name() + "\">"));
+				html.appendEscaped(MEDIA_TYPE_CONSTANTS.getString(MediaType.getMediaType(media.getType()).name()));
+				html.appendHtmlConstant("</span>");
+			}
+			return html.toSafeHtml();
+		}
+	};
+	public static final TextColumn<Media> SIZE = new TextColumn<Media>() {
+		@Override
+		public String getValue(final Media media) {
+			//megathos arxeiou (B, KB, MB)
+			if (media.getSize() < 1024l)
+				return SIZE_BYTES_FORMAT.format(media.getSize());
+			else if (media.getSize() < 1024l * 1024l)
+				return SIZE_KILOBYTES_FORMAT.format(media.getSize() / 1024.0f);
+			else
+				return SIZE_MEGABYTES_FORMAT.format(media.getSize() / 1024.0f / 1024.0f);
+		}
+	};
+	public static final TextColumn<Media> DURATION = new TextColumn<Media>() {
+		@Override
+		public String getValue(final Media media) {
+			final MediaType mediaType = MediaType.getMediaType(media.getType());
+			return ((mediaType == MediaType.AUDIO) || (mediaType == MediaType.VIDEO)) ?
+					formatDuration(media.getDuration()) : "-";
+		}
+	};
+	public static final TextColumn<Media> USER = new TextColumn<Media>() {
+		@Override
+		public String getValue(final Media media) {
+			return MOBILE_MEDIA_SHARE_MESSAGES.userFormat(
+					(media.getUser().getName() == null) ? MOBILE_MEDIA_SHARE_CONSTANTS._anonymous_() :
+						media.getUser().getName(), media.getUser().getEmail().substring(0,
+								media.getUser().getEmail().indexOf('@')));
+		}
+	};
+	public static final TextColumn<Media> CREATED = new TextColumn<Media>() { //Date created
+		@Override
+		public String getValue(final Media media) {
+			return DATE_TIME_FORMAT.format(media.getCreated());
+		}
+	};
+	public static final TextColumn<Media> EDITED = new TextColumn<Media>() { //Date edited
+		@Override
+		public String getValue(final Media media) {
+			return DATE_TIME_FORMAT.format(media.getEdited());
+		}
+	};
+	public static final TextColumn<Media> LATITUDE = new TextColumn<Media>() { //BigDecimal latitude
+		@Override
+		public String getValue(final Media media) {
+			return formatLatitude(media.getLatitude());
+		}
+	};
+	public static final TextColumn<Media> LONGITUDE = new TextColumn<Media>() { //BigDecimal longitude
+		@Override
+		public String getValue(final Media media) {
+			return formatLongitude(media.getLongitude());
+		}
+	};
+	public static final Column<Media, SafeHtml> PUBLIC = new Column<Media, SafeHtml>(new SafeHtmlCell()) { //boolean publik
+		@Override
+		public SafeHtml getValue(final Media media) {
+			final SafeHtmlBuilder html = new SafeHtmlBuilder();
+			if (media.isPublic()) {
+				html.appendHtmlConstant("<span class=\"public\">");
+				html.appendEscaped(MOBILE_MEDIA_SHARE_CONSTANTS.publik());
+			} else {
+				html.appendHtmlConstant("<span class=\"private\">");
+				html.appendEscaped(MOBILE_MEDIA_SHARE_CONSTANTS._private());
+			}
+			html.appendHtmlConstant("</span>");
+			return html.toSafeHtml();
+		}
+	};
 	private static final ListUiBinder LIST_UI_BINDER = GWT.create(ListUiBinder.class);
 	private static final MobileMediaShareConstants MOBILE_MEDIA_SHARE_CONSTANTS =
 			//kanei automath ulopoihsh to GWT tou interface
@@ -158,91 +238,11 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 			final SafeHtmlBuilder html = new SafeHtmlBuilder();
 			//* Oti einai hdh safe (me to trusted string 'h me allo builder), to vazei opws einai
 			html.append(SafeHtmlUtils.fromTrustedString("<a href=\"" +
-					MOBILE_MEDIA_SHARE_URLS.editMedia(LocaleInfo.getCurrentLocale().getLocaleName(), media.getId()) + "\">"));
+					MOBILE_MEDIA_SHARE_URLS.viewMedia(LocaleInfo.getCurrentLocale().getLocaleName(), media.getId()) + "\">"));
 			//* Oti den einai safe, to kanei upoxrewtika escape gia na mhn exei tags, p.x. <br /> -> &lt;br /&gt;
 			html.appendEscaped(media.getTitle());
 			//Append mia aplh stathera pou elegxetai se compile time
 			html.appendHtmlConstant("</a>");
-			return html.toSafeHtml();
-		}
-	};
-	private static final Column<Media, SafeHtml> TYPE = new Column<Media, SafeHtml>(new SafeHtmlCell()) {
-		@Override
-		public SafeHtml getValue(final Media media) {
-			final SafeHtmlBuilder html = new SafeHtmlBuilder();
-			if (MediaType.getMediaType(media.getType()) != null) {
-				html.append(SafeHtmlUtils.fromTrustedString("<span class=\"" + MediaType.getMediaType(media.getType()).name() + "\">"));
-				html.appendEscaped(MEDIA_TYPE_CONSTANTS.getString(MediaType.getMediaType(media.getType()).name()));
-				html.appendHtmlConstant("</span>");
-			}
-			return html.toSafeHtml();
-		}
-	};
-	private static final TextColumn<Media> SIZE = new TextColumn<Media>() {
-		@Override
-		public String getValue(final Media media) {
-			//megathos arxeiou (B, KB, MB)
-			if (media.getSize() < 1024l)
-				return SIZE_BYTES_FORMAT.format(media.getSize());
-			else if (media.getSize() < 1024l * 1024l)
-				return SIZE_KILOBYTES_FORMAT.format(media.getSize() / 1024.0f);
-			else
-				return SIZE_MEGABYTES_FORMAT.format(media.getSize() / 1024.0f / 1024.0f);
-		}
-	};
-	private static final TextColumn<Media> DURATION = new TextColumn<Media>() {
-		@Override
-		public String getValue(final Media media) {
-			final MediaType mediaType = MediaType.getMediaType(media.getType());
-			return ((mediaType == MediaType.AUDIO) || (mediaType == MediaType.VIDEO)) ?
-					formatDuration(media.getDuration()) : "-";
-		}
-	};
-	private static final TextColumn<Media> USER = new TextColumn<Media>() {
-		@Override
-		public String getValue(final Media media) {
-			return MOBILE_MEDIA_SHARE_MESSAGES.userFormat(
-					(media.getUser().getName() == null) ? MOBILE_MEDIA_SHARE_CONSTANTS._anonymous_() :
-						media.getUser().getName(), media.getUser().getEmail().substring(0,
-								media.getUser().getEmail().indexOf('@')));
-		}
-	};
-	private static final TextColumn<Media> CREATED = new TextColumn<Media>() { //Date created
-		@Override
-		public String getValue(final Media media) {
-			return DATE_TIME_FORMAT.format(media.getCreated());
-		}
-	};
-	private static final TextColumn<Media> EDITED = new TextColumn<Media>() { //Date edited
-		@Override
-		public String getValue(final Media media) {
-			return DATE_TIME_FORMAT.format(media.getEdited());
-		}
-	};
-	private static final TextColumn<Media> LATITUDE = new TextColumn<Media>() { //BigDecimal latitude
-		@Override
-		public String getValue(final Media media) {
-			return formatLatitude(media.getLatitude());
-		}
-	};
-	private static final TextColumn<Media> LONGITUDE = new TextColumn<Media>() { //BigDecimal longitude
-		@Override
-		public String getValue(final Media media) {
-			return formatLongitude(media.getLongitude());
-		}
-	};
-	private static final Column<Media, SafeHtml> PUBLIC = new Column<Media, SafeHtml>(new SafeHtmlCell()) { //boolean publik
-		@Override
-		public SafeHtml getValue(final Media media) {
-			final SafeHtmlBuilder html = new SafeHtmlBuilder();
-			if (media.isPublic()) {
-				html.appendHtmlConstant("<span class=\"public\">");
-				html.appendEscaped(MOBILE_MEDIA_SHARE_CONSTANTS.publik());
-			} else {
-				html.appendHtmlConstant("<span class=\"private\">");
-				html.appendEscaped(MOBILE_MEDIA_SHARE_CONSTANTS._private());
-			}
-			html.appendHtmlConstant("</span>");
 			return html.toSafeHtml();
 		}
 	};

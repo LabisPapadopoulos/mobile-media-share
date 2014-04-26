@@ -40,6 +40,7 @@
 			<arg value="gr.uoa.di.std08169.mobile.media.share.NewUser" />
 			<arg value="gr.uoa.di.std08169.mobile.media.share.NewVideo" />
 			<arg value="gr.uoa.di.std08169.mobile.media.share.Upload" />
+			<arg value="gr.uoa.di.std08169.mobile.media.share.ViewMedia" />
 		</java>
 	</target>
 	<target name="war" depends="gwtc" description="Create a war file">
@@ -56,6 +57,7 @@
 		<delete dir="war/newUser" failonerror="false" />
 		<delete dir="war/newVideo" failonerror="false" />
 		<delete dir="war/upload" failonerror="false" />
+		<delete dir="war/viewMedia" failonerror="false" />
 		<delete dir="war/WEB-INF/classes" failonerror="false" />
 		<delete dir="war/WEB-INF/deploy" failonerror="false" />
 	</target>
