@@ -245,8 +245,6 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 										//me to antistoixo locale 
 										LocaleInfo.getCurrentLocale().getLocaleName())));
 							}
-							
-							
 							break;
 						case VIDEO:
 							final VideoElement video = Document.get().createVideoElement();

@@ -8,22 +8,31 @@ package gr.uoa.di.std08169.mobile.media.share.shared.user;
  */
 public class User implements Comparable<User> {
 	private final String email;
+	private final UserStatus status;
 	private final String name;
 	private final String photo;
+	//To password prepei na phgainei pros th vash opote xreiazetai, alla pote na erxetai
 	
-	public User(final String email, final String name, final String photo) {
+	public User(final String email, final UserStatus status, final String name, final String photo) {
 		if (email == null)
 			//exception gia asfaleia se periptwsh null
 			throw new IllegalArgumentException(User.class.getName() + " email can not be null");
 		if (email.isEmpty())
 			throw new IllegalArgumentException(User.class.getName() + " email can not be empty");
+		if (status == null)
+			throw new IllegalArgumentException(User.class.getName() + " status can not be null");
 		this.email = email;
+		this.status = status;
 		this.name = ((name != null) && name.isEmpty()) ? null : name;
 		this.photo = ((photo != null) && photo.isEmpty()) ? null : photo;
 	}
 
 	public String getEmail() {
 		return email;
+	}
+	
+	public UserStatus getStatus() {
+		return status;
 	}
 
 	public String getName() {

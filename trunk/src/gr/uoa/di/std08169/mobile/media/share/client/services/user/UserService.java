@@ -17,13 +17,27 @@ public interface UserService extends RemoteService {
 	public boolean isValidUser(final String email, final String password) throws UserServiceException;
 	
 	/**
-	 * Add user if does not exist.
-	 * @param email the email of the user
-	 * @param password the password of the user
-	 * @return true if user was added, false if user already exists
-	 * @throws UserServiceException if any errors occur
+	 * Prosthikh xrhsth an den uparxei.
+	 * @param email to email tou user
+	 * @param password to password tou user
+	 * @return ena token pou anagnwrizei prosorina ton xrhsth an prostethike, alliws null an uparxei hdh o xrhsths.
+	 * @throws UserServiceException gia kathe sfalma
 	 */
-	public boolean addUser(final String email, final String password) throws UserServiceException;
-	//TODO editUser
-	//TODO deleteUser
+	public String addUser(final String email, final String password) throws UserServiceException;
+	
+	/**
+	 * Epexergasia enos xrhsth
+	 * @param user o xrhsths pou tha allaxtei
+	 * @param password to neo password tou xrhsth h null an de xreiazetai na allaxei
+	 * @return ena token pou anagnwrizei prosorina ton xrhsth an xehase to password, alliws null. 
+	 * @throws UserServiceException gia kathe sfalma
+	 */
+	public String editUser(final User user, final String password) throws UserServiceException;
+	
+	/**
+	 * Diagrafh xrhsth
+	 * @param email email tou xrhsth pros diagrafh
+	 * @throws UserServiceException gia kathe sfalma
+	 */
+	public void deleteUser(final String email) throws UserServiceException;
 }

@@ -12,7 +12,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 //* extends RemoteServiceServlet: gia na borei na kaleitai mesw diktuou 
 //(Gia na ulopoihthei to UserServiceAsync)
 //* implements UserService: gia na sumperiferetai san userService
-//GWT servlet
+//GWT servlet pou kalei to interface userService pou ulopoieitai apo to UserServiceImpl
 public class UserServiceServlet extends RemoteServiceServlet implements UserService {
 	private static final long serialVersionUID = 1L;
 
@@ -48,7 +48,17 @@ public class UserServiceServlet extends RemoteServiceServlet implements UserServ
 	}
 	
 	@Override
-	public boolean addUser(final String email, final String password) throws UserServiceException {
+	public String addUser(final String email, final String password) throws UserServiceException {
 		return userService.addUser(email, password);
+	}
+
+	@Override
+	public String editUser(final User user, final String password) throws UserServiceException {
+		return userService.editUser(user, password);
+	}
+
+	@Override
+	public void deleteUser(final String email) throws UserServiceException {
+		userService.deleteUser(email);
 	}
 }

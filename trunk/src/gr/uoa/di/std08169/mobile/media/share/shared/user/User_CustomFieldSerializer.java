@@ -11,13 +11,17 @@ public class User_CustomFieldSerializer extends CustomFieldSerializer<User> {
 	
 	public static User instantiate(final SerializationStreamReader reader) throws SerializationException {
 		final String email = reader.readString();
+		final int status = reader.readInt();
 		final String name = reader.readString();
 		final String photo = reader.readString();
-		return new User(email, name.isEmpty() ? null : name, photo.isEmpty() ? null : photo);
+		//UserStatus.values()[status]: pairnei to enumeration (exei epistrepsei oles tis times tou) me vash to int pou diavase
+		return new User(email, UserStatus.values()[status], name.isEmpty() ? null : name, photo.isEmpty() ? null : photo);
 	}
 	
 	public static void serialize(final SerializationStreamWriter writer, final User user) throws SerializationException {
 		writer.writeString(user.getEmail());
+		//serialize to enumaration se int
+		writer.writeInt(user.getStatus().ordinal());
 		writer.writeString((user.getName() == null) ? "" : user.getName());
 		writer.writeString((user.getPhoto() == null) ? "" : user.getPhoto());
 	}
@@ -33,14 +37,16 @@ public class User_CustomFieldSerializer extends CustomFieldSerializer<User> {
 	@Override
 	public User instantiateInstance(final SerializationStreamReader reader) throws SerializationException {
 		final String email = reader.readString();
+		final int status = reader.readInt();
 		final String name = reader.readString();
 		final String photo = reader.readString();
-		return new User(email, name.isEmpty() ? null : name, photo.isEmpty() ? null : photo);
+		return new User(email, UserStatus.values()[status], name.isEmpty() ? null : name, photo.isEmpty() ? null : photo);
 	}
 
 	@Override
 	public void serializeInstance(final SerializationStreamWriter writer, final User user) throws SerializationException {
 		writer.writeString(user.getEmail());
+		writer.writeInt(user.getStatus().ordinal());
 		writer.writeString((user.getName() == null) ? "" : user.getName());
 		writer.writeString((user.getPhoto() == null) ? "" : user.getPhoto());
 	}

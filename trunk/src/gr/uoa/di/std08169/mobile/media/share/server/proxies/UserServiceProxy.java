@@ -80,7 +80,25 @@ public class UserServiceProxy implements UserService {
 	}
 
 	@Override
-	public boolean addUser(final String email, final String password) throws UserServiceException {
+	public String addUser(final String email, final String password) throws UserServiceException {
+		getUsersCache.clear();
 		return userService.addUser(email, password);
+	}
+
+	@Override
+	public String editUser(final User user, final String password) throws UserServiceException {
+		final String token = userService.editUser(user, password);
+		getUsersCache.clear();
+		//enhmerwsh tis allaghs gia ton sugkekrimeno xrhsth
+		getUserCache.put(user.getEmail(), user);
+		return token;
+	}
+
+	@Override
+	public void deleteUser(final String email) throws UserServiceException {
+		userService.deleteUser(email);
+		getUsersCache.clear();
+		//diagrafh sugkekrimenou xrhsth apo tin cache
+		getUserCache.remove(email);
 	}
 }

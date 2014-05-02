@@ -32,9 +32,12 @@ DROP TABLE IF EXISTS Users CASCADE;
 
 CREATE TABLE Users (
 	email VARCHAR(128) NOT NULL PRIMARY KEY,
-	password CHAR(32) NOT NULL,
-	name VARCHAR(64),
-	photo CHAR(36)
+	password CHAR(32) DEFAULT NULL,
+	status INT NOT NULL,
+	tokenTimestamp TIMESTAMP DEFAULT NULL,
+	token CHAR(32) DEFAULT NULL,
+	name VARCHAR(64) DEFAULT NULL,
+	photo CHAR(128) DEFAULT NULL
 );
 
 -- Pinakas Fotografiwn, videos...
