@@ -123,9 +123,10 @@ public class UserServiceImpl implements UserService {
 				//onoma sthlhs kai timh
 				final Map<String, Value> properties = DatastoreHelper.getPropertyMap(entity);
 				final String email = entity.getKey().getPathElement(0).getName();
+				final boolean admin = properties.containsKey("admin") ? DatastoreHelper.getBoolean(properties.get("admin")) : false;
 				final String name = properties.containsKey("name") ? DatastoreHelper.getString(properties.get("name")) : null;
 				final String photo = properties.containsKey("photo") ? DatastoreHelper.getString(properties.get("photo")) : null;
-				users.add(new User(email, name, photo));
+				users.add(new User(email, admin, name, photo));
 			}
 			LOGGER.info("Retrieved " + users.size() + " users (query: " + query + ", limit: " + limit + ")");
 			return new UserResult(users, (batch.getEntityResultCount() > limit) ? -1 : users.size());
@@ -171,10 +172,11 @@ public class UserServiceImpl implements UserService {
 			//Olo to row ektos apo to primary key tou entity.
 			//px: [password: md5 tou password, name: onoma tou xrhsth, photo: eikona xrhsth]
 			final Map<String, Value> properties = DatastoreHelper.getPropertyMap(entity);
+			final boolean admin = properties.containsKey("admin") ? DatastoreHelper.getBoolean(properties.get("admin")) : false;
 			final String name = properties.containsKey("name") ? DatastoreHelper.getString(properties.get("name")) : null;
 			final String photo = properties.containsKey("photo") ? DatastoreHelper.getString(properties.get("photo")) : null;
 			LOGGER.info("Retrieved user " + email);
-			return new User(email, name, photo);
+			return new User(email, admin, name, photo);
 		} catch (final DatastoreException e) {
 			LOGGER.log(Level.WARNING, "Error retrieving user " + email, e);
 			throw new UserServiceException("Error retrieving user " + email, e);
@@ -279,5 +281,23 @@ public class UserServiceImpl implements UserService {
 		} catch (final NoSuchAlgorithmException e) {
 			throw new UserServiceException("Error adding user", e);
 		}
+	}
+
+	@Override
+	public void validateUser(final String token) throws UserServiceException {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void editUser(final User user, final String password)
+			throws UserServiceException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void deleteUser(final String email) throws UserServiceException {
+		// TODO Auto-generated method stub
+		
 	}
 }
