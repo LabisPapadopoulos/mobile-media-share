@@ -42,6 +42,7 @@ import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceException;
 import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
 import gr.uoa.di.std08169.mobile.media.share.shared.user.UserResult;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.UserStatus;
 
 public class UserServiceImpl implements UserService {
 	//Regular expression gia na spaei to mail sto '@' kai stin '.'
@@ -123,10 +124,11 @@ public class UserServiceImpl implements UserService {
 				//onoma sthlhs kai timh
 				final Map<String, Value> properties = DatastoreHelper.getPropertyMap(entity);
 				final String email = entity.getKey().getPathElement(0).getName();
-				final boolean admin = properties.containsKey("admin") ? DatastoreHelper.getBoolean(properties.get("admin")) : false;
+				final UserStatus status = properties.containsKey("status") ?
+						UserStatus.values()[Long.valueOf(DatastoreHelper.getLong(properties.get("admin"))).intValue()] : null;
 				final String name = properties.containsKey("name") ? DatastoreHelper.getString(properties.get("name")) : null;
 				final String photo = properties.containsKey("photo") ? DatastoreHelper.getString(properties.get("photo")) : null;
-				users.add(new User(email, admin, name, photo));
+				users.add(new User(email, status, name, photo));
 			}
 			LOGGER.info("Retrieved " + users.size() + " users (query: " + query + ", limit: " + limit + ")");
 			return new UserResult(users, (batch.getEntityResultCount() > limit) ? -1 : users.size());
@@ -172,11 +174,12 @@ public class UserServiceImpl implements UserService {
 			//Olo to row ektos apo to primary key tou entity.
 			//px: [password: md5 tou password, name: onoma tou xrhsth, photo: eikona xrhsth]
 			final Map<String, Value> properties = DatastoreHelper.getPropertyMap(entity);
-			final boolean admin = properties.containsKey("admin") ? DatastoreHelper.getBoolean(properties.get("admin")) : false;
+			final UserStatus status = properties.containsKey("status") ?
+					UserStatus.values()[Long.valueOf(DatastoreHelper.getLong(properties.get("status"))).intValue()] : null; 
 			final String name = properties.containsKey("name") ? DatastoreHelper.getString(properties.get("name")) : null;
 			final String photo = properties.containsKey("photo") ? DatastoreHelper.getString(properties.get("photo")) : null;
 			LOGGER.info("Retrieved user " + email);
-			return new User(email, admin, name, photo);
+			return new User(email, status, name, photo);
 		} catch (final DatastoreException e) {
 			LOGGER.log(Level.WARNING, "Error retrieving user " + email, e);
 			throw new UserServiceException("Error retrieving user " + email, e);
@@ -239,7 +242,7 @@ public class UserServiceImpl implements UserService {
 	 *	VALUES (?, md5(?));
 	 */
 	@Override
-	public boolean addUser(final String email, final String password) throws UserServiceException {
+	public String addUser(final String email, final String password) throws UserServiceException {
 		try {
 			//Dhmiourgeia tou transaction
 			final ByteString transaction = datastore.beginTransaction(BeginTransactionRequest.newBuilder().build()).getTransaction();
@@ -269,13 +272,16 @@ public class UserServiceImpl implements UserService {
 						//Kwdikopoihsh tou string password se MD5
 						MessageDigest.getInstance(MD5).digest(password.getBytes())
 						))));
+				// TODO add status, token, token timestamp
+				// TODO return token
 				//Fortwsh sto transaction ena insert gia to entity pou ftiaxthte
 		        commitRequestBuilder.getMutationBuilder().addInsert(entityBuilder.build());
 			}
 			//ginetai to commit tou panw transaction (uparxei/den uparxei o xrhsths)
 			datastore.commit(commitRequestBuilder.build());
 			LOGGER.info(((user == null) ? ("Added user " + email) : ("User " + email + " already exists")));
-			return (user == null);
+//			return (user == null);
+			return null;
 		} catch (final DatastoreException e) {
 			throw new UserServiceException("Error adding user", e);
 		} catch (final NoSuchAlgorithmException e) {
@@ -284,20 +290,13 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void validateUser(final String token) throws UserServiceException {
+	public String editUser(final User user, final String password) throws UserServiceException {
 		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void editUser(final User user, final String password)
-			throws UserServiceException {
-		// TODO Auto-generated method stub
-		
+		return null;
 	}
 
 	@Override
 	public void deleteUser(final String email) throws UserServiceException {
 		// TODO Auto-generated method stub
-		
 	}
 }

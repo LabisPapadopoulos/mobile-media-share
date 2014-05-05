@@ -3,8 +3,9 @@ New Audio page?
 My Account page
 Footer
 
-user roles: user, admin, NULL (pending)
 userServlet: edit password, reset password, create user (validate email), delete user
+userServlet me ajax???
+http://stackoverflow.com/questions/13825320/gwt-client-sending-a-file-with-multipart-form-data-post-request
 
 nightly build to project ston okeano
 timeout exception otan kanoume new photo apo capture
