@@ -7,29 +7,32 @@
 	<g:HTMLPanel>
 		<div class="content newUser">
 			<mms:Header /> <!-- Import to header sth selida -->
-			<p>
-				<span class="label"><ui:text from="{constants.email}" /></span>
-				<!-- To g einai Google Element kai den borei na tou prostethei klash -->
-				<g:TextBox ui:field="email" name="email" /><!-- To email einai tupou TextBox (exei ginei include panw sto g:...) -->
-			</p>
-			<p>
-				<span class="label"><ui:text from="{constants.password}" /></span>
-				<!-- To password einai tupou PasswordTextBox (exei ginei include panw sto g:...) -->
-				<g:PasswordTextBox ui:field="password" name="password" />
-			</p>
-			<p>
-				<span class="label"><ui:text from="{constants.confirmPassword}" /></span>
-				<g:PasswordTextBox ui:field="password2" name="password2" />
-			</p>
-			<p class="okBtn">
-				<g:Button ui:field="ok" text="{constants.ok}" />
-			</p>
-			<p class="resetBtn">
-				<g:Button ui:field="reset" text="{constants.reset}" />
-			</p>
-			<p class="cancelBtn">
-				<g:Button ui:field="cancel" text="{constants.cancel}" />
-			</p>
+			<form action="./userServlet" enctype="multipart/form-data" method="post" target="_self" class="newUserForm">
+			    <input type="hidden" name="action" value="new" />
+				<p>
+					<span class="label"><ui:text from="{constants.email}" /></span>
+					<!-- To g einai Google Element kai den borei na tou prostethei klash -->
+					<g:TextBox ui:field="email" name="email" /><!-- To email einai tupou TextBox (exei ginei include panw sto g:...) -->
+				</p>
+				<p>
+					<span class="label"><ui:text from="{constants.password}" /></span>
+					<!-- To password einai tupou PasswordTextBox (exei ginei include panw sto g:...) -->
+					<g:PasswordTextBox ui:field="password" name="password" />
+				</p>
+				<p>
+					<span class="label"><ui:text from="{constants.confirmPassword}" /></span>
+					<g:PasswordTextBox ui:field="password2" name="password2" />
+				</p>
+				<p class="okBtn">
+					<g:SubmitButton ui:field="ok" text="{constants.ok}" />
+				</p>
+				<p class="resetBtn">
+					<g:ResetButton text="{constants.reset}" />
+				</p>
+				<p class="cancelBtn">
+					<g:Button ui:field="cancel" text="{constants.cancel}" />
+				</p>
+			</form>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>

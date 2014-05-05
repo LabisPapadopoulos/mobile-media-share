@@ -16,5 +16,7 @@ public interface UserServiceAsync {
 	//epistrepsoun me to AsyncCallback argotera
 	public void getUser(final String email, final AsyncCallback<User> callback);
 	public void isValidUser(final String email, final String password, final AsyncCallback<Boolean> callback);
-	public void addUser(final String email, final String password, final AsyncCallback<Boolean> callback);
+	public void addUser(final String email, final String password, final AsyncCallback<String> callback);
+	public void editUser(final User user, final String password, final AsyncCallback<String> callback);
+	public void deleteUser(final String email, final AsyncCallback<Void> callback);
 }

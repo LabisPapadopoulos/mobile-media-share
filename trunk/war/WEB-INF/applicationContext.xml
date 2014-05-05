@@ -34,7 +34,8 @@
 										gr.uoa.di.std08169.mobile.media.share.server.jdbc.UserServiceImpl(dataSource); -->
 	<bean id="jdbcUserService" class="gr.uoa.di.std08169.mobile.media.share.server.jdbc.UserServiceImpl" scope="singleton">
 		<!-- San orisma tha parei bean me id to ref (etoimo dataSource) -->
-		<constructor-arg ref="dataSource" />
+		<constructor-arg ref="dataSource" /> <!-- deikths se object -->
+		<constructor-arg value="${user.service.timeout}" />
 	</bean>
 	
 	<!-- static final gr.uoa.di.std08169.mobile.media.share.server.gcd.UserServiceImpl gcdUserService = new 
