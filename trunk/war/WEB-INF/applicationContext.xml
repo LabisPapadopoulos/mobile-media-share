@@ -78,5 +78,45 @@
 	<bean id="mediaService" class="gr.uoa.di.std08169.mobile.media.share.server.proxies.MediaServiceProxy" scope="singleton">
 	    <constructor-arg ref="${media.service}" />
     </bean>
+    
+	<!-- smtpHost: typou string kai singleton gia xrhsh panta tou idiou -->
+	<bean id="smtpHost" class="java.lang.String" scope="singleton">
+	    <constructor-arg value="${smtp.host}" />
+	</bean>
+	
+	<bean id="smtpPort" class="java.lang.Integer" scope="singleton">
+	    <constructor-arg value="${smtp.port}" />
+	</bean>
+	
+	<bean id="smtpAuth" class="java.lang.Boolean" scope="singleton">
+	    <constructor-arg value="${smtp.auth}" />
+	</bean>
+	
+	<bean id="smtpSSL" class="java.lang.Boolean" scope="singleton">
+	    <constructor-arg value="${smtp.ssl}" />
+	</bean>
+	
+	<bean id="smtpUser" class="java.lang.String" scope="singleton">
+	    <constructor-arg value="${smtp.user}" />
+	</bean>
+	
+	<bean id="smtpPassword" class="java.lang.String" scope="singleton">
+	    <constructor-arg value="${smtp.password}" />
+	</bean>
+	
+	<bean id="smtpFrom" class="java.lang.String" scope="singleton">
+	    <constructor-arg value="${smtp.from}" />
+	</bean>
+	
+	<bean id="smtpReplyTo" class="java.lang.String" scope="singleton">
+	    <constructor-arg value="${smtp.reply.to}" />
+	</bean>
+	
+	<bean id="smtpSubject" class="java.lang.String" scope="singleton">
+	    <constructor-arg value="${smtp.subject}" />
+	</bean>
+	
+	<bean id="smtpContent" class="java.lang.String" scope="singleton">
+	    <constructor-arg value="${smtp.content}" />
+	</bean>	
 </beans>
-

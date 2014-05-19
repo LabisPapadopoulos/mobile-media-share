@@ -7,32 +7,34 @@
 	<g:HTMLPanel>
 		<div class="content newUser">
 			<mms:Header /> <!-- Import to header sth selida -->
-			<form action="./userServlet" enctype="multipart/form-data" method="post" target="_self" class="newUserForm">
-			    <input type="hidden" name="action" value="new" />
+			<div ui:field="form">
 				<p>
 					<span class="label"><ui:text from="{constants.email}" /></span>
 					<!-- To g einai Google Element kai den borei na tou prostethei klash -->
-					<g:TextBox ui:field="email" name="email" /><!-- To email einai tupou TextBox (exei ginei include panw sto g:...) -->
+					<g:TextBox ui:field="email" /><!-- To email einai tupou TextBox (exei ginei include panw sto g:...) -->
 				</p>
 				<p>
 					<span class="label"><ui:text from="{constants.password}" /></span>
 					<!-- To password einai tupou PasswordTextBox (exei ginei include panw sto g:...) -->
-					<g:PasswordTextBox ui:field="password" name="password" />
+					<g:PasswordTextBox ui:field="password" />
 				</p>
 				<p>
 					<span class="label"><ui:text from="{constants.confirmPassword}" /></span>
-					<g:PasswordTextBox ui:field="password2" name="password2" />
+					<g:PasswordTextBox ui:field="password2" />
 				</p>
 				<p class="okBtn">
-					<g:SubmitButton ui:field="ok" text="{constants.ok}" />
+					<g:Button ui:field="ok" text="{constants.ok}" />
 				</p>
 				<p class="resetBtn">
-					<g:ResetButton text="{constants.reset}" />
+					<g:Button ui:field="reset" text="{constants.reset}" />
 				</p>
 				<p class="cancelBtn">
 					<g:Button ui:field="cancel" text="{constants.cancel}" />
 				</p>
-			</form>
+			</div>
+			<div ui:field="info">
+			    <p><ui:text from="{constants.youHaveReceivedAnEmailWithInstructionsAboutCompletingYourRegistration}" /></p>
+			</div>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>

@@ -9,6 +9,7 @@
 			<mms:Header /> <!-- Import to header sth selida -->
 			<form action="./userServlet" enctype="multipart/form-data" method="post" target="_self" class="loginForm"><!-- controls -->
 				<g:Hidden ui:field="url" name="url" />
+				<g:Hidden ui:field="locale" name="locale" />
 				<p>
 					<span class="label"><ui:text from="{constants.email}" /></span>
 					<!-- To g einai Google Element kai den borei na tou prostethei klash -->

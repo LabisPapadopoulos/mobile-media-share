@@ -185,6 +185,12 @@ public class UserServiceImpl implements UserService {
 			throw new UserServiceException("Error retrieving user " + email, e);
 		}
 	}
+	
+	@Override
+	public User getUserByToken(final String token) throws UserServiceException {
+		//TODO
+		return null;
+	}
 
 	/**
 	 *	SELECT *

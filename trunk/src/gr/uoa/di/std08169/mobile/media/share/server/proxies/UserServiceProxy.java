@@ -70,6 +70,11 @@ public class UserServiceProxy implements UserService {
 		}
 		return user;
 	}
+	
+	@Override
+	public User getUserByToken(final String token) throws UserServiceException {
+		return userService.getUserByToken(token);
+	}
 
 	/**
 	 * Den cacharetai gia logous asfaleias. Exallou xrhsimopoieitai mono apo to login mia fora gia kathe xrhsth.

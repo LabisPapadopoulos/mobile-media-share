@@ -33,29 +33,37 @@ public class UserServiceImpl implements UserService {
 											"LIMIT ?;";
 	private static final String GET_TIMEDOUT_USERS = "SELECT email " +
 														"FROM Users " +
-														"WHERE CAST((extract(epoch FROM now()) * 1000) - " +
-														"(extract(epoch FROM tokenTimestamp) * 1000)) AS LONG >= ?;";
+														"WHERE CAST(((extract(epoch FROM now()) * 1000) - " +
+														"(extract(epoch FROM tokenTimestamp) * 1000)) AS BIGINT) >= ?;";
 	//apothikeush stin vash me MD5 gia logous asfaleias
 	private static final String GET_USER = "SELECT status, name, photo " +
 											"FROM Users " +
 											"WHERE email = ?;";
+	private static final String GET_USER_BY_TOKEN = "SELECT email, status, name, photo " +
+													"FROM Users " +
+													"WHERE token = ? AND " +
+													//kai den exei lhxei
+													"(CAST(((extract(epoch FROM now()) * 1000) - " +
+													"(extract(epoch FROM tokenTimestamp) * 1000)) AS BIGINT) < ?);";
 	private static final String IS_VALID_USER = "SELECT COUNT(*) AS count " +
 												"FROM Users " +
-												"WHERE email = ? AND password = md5(?);";
+												"WHERE email = ? AND password = md5(?) AND ((status = " + UserStatus.NORMAL.ordinal() + ") " +
+																		"OR (status = " + UserStatus.ADMIN.ordinal() + "));";
 																	//name, photo DEFAULT NULL apo tin vash
 	private static final String ADD_USER = "INSERT INTO Users (email, password, status, tokenTimestamp, token) " +
-											"VALUES (?, ?, ?, ?, ?);";
+											"VALUES (?, md5(?), ?, ?, ?);";
 											//An to token tou xrhsth exei lhxei den ginetai edit
 	private static final String EDIT_USER = "UPDATE Users " +
-											"SET password = ?, status = ?, tokenTimestamp = ?, token = ?, name = ?, photo = ? " +
+											"SET %sstatus = ?, tokenTimestamp = ?, token = ?, name = ?, photo = ? " +
 																//An einai SQL NULL
 											"WHERE email = ? AND ((tokenTimestamp IS NULL) OR " +
 											//extract (epoch from timestamp): epistrefei to timestamp se seconds apo to
 											//epoch (1/1/1970..). * 1000 ginetai se millisecond kai afairountai ta milliseconds tou twra
 											//apo ta milliseconds tou tokenTimestamp.
 											//Castaretai se long to apotelesma
-											"(CAST((extract(epoch FROM now()) * 1000) - " +
-											"(extract(epoch FROM tokenTimestamp) * 1000)) AS LONG < ?));";
+											"(CAST(((extract(epoch FROM now()) * 1000) - " +
+											"(extract(epoch FROM tokenTimestamp) * 1000)) AS BIGINT) < ?));";
+	private static final String UPDATE_PASSWORD = "password = md5(?), ";
 	private static final String DELETE_USER = "DELETE FROM Users " +
 											  "WHERE email = ?;";
 	private static final Logger LOGGER = Logger.getLogger(UserServiceImpl.class.getName());
@@ -159,6 +167,36 @@ public class UserServiceImpl implements UserService {
 			throw new UserServiceException("Error retrieving user " + email, e);
 		}
 	}
+
+	@Override
+	public User getUserByToken(final String token) throws UserServiceException {
+		try {
+			final Connection connection = dataSource.getConnection();
+			try {
+				final PreparedStatement preparedStatement = connection.prepareStatement(GET_USER_BY_TOKEN);
+				try {
+					preparedStatement.setString(1, token);
+					preparedStatement.setLong(2, timeout);
+					final ResultSet resultSet = preparedStatement.executeQuery();
+					try {
+						final User user = resultSet.next() ? new User(resultSet.getString("email"), UserStatus.values()[resultSet.getInt("status")], 
+									resultSet.getString("name"), resultSet.getString("photo")) : null;
+						LOGGER.info((user == null) ? ("User with token " + token + " not found") : ("Retrieved user with token " + token));
+						return user;
+					} finally {
+						resultSet.close();
+					}
+				} finally {
+					preparedStatement.close();
+				}
+			} finally {
+				connection.close();
+			}
+		} catch (final SQLException e) {
+			LOGGER.log(Level.WARNING, "Error retrieving user by token " + token, e);
+			throw new UserServiceException("Error retrieving user by token " + token, e);
+		}
+	}
 	
 	@Override
 	public boolean isValidUser(final String email, final String password) throws UserServiceException {
@@ -237,25 +275,34 @@ public class UserServiceImpl implements UserService {
 		try {
 			final Connection connection = dataSource.getConnection();
 			try {
-				final PreparedStatement editUser = connection.prepareStatement(EDIT_USER);
+				//An o xrhsths dwsei neo password 'h xexasei to password, tote to password allazei
+				final boolean updatePassword = (password != null) || (user.getStatus() == UserStatus.FORGOT);				
+				final PreparedStatement editUser = connection.prepareStatement(String.format(EDIT_USER, updatePassword ? UPDATE_PASSWORD : ""));
 				try {
 					final Date date = new Date();
-					editUser.setString(1, password);
-					editUser.setInt(2, user.getStatus().ordinal());
+					
+					if (password != null)
+						editUser.setString(1, password);
+					else if (user.getStatus() == UserStatus.FORGOT)
+						//svhnei to password me SQL NULL
+						editUser.setNull(1, Types.CHAR);
+					//-1 se ola se periptwsh pou den allazei to password
+					editUser.setInt(updatePassword ? 2 : 1, user.getStatus().ordinal());
 					String token = null;
+					//dhmeiourgei token
 					if (user.getStatus() == UserStatus.FORGOT) {
 						//Se Forgot katastash
 						editUser.setTimestamp(3, new Timestamp(date.getTime()));
 						token = generateToken(user.getEmail(), date);
 						editUser.setString(4, token);
-					} else {
-						editUser.setNull(3, Types.TIMESTAMP);
-						editUser.setNull(4, Types.CHAR);
+					} else { //petaei to token
+						editUser.setNull(updatePassword ? 3 : 2, Types.TIMESTAMP);
+						editUser.setNull(updatePassword ? 4 : 3, Types.CHAR);
 					}
-					editUser.setString(5, user.getName());
-					editUser.setString(6, user.getPhoto());
-					editUser.setString(7, user.getEmail());
-					editUser.setLong(8, timeout);
+					editUser.setString(updatePassword ? 5 : 4, user.getName());
+					editUser.setString(updatePassword ? 6 : 5, user.getPhoto());
+					editUser.setString(updatePassword ? 7 : 6, user.getEmail());
+					editUser.setLong(updatePassword ? 8 : 7, timeout);
 					editUser.executeUpdate();
 					LOGGER.info("User " + user.getEmail() + " edited successfully");
 					return token;

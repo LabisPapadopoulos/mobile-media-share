@@ -14,6 +14,7 @@ public interface UserService extends RemoteService {
 	// getUsers
 	public UserResult getUsers(final String query, final int limit) throws UserServiceException;
 	public User getUser(final String email) throws UserServiceException;
+	public User getUserByToken(final String token) throws UserServiceException;
 	public boolean isValidUser(final String email, final String password) throws UserServiceException;
 	
 	/**
