@@ -43,6 +43,11 @@ public class UserServiceServlet extends RemoteServiceServlet implements UserServ
 	}
 	
 	@Override
+	public User getUserByToken(final String token) throws UserServiceException {
+		return userService.getUserByToken(token);
+	}
+	
+	@Override
 	public boolean isValidUser(final String email, final String password) throws UserServiceException {
 		return userService.isValidUser(email, password);
 	}

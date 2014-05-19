@@ -144,6 +144,9 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("Reset")
 	public String reset();
+
+	@DefaultStringValue("Return to login page")
+	public String returnToLoginPage();
 	
 	@DefaultStringValue("Size")
 	public String size();
@@ -176,4 +179,7 @@ public interface MobileMediaShareConstants extends Constants {
 
 	@DefaultStringValue("You are here:")
 	public String youAreHere();
+	
+	@DefaultStringValue("You have received an email with instructions about completing your registration.")
+	public String youHaveReceivedAnEmailWithInstructionsAboutCompletingYourRegistration();
 }

@@ -8,9 +8,9 @@ package gr.uoa.di.std08169.mobile.media.share.shared.user;
  */
 public class User implements Comparable<User> {
 	private final String email;
-	private final UserStatus status;
 	private final String name;
 	private final String photo;
+	private UserStatus status;
 	//To password prepei na phgainei pros th vash opote xreiazetai, alla pote na erxetai
 	
 	public User(final String email, final UserStatus status, final String name, final String photo) {
@@ -34,7 +34,13 @@ public class User implements Comparable<User> {
 	public UserStatus getStatus() {
 		return status;
 	}
-
+	
+	public void setStatus(final UserStatus status) {
+		if (status == null)
+			throw new IllegalArgumentException(User.class.getName() + " status can not be null");
+		this.status = status;
+	}
+	
 	public String getName() {
 		return name;
 	}

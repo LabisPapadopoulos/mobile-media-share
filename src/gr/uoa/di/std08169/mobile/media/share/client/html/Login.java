@@ -36,6 +36,8 @@ public class Login extends Composite implements ClickHandler, EntryPoint, KeyUpH
 	@UiField
 	protected Hidden url;
 	@UiField
+	protected Hidden locale;
+	@UiField
 	protected TextBox email;
 	@UiField
 	protected PasswordTextBox password;
@@ -50,6 +52,7 @@ public class Login extends Composite implements ClickHandler, EntryPoint, KeyUpH
 		//Arxikopoihsh tou grafikou me ton Ui Binder
 		initWidget(LOGIN_UI_BINDER.createAndBindUi(this));
 		url.setValue(MOBILE_MEDIA_SHARE_URLS.map(LocaleInfo.getCurrentLocale().getLocaleName()));
+		locale.setValue(LocaleInfo.getCurrentLocale().getLocaleName());
 		email.addKeyUpHandler(this);
 		password.addKeyUpHandler(this);
 		newUser.addClickHandler(this);
