@@ -56,7 +56,11 @@ public interface MobileMediaShareUrls extends Messages {
 	public String upload(final String locale);
 
 	@DefaultMessage("./userServlet?locale={0}&email={1}&password={2}&password2={3}")
-	public String userServlet(final String locale, final String email, final String password, final String password2);
+	public String userServletLogin(final String locale, final String email, final String password, final String password2);
+
+	@DefaultMessage("./userServlet?locale={0}&email={1}&action=reset")
+	public String userServletReset(final String locale, final String email);
+
 
 	@DefaultMessage("./viewMedia.jsp?locale={0}&id={1}")
 	public String viewMedia(final String locale, final String id);

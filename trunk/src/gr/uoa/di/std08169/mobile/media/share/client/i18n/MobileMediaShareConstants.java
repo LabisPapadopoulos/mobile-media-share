@@ -135,7 +135,10 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("Passwords do not match")
 	public String passwordsDoNotMatch();
-	
+
+	@DefaultStringValue("Please fill in your email to reset your password")
+	public String pleaseFillInYourEmailToResetYourPassword();
+
 	@DefaultStringValue("Private")
 	public String _private();
 	
@@ -182,4 +185,7 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("You have received an email with instructions about completing your registration.")
 	public String youHaveReceivedAnEmailWithInstructionsAboutCompletingYourRegistration();
+	
+	@DefaultStringValue("You have received an email with instructions about resetting your password.")
+	public String youHaveReceivedAnEmailWithInstructionsAboutResettingYourPassword();
 }

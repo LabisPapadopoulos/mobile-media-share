@@ -31,6 +31,9 @@ public interface MobileMediaShareMessages extends Messages {
 	@DefaultMessage("Error editing media: {0}")
 	public String errorEditingMedia(final String message);
 	
+	@DefaultMessage("Error resetting password: {0}")
+	public String errorResettingPassword(final String message);
+	
 	@DefaultMessage("Error retrieving media: {0}")
 	public String errorRetrievingMedia(final String message);
 	

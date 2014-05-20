@@ -3,6 +3,9 @@ New Audio page?
 My Account page
 Footer
 
+check login with non existing user
+no header in login, new user, forgot password
+calculate duration
 smtp.from, smtp.reply.to, smtp.subject and smtp.content from ResourceBundle
 
 userServlet: edit password, reset password, create user (validate email), delete user
