@@ -112,11 +112,7 @@
 	    <constructor-arg value="${smtp.reply.to}" />
 	</bean>
 	
-	<bean id="smtpSubject" class="java.lang.String" scope="singleton">
-	    <constructor-arg value="${smtp.subject}" />
+	<bean id="smtpResourceBundle" class="java.lang.String" scope="singleton">
+	    <constructor-arg value="${smtp.resource.bundle}" />
 	</bean>
-	
-	<bean id="smtpContent" class="java.lang.String" scope="singleton">
-	    <constructor-arg value="${smtp.content}" />
-	</bean>	
 </beans>

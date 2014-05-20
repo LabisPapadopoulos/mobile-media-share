@@ -7,7 +7,10 @@
 	<g:HTMLPanel>
 		<div class="content loginPage">
 			<mms:Header /> <!-- Import to header sth selida -->
-			<form action="./userServlet" enctype="multipart/form-data" method="post" target="_self" class="loginForm"><!-- controls -->
+			<form action="./userServlet" enctype="application/x-www-form-urlencoded" method="post" target="_self" class="loginForm"><!-- controls -->
+			    <!-- deixnei oti thelei na kanei login kai oxi forgot -->
+				<input type="hidden" name="action" value="login" />
+				<!-- xwris times gia na orisei to gwt times kai na ta steilei -->
 				<g:Hidden ui:field="url" name="url" />
 				<g:Hidden ui:field="locale" name="locale" />
 				<p>

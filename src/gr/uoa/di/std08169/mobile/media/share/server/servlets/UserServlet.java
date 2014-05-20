@@ -2,7 +2,9 @@ package gr.uoa.di.std08169.mobile.media.share.server.servlets;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.Locale;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,10 +25,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -57,6 +55,8 @@ public class UserServlet extends HttpServlet {
 	}
 	
 	private static final long serialVersionUID = 1L;
+	private static final String LOGIN_ACTION = "login";
+	private static final String RESET_ACTION = "reset";
 	private static final String LOGIN_URL = "./login.html?locale=%s&url=%s";
 	private static final String MAP_URL = "./map.jsp?locale=%s";
 	private static final String UTF_8 = "UTF-8";
@@ -69,10 +69,8 @@ public class UserServlet extends HttpServlet {
 	private String smtpPassword;
 	private String smtpFrom;
 	private String smtpReplyTo;
-	private String smtpSubject;
-	private String smtpContent;
-
-		
+	private String smtpResourceBundle;
+			
 	//init gia to servlet
 	@Override
 	public void init() {
@@ -103,8 +101,7 @@ public class UserServlet extends HttpServlet {
 		smtpPassword = (String) webApplicationContext.getBean("smtpPassword", String.class);
 		smtpFrom = (String) webApplicationContext.getBean("smtpFrom", String.class);
 		smtpReplyTo = (String) webApplicationContext.getBean("smtpReplyTo", String.class);
-		smtpSubject = (String) webApplicationContext.getBean("smtpSubject", String.class);
-		smtpContent = (String) webApplicationContext.getBean("smtpContent", String.class);
+		smtpResourceBundle = (String) webApplicationContext.getBean("smtpResourceBundle", String.class);
 		//Sundesh me SMTP server pou orizetai apo ta properties kai 
 		//me ton PasswordAuthenticator exei kai username kai password
 		session = Session.getInstance(properties, new PasswordAuthenticator());
@@ -121,12 +118,19 @@ public class UserServlet extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No token specified"); //400 Bad Request
 			return;
 		}
+		// TODO action reset
 		try {
 			final User user = userService.getUserByToken(token);
 			if (user == null) {
 				LOGGER.warning("Invalid token " + token);
-				//Den anagnwrizei to token pou dinei o xrhsths (den uparxei 'h exei lhxei) - 401
-				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
+				//Den anagnwrizei to token pou dinei o xrhsths (den uparxei 'h exei lhxei) - 404
+				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Invalid token");
+				return;
+			}
+			if ((user.getStatus() != UserStatus.PENDING) && (user.getStatus() != UserStatus.FORGOT)) {
+				LOGGER.warning("Invalid status " + user.getStatus() + " for user " + user.getEmail());
+				//O xrhsths den einai pending h forgot
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid status");
 				return;
 			}
 			user.setStatus(UserStatus.NORMAL);
@@ -188,12 +192,15 @@ public class UserServlet extends HttpServlet {
 			message.setReplyTo(new InternetAddress[] {new InternetAddress(smtpReplyTo)});
 			//Prosthikh parallhpth. TO: autos pou tha parei to mhnuma
 			message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
-			message.setSubject(smtpSubject, UTF_8);
+			//Pairnei to bundle ths antistoixhs glwssas
+			final ResourceBundle bundle = ResourceBundle.getBundle(smtpResourceBundle, new Locale(locale));
+			//apo to bundle pairnei to string me key: register.subject
+			message.setSubject(bundle.getString("register.subject"), UTF_8);
 			//Lista me ta kommatia tou mhnumatos. Gia apostolh otidhpote allo ektos apo plain-text p.x apostolh html
 			final Multipart multipart = new MimeMultipart();
 			//Kurio meros tou mhnumatos
 	        final MimeBodyPart mimeBodyPart = new MimeBodyPart();
-	        mimeBodyPart.setContent(String.format(smtpContent, email, token, locale), HTML_MIME_TYPE);
+	        mimeBodyPart.setContent(String.format(bundle.getString("register.content"), email, token), HTML_MIME_TYPE);
 	        multipart.addBodyPart(mimeBodyPart);
 	        message.setContent(multipart);
 	        //apostolh mhmunatos
@@ -217,39 +224,13 @@ public class UserServlet extends HttpServlet {
 	 */
 	@Override
 	public void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
-		//Elegxos an to request einai multipart form data
-		if (!ServletFileUpload.isMultipartContent(request)) {
-			LOGGER.warning("Request content type is not multipart/form-data");
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request content type is not multipart/form-data"); //400 Bad Request
-			return;
-		}
-		//DiskFileItemFactoryapothikeuei oti erthei se multipart form data sto disko
-		//ServletFileUpload: parsarei to request gia na xexwrisei ta fileItems kai ta apothikeuei sto DiskFile..
-		//FileItem: To kathe part tou multi part
-		try {
-			String email = null;
-			String password = null;
-			String locale = null;
-			String url = null;
-			for (FileItem fileItem : new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request)) {
-				//an einai pedio formas kai oxi arxeia
-				if (fileItem.isFormField() && fileItem.getFieldName().equals("email")) {
-					//vrethike to e-mail
-					email = fileItem.getString();
-					//diagrafh apo ton disko
-					fileItem.delete();
-				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("password")) {
-					//vrethike to password
-					password = fileItem.getString();
-					fileItem.delete();
-				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("locale")) {
-					locale = fileItem.getString();
-					fileItem.delete();
-				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("url")) {
-					url = fileItem.getString();
-					fileItem.delete();
-				}
-			}
+		final String action = request.getParameter("action");
+		final String email = request.getParameter("email");
+		final String password = request.getParameter("password");
+		final String locale = request.getParameter("locale");
+		final String url = request.getParameter("url");
+		
+		if (LOGIN_ACTION.equals(action)) {
 			if (email == null) {
 				LOGGER.warning("No email specified");
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No email specified"); //400 Bad Request
@@ -260,7 +241,31 @@ public class UserServlet extends HttpServlet {
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No password specified"); //400 Bad Request
 				return;
 			}
+			if (locale == null) {
+				LOGGER.warning("No locale specified");
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No locale specified"); //400 Bad Request
+				return;
+			}
+			if (url == null) {
+				LOGGER.warning("No URL specified");
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No URL specified"); //400 Bad Request
+				return;
+			}
 			try {
+				final User user = userService.getUser(email);
+				if (user == null) {
+					LOGGER.warning("User " + email + " does not exist");
+					//O xrhsths den einai normal h admin
+					response.sendRedirect(String.format(LOGIN_URL, URLEncoder.encode(locale, UTF_8),
+							URLEncoder.encode(url, UTF_8)));
+					return;
+				}
+				if ((user.getStatus() != UserStatus.NORMAL) && (user.getStatus() != UserStatus.ADMIN)) {
+					LOGGER.warning("Invalid status " + user.getStatus() + " for user " + user.getEmail());
+					//O xrhsths den einai normal h admin
+					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid status");
+					return;
+				}
 				if (userService.isValidUser(email, password)) {
 					//apothikeush tou xrhsth sto session pou einai ston server
 					request.getSession().setAttribute("email", email);
@@ -274,10 +279,69 @@ public class UserServlet extends HttpServlet {
 			} catch (final UserServiceException e) {
 				LOGGER.log(Level.WARNING, "Error validating user " + email, e);
 				throw new ServletException("Error validating user " + email, e); //Epistrefei 500 ston client
+			}	
+		} else if (RESET_ACTION.equals(action)) {
+			if (email == null) {
+				LOGGER.warning("No email specified");
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No email specified"); //400 Bad Request
+				return;
 			}
-		} catch (final FileUploadException e) {
-			LOGGER.log(Level.WARNING, "Error parsing request", e);
-			throw new ServletException("Error parsing request", e); //Epistrefei 500 ston client
+			try {
+				final User user = userService.getUser(email);
+				if (user == null) {
+					LOGGER.warning("User not found");
+					response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not found"); //404 Not Found
+					return;
+				}
+				if ((user.getStatus() != UserStatus.NORMAL) && (user.getStatus() != UserStatus.ADMIN)) {
+					LOGGER.warning("Invalid status " + user.getStatus() + " for user " + user.getEmail());
+					//O xrhsths den einai normal h admin
+					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid status");
+					return;
+				}
+				user.setStatus(UserStatus.FORGOT);
+				final String token = userService.editUser(user, null);
+				//Message me polla parts giati borei na perilamvanei attachments
+				//Borei na einai kai plain-text, alla den exei attachments (html, fotos)
+				final MimeMessage message = new MimeMessage(session);
+				//Logariasmos pou tha fainetai ston paralhpth ws apostoleas
+				//InternetAddress, suntaktikos elegnxos e-mail
+				message.setFrom(new InternetAddress(smtpFrom));
+				message.setReplyTo(new InternetAddress[] {new InternetAddress(smtpReplyTo)});
+				//Prosthikh parallhpth. TO: autos pou tha parei to mhnuma
+				message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
+				//Pairnei to bundle ths antistoixhs glwssas
+				final ResourceBundle bundle = ResourceBundle.getBundle(smtpResourceBundle, new Locale(locale));
+				//apo to bundle pairnei to string me key: forgot.subject	
+				message.setSubject(bundle.getString("forgot.subject"), UTF_8);
+				//Lista me ta kommatia tou mhnumatos. Gia apostolh otidhpote allo ektos apo plain-text p.x apostolh html
+				final Multipart multipart = new MimeMultipart();
+				//Kurio meros tou mhnumatos
+		        final MimeBodyPart mimeBodyPart = new MimeBodyPart();
+		        mimeBodyPart.setContent(String.format(bundle.getString("forgot.content"),
+		        		((user.getName() == null) || user.getName().isEmpty()) ? email : user.getName(), token), HTML_MIME_TYPE);
+		        multipart.addBodyPart(mimeBodyPart);
+		        message.setContent(multipart);
+		        //apostolh mhmunatos
+				Transport.send(message);
+				//OK apanta o server xwris na grapsei kati allo
+				response.getWriter().flush();
+				return;
+			} catch (final AddressException e) {
+				LOGGER.log(Level.WARNING, "Error resetting password for user " + email, e);
+				throw new ServletException("Error resetting password for user " + email, e); //Epistrefei 500 ston client (provlima ston server)
+			} catch (final MessagingException e) {
+				LOGGER.log(Level.WARNING, "Error resetting password for user " + email, e);
+				throw new ServletException("Error resetting password for user " + email, e); //Epistrefei 500 ston client
+			} catch (final UserServiceException e) {
+				LOGGER.log(Level.WARNING, "Error resetting password for user " + email, e);
+				throw new ServletException("Error resetting password for user " + email, e); //Epistrefei 500 ston client				
+			}
+		} else { // sumperilamvanomenou tou null
+			LOGGER.warning("Unknown action " + action);
+			//den katalavenei ti phre
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action " + action); //400 Bad Request
+			return;
 		}
 	}
 }
