@@ -56,11 +56,13 @@ public class UserServlet extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
 	private static final String LOGIN_ACTION = "login";
+	private static final String FORGOT_ACTION = "forgot";
 	private static final String RESET_ACTION = "reset";
 	private static final String LOGIN_URL = "./login.html?locale=%s&url=%s";
 	private static final String MAP_URL = "./map.jsp?locale=%s";
-	private static final String UTF_8 = "UTF-8";
-	private static final String HTML_MIME_TYPE = "text/html;charset=UTF-8";
+	private static final String RESET_PASSWORD_URL = "./resetPassword.html?locale=%s&token=%s";
+	private static final String UTF_8 = "utf-8";
+	private static final String HTML_MIME_TYPE = "text/html;charset=utf-8";
 	private static final Logger LOGGER = Logger.getLogger(UserServlet.class.getName()); 
 	
 	private UserService userService; //Java Bean
@@ -118,7 +120,6 @@ public class UserServlet extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No token specified"); //400 Bad Request
 			return;
 		}
-		// TODO action reset
 		try {
 			final User user = userService.getUserByToken(token);
 			if (user == null) {
@@ -127,21 +128,26 @@ public class UserServlet extends HttpServlet {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Invalid token");
 				return;
 			}
-			if ((user.getStatus() != UserStatus.PENDING) && (user.getStatus() != UserStatus.FORGOT)) {
+			if (user.getStatus() == UserStatus.PENDING) { //action register
+				user.setStatus(UserStatus.NORMAL);
+				userService.editUser(user, null);
+				LOGGER.info("User " + user.getEmail() + " activated their account");
+				//teleiwnei tin apanthsh
+				response.sendRedirect(String.format(MAP_URL, URLEncoder.encode(locale, UTF_8)));
+			} else if (user.getStatus() == UserStatus.FORGOT) { //action reset
+				LOGGER.info("User " + user.getEmail() + " initialized password reset");
+				//teleiwnei tin apanthsh
+				response.sendRedirect(String.format(RESET_PASSWORD_URL, URLEncoder.encode(locale, UTF_8),
+						URLEncoder.encode(token, UTF_8)));
+			} else { //periptwsh pou exei xrhsimopoihthei token apo mail pou den einai egkuro
 				LOGGER.warning("Invalid status " + user.getStatus() + " for user " + user.getEmail());
 				//O xrhsths den einai pending h forgot
 				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid status");
-				return;
 			}
-			user.setStatus(UserStatus.NORMAL);
-			userService.editUser(user, null);
-			LOGGER.info("User " + user.getEmail() + " activated their account");
-			//teleiwnei tin apanthsh
-			response.sendRedirect(String.format(MAP_URL, URLEncoder.encode(locale, UTF_8)));
 		} catch (final UserServiceException e) {
-			LOGGER.log(Level.WARNING, "Error retrieving user with token " + token, e);
+			LOGGER.log(Level.WARNING, "Error updating user with token " + token, e);
 			//Internal Server Error (500)
-			throw new ServletException("Error retrieving user", e);
+			throw new ServletException("Error updating user", e);
 		}
 	}
 	
@@ -195,6 +201,7 @@ public class UserServlet extends HttpServlet {
 			//Pairnei to bundle ths antistoixhs glwssas
 			final ResourceBundle bundle = ResourceBundle.getBundle(smtpResourceBundle, new Locale(locale));
 			//apo to bundle pairnei to string me key: register.subject
+			
 			message.setSubject(bundle.getString("register.subject"), UTF_8);
 			//Lista me ta kommatia tou mhnumatos. Gia apostolh otidhpote allo ektos apo plain-text p.x apostolh html
 			final Multipart multipart = new MimeMultipart();
@@ -220,17 +227,19 @@ public class UserServlet extends HttpServlet {
 	}
 	
 	/**
-	 * Log in users.
+	 * Log in users, forgot password, reset password
 	 */
 	@Override
 	public void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
 		final String action = request.getParameter("action");
 		final String email = request.getParameter("email");
 		final String password = request.getParameter("password");
+		final String password2 = request.getParameter("password2");
 		final String locale = request.getParameter("locale");
 		final String url = request.getParameter("url");
+		final String token = request.getParameter("token");
 		
-		if (LOGIN_ACTION.equals(action)) {
+		if (LOGIN_ACTION.equals(action)) { //login stin forma
 			if (email == null) {
 				LOGGER.warning("No email specified");
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No email specified"); //400 Bad Request
@@ -278,9 +287,9 @@ public class UserServlet extends HttpServlet {
 				}
 			} catch (final UserServiceException e) {
 				LOGGER.log(Level.WARNING, "Error validating user " + email, e);
-				throw new ServletException("Error validating user " + email, e); //Epistrefei 500 ston client
-			}	
-		} else if (RESET_ACTION.equals(action)) {
+				throw new ServletException("Error validating user", e); //Epistrefei 500 ston client
+			}
+		} else if (FORGOT_ACTION.equals(action)) { //sto ok ths formas tou forgot password
 			if (email == null) {
 				LOGGER.warning("No email specified");
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No email specified"); //400 Bad Request
@@ -300,7 +309,7 @@ public class UserServlet extends HttpServlet {
 					return;
 				}
 				user.setStatus(UserStatus.FORGOT);
-				final String token = userService.editUser(user, null);
+				final String newToken = userService.editUser(user, null);
 				//Message me polla parts giati borei na perilamvanei attachments
 				//Borei na einai kai plain-text, alla den exei attachments (html, fotos)
 				final MimeMessage message = new MimeMessage(session);
@@ -319,7 +328,7 @@ public class UserServlet extends HttpServlet {
 				//Kurio meros tou mhnumatos
 		        final MimeBodyPart mimeBodyPart = new MimeBodyPart();
 		        mimeBodyPart.setContent(String.format(bundle.getString("forgot.content"),
-		        		((user.getName() == null) || user.getName().isEmpty()) ? email : user.getName(), token), HTML_MIME_TYPE);
+		        		((user.getName() == null) || user.getName().isEmpty()) ? email : user.getName(), newToken), HTML_MIME_TYPE);
 		        multipart.addBodyPart(mimeBodyPart);
 		        message.setContent(multipart);
 		        //apostolh mhmunatos
@@ -329,13 +338,54 @@ public class UserServlet extends HttpServlet {
 				return;
 			} catch (final AddressException e) {
 				LOGGER.log(Level.WARNING, "Error resetting password for user " + email, e);
-				throw new ServletException("Error resetting password for user " + email, e); //Epistrefei 500 ston client (provlima ston server)
+				throw new ServletException("Error resetting password", e); //Epistrefei 500 ston client (provlima ston server)
 			} catch (final MessagingException e) {
 				LOGGER.log(Level.WARNING, "Error resetting password for user " + email, e);
-				throw new ServletException("Error resetting password for user " + email, e); //Epistrefei 500 ston client
+				throw new ServletException("Error resetting password", e); //Epistrefei 500 ston client
 			} catch (final UserServiceException e) {
 				LOGGER.log(Level.WARNING, "Error resetting password for user " + email, e);
-				throw new ServletException("Error resetting password for user " + email, e); //Epistrefei 500 ston client				
+				throw new ServletException("Error resetting password", e); //Epistrefei 500 ston client				
+			}
+		} else if (RESET_ACTION.equals(action)) { //sti forma resetPassword
+			if (token == null) {
+				LOGGER.warning("No token specified");
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No token specified"); //400 Bad Request
+				return;
+			}
+			try {
+				final User user = userService.getUserByToken(token);
+				if (user == null) {
+					LOGGER.warning("User not found");
+					response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not found"); //404 Not Found
+					return;
+				}
+				if (user.getStatus() != UserStatus.FORGOT) {
+					LOGGER.warning("Invalid status " + user.getStatus() + " for user with token " + token);
+					//O xrhsths den einai normal h admin
+					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid status");
+					return;
+				}
+				if (password == null) {
+					LOGGER.warning("No password specified");
+					response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No password specified"); //400 Bad Request
+					return;
+				}
+				if (password2 == null) {
+					LOGGER.warning("No confirm password specified");
+					response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No confirm password specified"); //400 Bad Request
+					return;
+				}
+				if (!password.equals(password2)) {
+					LOGGER.warning("Passwords do not match");
+					response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Passwords do not match"); //400 Bad Request
+					return;
+				}
+				user.setStatus(UserStatus.NORMAL);
+				userService.editUser(user, password);
+				LOGGER.info("User " + user.getEmail() + " reset their password succesfully");
+			} catch (final UserServiceException e) {
+				LOGGER.log(Level.WARNING, "Error resetting password for user with token " + token, e);
+				throw new ServletException("Error resetting password", e); //Epistrefei 500 ston client
 			}
 		} else { // sumperilamvanomenou tou null
 			LOGGER.warning("Unknown action " + action);
