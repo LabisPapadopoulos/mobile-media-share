@@ -143,7 +143,7 @@ public class NewPhoto extends Composite implements ClickHandler, EntryPoint, Goo
 	
 	@Override
 	public void onKeyUp(final KeyUpEvent _) {
-		ok.setEnabled((!photo.getValue().trim().isEmpty()) && (!title.getValue().trim().isEmpty()));		
+		ok.setEnabled((!photo.getValue().trim().isEmpty()) && (!title.getValue().trim().isEmpty()));
 	}
 	
 	@Override

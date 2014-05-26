@@ -77,7 +77,7 @@ public class NewUser extends Composite implements ClickHandler, EntryPoint, KeyU
 			//Klhsh tou UserServlet me ajax, me tin methodo put (Ylopoihsh protokolou REST)
 			//Oi Browsers den upostirizoun PUT kai kat' epektash formes opote kanoun GET kai vazoun ta dedomena sto url.
 			//Gi' auto ginetai xrhsh tou RequestBuilder
-			final RequestBuilder request = new RequestBuilder(RequestBuilder.PUT, MOBILE_MEDIA_SHARE_URLS.userServletLogin(
+			final RequestBuilder request = new RequestBuilder(RequestBuilder.PUT, MOBILE_MEDIA_SHARE_URLS.userServletRegister(
 					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
 					URL.encodeQueryString(email.getValue()), URL.encodeQueryString(password.getValue()),
 					URL.encodeQueryString(password2.getValue())));

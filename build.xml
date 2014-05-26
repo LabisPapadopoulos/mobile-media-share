@@ -40,6 +40,7 @@
 			<arg value="gr.uoa.di.std08169.mobile.media.share.NewPhoto" />
 			<arg value="gr.uoa.di.std08169.mobile.media.share.NewUser" />
 			<arg value="gr.uoa.di.std08169.mobile.media.share.NewVideo" />
+			<arg value="gr.uoa.di.std08169.mobile.media.share.ResetPassword" />
 			<arg value="gr.uoa.di.std08169.mobile.media.share.Upload" />
 			<arg value="gr.uoa.di.std08169.mobile.media.share.ViewMedia" />
 		</java>
@@ -58,6 +59,7 @@
 		<delete dir="war/newPhoto" failonerror="false" />
 		<delete dir="war/newUser" failonerror="false" />
 		<delete dir="war/newVideo" failonerror="false" />
+		<delete dir="war/resetPassword" failonerror="false" />
 		<delete dir="war/upload" failonerror="false" />
 		<delete dir="war/viewMedia" failonerror="false" />
 		<delete dir="war/WEB-INF/classes" failonerror="false" />
