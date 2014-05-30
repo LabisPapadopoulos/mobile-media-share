@@ -7,6 +7,7 @@
 	<g:HTMLPanel ui:field="htmlPanel">
 		<div class="content editMediaPage">
 			<mms:Header /> <!-- Import to header sth selida -->
+			<mms:Menu />
 			<!-- Breadcrumb -->
 			<h3><ui:text from="{constants.youAreHere}" />&nbsp;<ui:text from="{constants.editMedia}" /></h3>
 			<p>
@@ -28,6 +29,7 @@
 				<g:Button ui:field="reset" text="{constants.reset}" />
 			</p>
 		</div>
+		<mms:Footer />
 	</g:HTMLPanel>
 </ui:UiBinder>
 

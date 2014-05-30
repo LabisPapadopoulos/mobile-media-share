@@ -15,6 +15,10 @@
 	<html>
 		<head>
 			<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+			<script type="text/javascript" src="./js/whammy.min.js"></script>
+			<script type="text/javascript">
+				window.whammy = Whammy;
+			</script>
 			<script type="text/javascript" src="./newVideo/newVideo.nocache.js"></script>
 			<title>Mobile Media Share</title>
 		</head>

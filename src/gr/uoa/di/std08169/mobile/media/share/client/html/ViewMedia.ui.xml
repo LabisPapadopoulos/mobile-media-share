@@ -7,6 +7,7 @@
 	<g:HTMLPanel ui:field="htmlPanel">
 		<div class="content viewMediaPage">
 			<mms:Header /> <!-- Import to header sth selida -->
+			<mms:Menu />
 			<!-- Breadcrumb -->
 			<h3><ui:text from="{constants.youAreHere}" />&nbsp;<ui:text from="{constants.viewMedia}" /></h3>
 			<div ui:field="content" class="mediaContent"></div>
@@ -54,5 +55,6 @@
 			<img src="./images/view.jpg" class="viewMediaFile" alt="{constants.viewMedia}" />
 			<div ui:field="map" class="mediaMap"></div>
 		</div>
+		<mms:Footer />
 	</g:HTMLPanel>
 </ui:UiBinder>
