@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+		xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:mms="urn:import:gr.uoa.di.std08169.mobile.media.share.client.html"> <!-- mms: mobile-media-share -->
+	<ui:with field="constants" type="gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants" />
+	<g:HTMLPanel>
+		<div class="content newVideoPage">
+			<mms:Header /> <!-- Import to header sth selida -->
+			<!-- Breadcrumb -->
+			<h3><ui:text from="{constants.youAreHere}" />&nbsp;<ui:text from="{constants.newVideo}" /></h3>
+			<video ui:field="video" style="display:block;" class="video" />
+			<canvas ui:field="canvas" style="display:block;" />
+			<p>
+				<g:Button ui:field="startRecording" text="{constants.startRecording}" />
+				<g:Button ui:field="stopRecording" text="{constants.stopRecording}" />
+			</p>
+			<p>
+			    <g:InlineLabel ui:field="elapsedTime" />
+			</p>
+			<p>
+				<span class="label"><ui:text from="{constants.title}" /></span>
+				<g:TextBox ui:field="title" />
+			</p>
+			<p>
+				<span class="label"><ui:text from="{constants.publik}" /></span>
+				<g:CheckBox ui:field="publik" />
+			</p>
+			<p>
+				<span class="label"><ui:text from="{constants.latitudeLongitude}" /></span>
+				<g:InlineLabel ui:field="latitudeLongitude" />
+			</p>
+			<div ui:field="map" class="mediaMap"></div>
+			<p class="newVideoButtons">
+				<g:SubmitButton ui:field="ok" text="{constants.ok}" />
+				<g:ResetButton ui:field="reset" text="{constants.reset}" />
+			</p>
+		</div>
+		<mms:Footer />
+	</g:HTMLPanel>
+</ui:UiBinder>	

@@ -1,7 +1,6 @@
 package gr.uoa.di.std08169.mobile.media.share.client.html;
 
 import java.math.BigDecimal;
-
 import com.google.gwt.ajaxloader.client.AjaxLoader;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.EntryPoint;
@@ -22,8 +21,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.ResetButton;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -52,27 +51,25 @@ public class NewVideo extends Composite implements ClickHandler, EntryPoint, Goo
 			GWT.create(MobileMediaShareUrls.class);
 	private static final MobileMediaShareMessages MOBILE_MEDIA_SHARE_MESSAGES =
 			GWT.create(MobileMediaShareMessages.class);
-	
+
 	@UiField
 	protected VideoElement video;
 	@UiField
 	protected CanvasElement canvas;
 	@UiField
-	protected Button capture;
+	protected Button startRecording;
 	@UiField
-	protected Hidden photo;
+	protected Button stopRecording;
+	@UiField
+	protected InlineLabel elapsedTime;
 	@UiField
 	protected TextBox title;
+	@UiField
+	protected CheckBox publik;
 	@UiField
 	protected InlineLabel latitudeLongitude;
 	@UiField
 	protected DivElement map;
-	@UiField
-	protected Hidden latitude;
-	@UiField
-	protected Hidden longitude;
-	@UiField
-	protected Hidden locale;
 	@UiField
 	protected SubmitButton ok;
 	@UiField
@@ -81,15 +78,19 @@ public class NewVideo extends Composite implements ClickHandler, EntryPoint, Goo
 	private BigDecimal defaultLongitude;
 	private GoogleMap googleMap;
 	private Marker marker;
-
+	private BigDecimal latitude;
+	private BigDecimal longitude;
+	
 	public NewVideo() {
 		//Arxikopoihsh tou grafikou me ton Ui Binder
 		initWidget(NEW_VIDEO_UI_BINDER.createAndBindUi(this));
-		capture.addClickHandler(this);
-		capture.setEnabled(false);
+		startRecording.addClickHandler(this);
+		startRecording.setEnabled(false);
+		stopRecording.addClickHandler(this);
+		stopRecording.setEnabled(false);
 		title.addKeyUpHandler(this);
-		locale.setValue(LocaleInfo.getCurrentLocale().getLocaleName());
 		ok.setEnabled(false);
+		ok.addClickHandler(this);
 		reset.addClickHandler(this);
 	}
 	
@@ -104,30 +105,37 @@ public class NewVideo extends Composite implements ClickHandler, EntryPoint, Goo
 		//orismos theshs marker
 		marker.setPosition(event.getLatLng());
 		//orismos timwn twn latitude and longitude
-		latitude.setValue(new BigDecimal(event.getLatLng().lat()).toString());
-		longitude.setValue(new BigDecimal(event.getLatLng().lng()).toString());
+		latitude = new BigDecimal(event.getLatLng().lat());
+		longitude = new BigDecimal(event.getLatLng().lng());
 	}
 
 	@Override
 	public void onClick(final ClickEvent clickEvent) {
-		if (clickEvent.getSource() == capture) {
-			//zwgrafizei se sugkekrimenes diastaseis, analoga me tin kamera tou xrhsth
+		if (clickEvent.getSource() == startRecording) {
+			startRecording.setEnabled(false);
+			stopRecording.setEnabled(true);
 			canvas.setWidth(video.getVideoWidth());
 			canvas.setHeight(video.getVideoHeight());
-			//Sto hidden photo orizetai to photo data url (by default .png)
-			photo.setValue(capture());
-			//apokrupsh video
-			video.getStyle().setDisplay(Display.NONE);
-			//emfanish canvas
-			canvas.getStyle().setDisplay(Display.BLOCK);
-			ok.setEnabled(!title.getValue().trim().isEmpty());
+			updateElapsedTime(0);
+			startRecording();
+		} else if (clickEvent.getSource() == stopRecording) {
+			stopRecording();
+			canvas.setWidth(video.getVideoWidth());
+			canvas.setHeight(video.getVideoHeight());
+			stopRecording.setEnabled(false);
+			startRecording.setEnabled(true);
+							//na uparxoun frames (dedomena) & titlos
+			ok.setEnabled((countFrames() > 0) && (!title.getValue().trim().isEmpty()));
+		} else if (clickEvent.getSource() == ok) {
+			ok.setEnabled(false);
+			submit(title.getValue(), publik.getValue());
 		} else if (clickEvent.getSource() == reset) {
+			resetRecording();
 			video.getStyle().setDisplay(Display.BLOCK);
 			canvas.getStyle().setDisplay(Display.NONE);
 			//katharizei to canvas
 			canvas.setWidth(0);
 			canvas.setHeight(0);
-			photo.setValue(null);
 			title.setValue(null);
 			latitudeLongitude.setText("(" + List.formatLatitude(defaultLatitude) + ", " + List.formatLongitude(defaultLongitude) + ")");
 			final LatLng latLng = LatLng.create(defaultLatitude.doubleValue(), defaultLongitude.doubleValue()); 
@@ -135,15 +143,18 @@ public class NewVideo extends Composite implements ClickHandler, EntryPoint, Goo
 			googleMap.setZoom(Map.GOOGLE_MAPS_ZOOM);
 			marker.setPosition(latLng);
 			//orismos timwn twn latitude and longitude
-			latitude.setValue(defaultLatitude.toString());
-			longitude.setValue(defaultLongitude.toString());
+			latitude = defaultLatitude;
+			longitude = defaultLongitude;
+			stopRecording.setEnabled(false);
 			ok.setEnabled(false);
+			startRecording.setEnabled(true);
 		}
 	}
 	
 	@Override
 	public void onKeyUp(final KeyUpEvent _) {
-		ok.setEnabled((!photo.getValue().trim().isEmpty()) && (!title.getValue().trim().isEmpty()));		
+		//na uparxoun frames (dedomena) & titlos
+		ok.setEnabled((countFrames() > 0) && (!title.getValue().trim().isEmpty()));
 	}
 	
 	@Override
@@ -195,16 +206,14 @@ public class NewVideo extends Composite implements ClickHandler, EntryPoint, Goo
 	private native void initializeVideo() /*-{
 		//navigator: singleton antikeimeno js pou antiproswpeuei ton browser
 		//*getUserMedia: ti polhmesa upostirizei o upologisths tou xrhsth
+		if (navigator.getUserMedia == null)
+			navigator.getUserMedia = navigator.mozGetUserMedia;
+		if (navigator.getUserMedia == null)
+			navigator.getUserMedia = navigator.msGetUserMedia;
+		if (navigator.getUserMedia == null)
+			navigator.getUserMedia = navigator.webkitGetUserMedia;
 		if (navigator.getUserMedia == null) {
-			if (navigator.mozGetUserMedia != null)
-				navigator.getUserMedia = navigator.mozGetUserMedia;
-			else if (navigator.msGetUserMedia != null)
-				navigator.getUserMedia = navigator.msGetUserMedia;
-			else if (navigator.webkitGetUserMedia != null)
-				navigator.getUserMedia = navigator.webkitGetUserMedia;
-		}
-		if (navigator.getUserMedia == null) {
-			//Klhsh tis sunartishs (::...) userMediaError apo tin klash (@...NewPhoto)
+			//Klhsh tis sunartishs (::...) userMediaError apo tin klash (@...NewVideo)
 			//(Ljava/lang/String;): gia overloading stin sunartish userMediaError
 			//(casting to null se String gia tin Java)
 			this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::userMediaError(Ljava/lang/Integer;)(null);
@@ -216,13 +225,45 @@ public class NewVideo extends Composite implements ClickHandler, EntryPoint, Goo
 			this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::userMediaError(Ljava/lang/Integer;)(null);
 			return;
 		}
+		//An den uparxei to requestAnimationFrame psaxnei na to vrei me tin seira apo extension
+		// webkit	-> Safari, Chrome
+		// moz		-> Firefox
+		// ms		-> Internet Explorer
+		// o		-> Opera
+		if ($wnd.requestAnimationFrame == null)
+			$wnd.requestAnimationFrame = $wnd.webkitRequestAnimationFrame;
+		if ($wnd.requestAnimationFrame == null)
+			$wnd.requestAnimationFrame = $wnd.mozRequestAnimationFrame;
+		if ($wnd.requestAnimationFrame == null)
+			$wnd.requestAnimationFrame = $wnd.msRequestAnimationFrame;
+		if ($wnd.requestAnimationFrame == null)
+			$wnd.requestAnimationFrame = $wnd.oRequestAnimationFrame;
+		if ($wnd.requestAnimationFrame == null) {
+			this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::userMediaError(Ljava/lang/Integer;)(null);
+			return;
+		}
+		if ($wnd.cancelAnimationFrame == null)
+			$wnd.cancelAnimationFrame = $wnd.webkitCancelAnimationFrame;
+		if ($wnd.cancelAnimationFrame == null)
+			$wnd.cancelAnimationFrame = $wnd.mozCancelAnimationFrame;
+		if ($wnd.cancelAnimationFrame == null)
+			$wnd.cancelAnimationFrame = $wnd.msCancelAnimationFrame;
+		if ($wnd.cancelAnimationFrame == null)
+			$wnd.cancelAnimationFrame = $wnd.oCancelAnimationFrame;
+		if ($wnd.cancelAnimationFrame == null) {
+			this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::userMediaError(Ljava/lang/Integer;)(null);
+			return;
+		}
+		//katharismos tou recording
+		this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::resetRecording()();
+		
 		//mono gia video
-		//this: to newPhoto java antikeimeno
+		//this: to newVideo java antikeimeno
 		var that = this;
 		navigator.getUserMedia({video: true},
 		 	//Sto on Success kalei tin userMediaSuccess kai pernaei sto video pou travaei h getUserMedia
 			function (stream) {
-				//that: klish epanw sto newPhoto java object (to instance tin klashs)
+				//that: klish epanw sto newVideo java object (to instance tin klashs)
 				that.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::userMediaSuccess(Ljava/lang/String;)($wnd.URL.createObjectURL(stream));
 			},
 			//Sto on Error kalei tin userMediaError kai pernaei to error event h getUserMedia
@@ -233,21 +274,116 @@ public class NewVideo extends Composite implements ClickHandler, EntryPoint, Goo
 	
 	private void userMediaError(final Integer error) {
 		if ((error != null) && (error == 1))
-			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCapturingPhoto(MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
+			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCapturingPhoto(MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied())); // TODO
 		else
-			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCapturingPhoto(MOBILE_MEDIA_SHARE_CONSTANTS.notSupported()));
+			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCapturingPhoto(MOBILE_MEDIA_SHARE_CONSTANTS.notSupported())); // TODO
+	}
+	
+	private void updateElapsedTime(final Integer elapsedTime) {
+Window.alert("Elapsed time: " + elapsedTime);
+		this.elapsedTime.setText(List.formatDuration(elapsedTime));
 	}
 	
 	private void userMediaSuccess(final String url) {
 		video.setSrc(url);
 		video.play();
-		capture.setEnabled(true);
+		startRecording.setEnabled(true);
 	}
 	
-	private native String capture() /*-{
+	private native void startRecording() /*-{
+		this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::resetRecording()();
+		$wnd.video.isRecording = true;
+		$wnd.video.frameId = $wnd.requestAnimationFrame($wnd.video.recording);
+	}-*/;
+	
+	private native void stopRecording() /*-{
+		$wnd.video.isRecording = false;
+		$wnd.cancelAnimationFrame($wnd.video.frameId);
+		$wnd.video.elapsedTime = Math.floor((Date.now() - $wnd.video.startTime) / 1000);
+console.log('$wnd.video.elapsedTime = ' + $wnd.video.elapsedTime); 
+		this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::updateElapsedTime(Ljava/lang/Integer;)($wnd.video.elapsedTime);
+	}-*/;
+	
+	private native void resetRecording() /*-{
+		if (($wnd.video != null) && ($wnd.video.frameId != null))
+			$wnd.cancelAnimationFrame($wnd.video.frameId);
+		//arxikopoihsh dedomenwn pou tha xreiastei h javascript
+		$wnd.video = new Object();
+		$wnd.video.fps = 30;
+		$wnd.video.frames = new Array();
+		$wnd.video.startTime = Date.now();
+		$wnd.video.elapsedTime = 0;
+		$wnd.video.frameId = null;
+		$wnd.video.isRecording = false;
+		var that = this;
+console.log('this: ' + this);
 		var canvas = this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::canvas;
 		var video = this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::video;
-		canvas.getContext('2d').drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-		return canvas.toDataURL();
+		$wnd.video.recording = function (time) {
+			//zwgrafizei to kathe kare san fwtografeia s' ena canvas gia na boresei na parei fwtografeies apo to video pou trexei 
+			canvas.getContext('2d').drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+			//apothikeush tou kathe kare (frame) s' ena pinaka (me poiothta eikonas 1.0)
+			$wnd.video.frames.push(canvas.toDataURL('image/webp', 1.0));
+			//metraei ton xrono pou exei perasei
+			$wnd.video.elapsedTime = Math.floor((Date.now() - $wnd.video.startTime) / 1000);
+console.log('$wnd.video.elapsedTime = ' + $wnd.video.elapsedTime);
+console.log('that: ' + that);
+			//klish ths updateElapsedTime gia na ananewnei to xronometro
+			that.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::updateElapsedTime(Ljava/lang/Integer;)($wnd.video.elapsedTime);
+			//an grafei akoma video, zhtaei na klithei xana (asugxrona) se 1000 / fps millisecons h requestAnimationFrame h opoia 
+			//tha kalesei (asugxrona) tin video.recording otan einai na zwgrafistei to epomeno kare
+			if ($wnd.video.isRecording) {
+				setTimeout(function() {
+					$wnd.video.frameId = requestAnimationFrame($wnd.video.recording);
+				}, 1000 / $wnd.video.fps);
+			}
+//			$wnd.video.frameId = requestAnimationFrame($wnd.video.recording); //anadromh ouras (apla mazeuei to stack kai oti ektelei, to ektelei stin arxh)
+		};
 	}-*/;
+	
+	private native int countFrames() /*-{
+		return $wnd.video.frames.length;
+	}-*/;
+	
+	private native void submit(final String title, final boolean publik) /*-{
+		//Ajax Request epeidh to blob (to video) dhmiourgeitai dunamika se javascript (dedomena pou 
+		//paragei o idios o browser monos tou) kai den eisagetai apo ton xrhsth
+		var request = new XMLHttpRequest();
+		//tha kanei post sto mediaServlet, asugxrona (true)
+		request.open('post', '../mediaServlet', true);
+		var that = this;
+		//otan ginei opoiadhpote kinhsh sxetika me to request, tha kaleitai asugxrona h onreadystatechange
+		request.onreadystatechange = function () {
+			//an exei oloklhrwthei to request
+			if (request.readyState == XMLHttpRequest.DONE) {
+				if (request.status == 200) //an exei teleiwsei epituxws
+					that.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::requestSuccess()();
+				else //kaleitai h sunarthsh gia sfalmatos
+					that.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::requestError(Ljava/lang/String;)(request.statusText);
+			}
+		};
+		var latitude = this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::latitude;
+		var longitude = this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::longitude;
+		//gemisma pediwn gia apostolh sto servlet
+		//Dedomena pou tha pane san multipart/form-data
+		var formData = new FormData();
+		formData.append('title', title);
+		formData.append('public', publik);
+		formData.append('latitude', latitude);
+		formData.append('longitude', longitude);
+		var blob = $wnd.whammy.fromImageArray($wnd.video.frames, $wnd.video.frames.length / $wnd.video.elapsedTime);
+		formData.append('video', blob);
+		formData.append('duration', $wnd.video.elapsedTime);
+		request.send(formData);
+	}-*/;
+	
+	private void requestError(final String error) {
+		// TODO
+		Window.alert("Request error: " + error);
+	}
+	
+	private void requestSuccess() {
+		Window.alert("Request success");
+		// TODO
+	}
 }
