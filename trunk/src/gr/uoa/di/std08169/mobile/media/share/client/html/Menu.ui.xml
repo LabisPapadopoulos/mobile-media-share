@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <!-- Template tou GWT (namespace) -> xmlns:ui="urn:ui:com.google.gwt.uibinder" -->
+	<!-- Import gia to com.google.gwt.user.client.ui.HTMLPanel
+		xmlns:g="urn:import:com.google.gwt.user.client.ui"
+			(san import com.google.gwt.user.client.ui.* kai to vaftizeis g),
+		g:HTMLPanel
+			to HTMLPanel pou einai mesa sto g -->    
+    <!-- dhmiourgei ena constant tupou type pou tha to leei field -->
+    <ui:with field="constants" type="gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants" />
+	<g:HTMLPanel><!-- header -->
+	    <div class="menu">
+		    <a ui:field="mapLink" class="map">
+		        <img src="./images/map.svg" class="mapImg" alt="{constants.map}" />
+		        <ui:text from="{constants.map}" />
+		    </a>
+		    <a ui:field="listLink" class="list">
+		        <img src="./images/list.svg" class="listImg" alt="{constants.list}" />
+		        <ui:text from="{constants.list}" />
+		    </a>
+  			    <a ui:field="newPhotoLink" class="newPhoto">
+  			        <img src="./images/newPhoto.svg" class="newPhotoImg" alt="{constants.newPhoto}" />
+		        <ui:text from="{constants.newPhoto}" />
+		    </a>
+  			    <a ui:field="newVideoLink" class="newVideo">
+  			        <img src="./images/newVideo.svg" class="newVideoImg" alt="{constants.newVideo}" />
+		        <ui:text from="{constants.newVideo}" />
+		    </a>
+  			    <a ui:field="uploadLink" class="upload">
+  			        <img src="./images/upload.svg" class="uploadImg" alt="{constants.upload}" />
+		        <ui:text from="{constants.upload}" />
+		    </a>
+		    <a ui:field="myAccountLink" class="myAccount">
+		        <img src="./images/myAccount.svg" class="myAccountImg" alt="{constants.myAccount}" />
+		        <ui:text from="{constants.myAccount}" />
+		    </a>
+		    <a ui:field="logoutLink" class="logout" title="{constants.logout}">
+		        <img src="./images/logout.svg" class="logoutImg" />
+		        <!-- prosthetei keimeno exw apo attribute  -->
+		        <ui:text from="{constants.logout}" />
+		    </a>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder>

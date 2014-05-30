@@ -9,6 +9,7 @@
 	<g:HTMLPanel ui:field="htmlPanel">
 		<div class="content mapPage">
 			<mms:Header /> <!-- Import to header sth selida -->
+			<mms:Menu />
 			<!-- Breadcrumb -->
 			<h3><ui:text from="{constants.youAreHere}" />&nbsp;<ui:text from="{constants.map}" /></h3>
 			<div class="controls"><!-- controls -->
@@ -43,6 +44,7 @@
 			</p>
 			<div ui:field="mapContainer" class="map"></div>
 		</div>
+		<mms:Footer />
 	</g:HTMLPanel>
 </ui:UiBinder>
 

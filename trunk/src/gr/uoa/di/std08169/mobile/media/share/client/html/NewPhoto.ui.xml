@@ -7,6 +7,7 @@
 	<g:HTMLPanel>
 		<div class="content newPhotoPage">
 			<mms:Header /> <!-- Import to header sth selida -->
+			<mms:Menu />
 			<!-- Breadcrumb -->
 			<h3><ui:text from="{constants.youAreHere}" />&nbsp;<ui:text from="{constants.newPhoto}" /></h3>
 			<form method="post" action="./mediaServlet" enctype="multipart/form-data" target="_self">
@@ -36,5 +37,6 @@
 				</p>
 			</form>
 		</div>
+		<mms:Footer />
 	</g:HTMLPanel>
 </ui:UiBinder>	

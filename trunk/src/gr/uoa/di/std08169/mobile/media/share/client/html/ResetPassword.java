@@ -1,7 +1,7 @@
 package gr.uoa.di.std08169.mobile.media.share.client.html;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.shared.GWT;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants;
 import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessages;
 
 public class ResetPassword extends Composite implements ClickHandler, EntryPoint, KeyUpHandler, RequestCallback {
@@ -37,6 +38,8 @@ public class ResetPassword extends Composite implements ClickHandler, EntryPoint
 			GWT.create(MobileMediaShareUrls.class);
 	private static final MobileMediaShareMessages MOBILE_MEDIA_SHARE_MESSAGES =
 			GWT.create(MobileMediaShareMessages.class);
+	private static final MobileMediaShareConstants MOBILE_MEDIA_SHARE_CONSTANTS =
+			GWT.create(MobileMediaShareConstants.class);
 	
 	@UiField
 	protected PasswordTextBox password;
@@ -46,6 +49,7 @@ public class ResetPassword extends Composite implements ClickHandler, EntryPoint
 	protected Button ok;
 	@UiField
 	protected Button reset;
+	private String token;
 	
 	public ResetPassword() {
 		initWidget(RESET_PASSWORD_UI_BINDER.createAndBindUi(this));
@@ -66,8 +70,7 @@ public class ResetPassword extends Composite implements ClickHandler, EntryPoint
 			final RequestBuilder request = new RequestBuilder(RequestBuilder.POST, MOBILE_MEDIA_SHARE_URLS.userServletReset(
 					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
 					//apostolh kai tou token sto url anti gia hidden pedio
-					URL.encodeQueryString(Window.Location.getParameter("token")),
-					URL.encodeQueryString(password.getValue()),
+					URL.encodeQueryString(token), URL.encodeQueryString(password.getValue()),
 					URL.encodeQueryString(password2.getValue())));
 			//xana asxoleitai h idia h klash (this) me tin apantish tou request (onError, onResponseReceived) 
 			request.setCallback(this);
@@ -106,6 +109,16 @@ public class ResetPassword extends Composite implements ClickHandler, EntryPoint
 	
 	@Override
 	public void onModuleLoad() {
+		token = Window.Location.getParameter("token");
+		if (token == null) {
+			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorResettingPassword(
+					MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
+			//redirect sto map
+			Window.Location.assign(GWT.getHostPageBaseURL() + MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
+					//me to antistoixo locale 
+					LocaleInfo.getCurrentLocale().getLocaleName())));
+			return;
+		}
 		RootPanel.get().add(this);
 	}
 	

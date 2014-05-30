@@ -10,6 +10,7 @@
 	<g:HTMLPanel ui:field="htmlPanel">
 		<div class="content listPage">
 			<mms:Header /> <!-- Import to header sth selida -->
+			<mms:Menu />
 			<!-- Breadcrumb -->
 			<h3><ui:text from="{constants.youAreHere}" />&nbsp;<ui:text from="{constants.list}" /></h3>
 			<!-- InlineLabel -> span -->
@@ -49,6 +50,7 @@
 			<ggg:SimplePager ui:field="pager" location="CENTER" /> <!-- Stoixish sto kentro to text ston pager -->
 			<ggg:CellTable ui:field="mediaTable" />
 		</div>
+		<mms:Footer />
 	</g:HTMLPanel>
 </ui:UiBinder>
 

@@ -8,6 +8,7 @@
 	<g:HTMLPanel ui:field="htmlPanel">
 		<div class="content uploadPage">
 			<mms:Header /> <!-- Import to header sth selida -->
+			<mms:Menu />
 			<!-- Breadcrumb -->
 			<h3><ui:text from="{constants.youAreHere}" />&nbsp;<ui:text from="{constants.upload}" /></h3>
 			<img src="./images/uploadLogo.png" class="uploadImage" alt="{constants.upload}" />
@@ -40,6 +41,7 @@
 				</p>
 			</form><!-- controls -->
 		</div>
+		<mms:Footer />
 	</g:HTMLPanel>
 </ui:UiBinder>
 
