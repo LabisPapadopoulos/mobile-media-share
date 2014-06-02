@@ -380,7 +380,7 @@ console.log('that: ' + that);
 	}-*/;
 	
 	private void requestError(final String error) {
-		Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCapturingVideo(error));
+		Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorUploadingVideo(error));
 		Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 	}
 	

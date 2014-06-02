@@ -40,11 +40,17 @@ public interface MobileMediaShareMessages extends Messages {
 	@DefaultMessage("Error retrieving media: {0}")
 	public String errorRetrievingMedia(final String message);
 	
-	@DefaultMessage("Error retrieving media: {0}")
+	@DefaultMessage("Error retrieving medium: {0}")
 	public String errorRetrievingMedium(final String message);
+	
+	@DefaultMessage("Error retrieving user: {0}")
+	public String errorRetrievingUser(final String message);
 	
 	@DefaultMessage("Error retrieving your location: {0}")
 	public String errorRetrievingYourLocation(final String message);
+	
+	@DefaultMessage("Error uploading video: {0}")
+	public String errorUploadingVideo(final String message);
 	
 	@DefaultMessage("Error viewing media: {0}")
 	public String errorViewingMedia(final String message);
