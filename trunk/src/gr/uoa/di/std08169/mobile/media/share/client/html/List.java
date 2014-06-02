@@ -136,7 +136,7 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 	public static final TextColumn<Media> SIZE = new TextColumn<Media>() {
 		@Override
 		public String getValue(final Media media) {
-			//megathos arxeiou (B, KB, MB)
+			//megethos arxeiou (B, KB, MB)
 			if (media.getSize() < 1024l)
 				return SIZE_BYTES_FORMAT.format(media.getSize());
 			else if (media.getSize() < 1024l * 1024l)
@@ -231,7 +231,7 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 	private static final int DURATION_BASE = 60;
 	private static final BigDecimal DEGREES_BASE = new BigDecimal(60);
 	//Ena geniko column pou pairnei Media kai deixnei SafeHtml. Ws orisma pairnei ena Cell gia SafeHtmlCell
-	private static final Column<Media, SafeHtml> TITLE = new Column<Media, SafeHtml>(new SafeHtmlCell()) {
+	public static final Column<Media, SafeHtml> TITLE = new Column<Media, SafeHtml>(new SafeHtmlCell()) {
 		@Override
 		public SafeHtml getValue(final Media media) {
 			//Dhmiourgeitai Builder pou kanei append pragmata. (San StringBuilder)

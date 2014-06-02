@@ -109,6 +109,9 @@ public interface MobileMediaShareConstants extends Constants {
 	@DefaultStringValue("My Account")
 	public String myAccount();
 
+	@DefaultStringValue("Name")
+	public String name();
+	
 	@DefaultStringValue("New Photo")
 	public String newPhoto();
 	
@@ -153,7 +156,7 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("Size")
 	public String size();
-	
+
 	//# -> psifio, an einai 0 den to deixnei
 	//0 -> an einai 0, tha to deixei
 	@DefaultStringValue("0.### B")
@@ -167,6 +170,9 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("Start recording")
 	public String startRecording();
+	
+	@DefaultStringValue("Status")
+	public String status();
 	
 	@DefaultStringValue("Stop recording")
 	public String stopRecording();
@@ -182,6 +188,9 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("User")
 	public String user();
+	
+	@DefaultStringValue("user not found")
+	public String userNotFound();
 
 	@DefaultStringValue("View Media")
 	public String viewMedia();
