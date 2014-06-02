@@ -36,25 +36,7 @@ public class Header extends Composite {
 	protected AnchorElement di; //<a></a>
 
 	@UiField
-	protected AnchorElement mapLink; //<a></a>
-	
-	@UiField
-	protected AnchorElement listLink; //<a></a>
-	
-	@UiField
-	protected AnchorElement newPhotoLink; //<a></a>
-	
-	@UiField
-	protected AnchorElement newVideoLink; //<a></a>
-	
-	@UiField
-	protected AnchorElement uploadLink; //<a></a>
-	
-	@UiField
-	protected AnchorElement myAccountLink; //<a></a>
-		
-	@UiField
-	protected AnchorElement logoutLink; //<a></a>
+	protected AnchorElement startPage; //<a></a>
 		
 	protected Header() {
 		//sto this fernei to header (to div) pou molis eftiaxe
@@ -62,13 +44,7 @@ public class Header extends Composite {
 		//Gia pragmata pou theloun periexomeno
 		//redirect sto map kai krataei kai tin glwssa
 		di.setHref(MOBILE_MEDIA_SHARE_URLS.di(LocaleInfo.getCurrentLocale().getLocaleName()));
-		mapLink.setHref(MOBILE_MEDIA_SHARE_URLS.map(LocaleInfo.getCurrentLocale().getLocaleName()));
-		listLink.setHref(MOBILE_MEDIA_SHARE_URLS.list(LocaleInfo.getCurrentLocale().getLocaleName()));
-		newPhotoLink.setHref(MOBILE_MEDIA_SHARE_URLS.newPhoto(LocaleInfo.getCurrentLocale().getLocaleName()));
-		newVideoLink.setHref(MOBILE_MEDIA_SHARE_URLS.newVideo(LocaleInfo.getCurrentLocale().getLocaleName()));
-		uploadLink.setHref(MOBILE_MEDIA_SHARE_URLS.upload(LocaleInfo.getCurrentLocale().getLocaleName()));
-		myAccountLink.setHref(MOBILE_MEDIA_SHARE_URLS.myAccount(LocaleInfo.getCurrentLocale().getLocaleName()));
-		logoutLink.setHref(MOBILE_MEDIA_SHARE_URLS.logout(LocaleInfo.getCurrentLocale().getLocaleName()));
+		startPage.setHref(MOBILE_MEDIA_SHARE_URLS.map(LocaleInfo.getCurrentLocale().getLocaleName()));
 		//Gia kathe diathesimo locale (apo to MobileMediaShare.gwt.xml)
 		for (String locale : LocaleInfo.getAvailableLocaleNames()) {
 			if (!locale.equals("default")) {

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <!-- Template tou GWT (namespace) -> xmlns:ui="urn:ui:com.google.gwt.uibinder" -->
+	<!-- Import gia to com.google.gwt.user.client.ui.HTMLPanel
+		xmlns:g="urn:import:com.google.gwt.user.client.ui"
+			(san import com.google.gwt.user.client.ui.* kai to vaftizeis g),
+		g:HTMLPanel
+			to HTMLPanel pou einai mesa sto g -->    
+    <!-- dhmiourgei ena constant tupou type pou tha to leei field -->
+    <ui:with field="constants" type="gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants" />
+	<g:HTMLPanel><!-- header -->
+	    <div class="footer">
+		    <p>Copyright &copy; 2014, <a ui:field="administrator" target="_blank" title="labis" >Labis Papadopoulos.</a> All Rights Reserved</p>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder>

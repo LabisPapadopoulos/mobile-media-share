@@ -1,15 +1,15 @@
-New Video page
-New Audio page?
 My Account page
 Footer
 
-check login with non existing user
 no header in login, new user, forgot password
-calculate duration
-smtp.from, smtp.reply.to, smtp.subject and smtp.content from ResourceBundle
 
-userServlet: edit password, reset password, create user (validate email), delete user
-http://stackoverflow.com/questions/13825320/gwt-client-sending-a-file-with-multipart-form-data-post-request
+check for admin rights
+	grep -r getElementById src/ | grep email
+
+
+calculate duration
+
+userServlet: edit password, delete user
 
 nightly build to project ston okeano
 timeout exception otan kanoume new photo apo capture

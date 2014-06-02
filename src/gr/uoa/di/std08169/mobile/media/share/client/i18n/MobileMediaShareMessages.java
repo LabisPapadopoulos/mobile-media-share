@@ -21,6 +21,9 @@ public interface MobileMediaShareMessages extends Messages {
 	@DefaultMessage("Error capturing photo: {0}")
 	public String errorCapturingPhoto(final String message);
 	
+	@DefaultMessage("Error capturing video: {0}")
+	public String errorCapturingVideo(final String message);
+	
 	//{0} to prwto orisma (message)
 	@DefaultMessage("Error creating user: {0}")
 	public String errorCreatingUser(final String message);

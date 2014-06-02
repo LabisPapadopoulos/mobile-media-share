@@ -31,6 +31,7 @@ import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceExc
 import gr.uoa.di.std08169.mobile.media.share.server.ExtendedMediaService;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
 import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.UserStatus;
 
 public class MediaServlet extends HttpServlet {
 	private static final File TMP_DIR = new File(System.getProperty("java.io.tmpdir"));
@@ -67,6 +68,7 @@ public class MediaServlet extends HttpServlet {
 	public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
 		//elenxos oti uparxei email sto session
 		if ((String) request.getSession().getAttribute("email") == null) {
+			//agnwstos xrhsths (den exei kanei login)
 			LOGGER.warning("Authentication required");
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication required"); //401 Unauthorized
 			return;
@@ -75,6 +77,7 @@ public class MediaServlet extends HttpServlet {
 			//elenxos oti o xrhsths einai gnwstos (oti uparxei stin vash)  
 			final User user = userService.getUser((String) request.getSession().getAttribute("email"));
 			if (user == null) {
+				//agnwstos xrhsths (den uparxei)
 				LOGGER.warning("Access denied");
 				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
 				return;
@@ -85,10 +88,18 @@ public class MediaServlet extends HttpServlet {
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request"); //400 Bad request
 				return;
 			}
-			mediaService.getMedia(id, response);
+			final Media media = mediaService.getMedia(id);
+			if ((user.getStatus() == UserStatus.ADMIN) || user.equals(media.getUser()) || media.isPublic())
+				mediaService.getMedia(id, response);
+			else {
+				//Den exei dikaioma autos o xrhsths na katevasei auto to media
+				LOGGER.warning("Access denied");
+				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
+				return;				
+			}
 		} catch (final MediaServiceException e) {
-			LOGGER.log(Level.WARNING, "Internal server error", e); //den borese na psaxei gia to arxeio
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error"); //500 Internal server error
+			LOGGER.log(Level.WARNING, "Error retrieving media", e); //den borese na psaxei gia to arxeio
+			throw new ServletException("Error retrieving media", e); //Internal Server Error 500
 		} catch (final UserServiceException e) {
 			LOGGER.log(Level.WARNING, "Access denied", e);
 			response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
@@ -156,11 +167,19 @@ public class MediaServlet extends HttpServlet {
 					id = UUID.randomUUID().toString();
 					type = "image/png";
 					size = data.length;
+				} else if ((!fileItem.isFormField()) && fileItem.getFieldName().equals("video")) { //vrethike video blob
+					input = fileItem.getInputStream();
+					id = UUID.randomUUID().toString();
+					type = fileItem.getContentType();
+					size = fileItem.getSize();
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("title")) {
 					//vrethike to title
 					title = fileItem.getString(UTF_8);
+				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("duration")) {
+					duration = Integer.parseInt(fileItem.getString(UTF_8));
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("public")) {
-					publik = "on".equals(fileItem.getString(UTF_8));
+//					publik = "on".equals(fileItem.getString(UTF_8)); TODO
+					publik = Boolean.parseBoolean(fileItem.getString(UTF_8));
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("latitude")) {
 					latitude = new BigDecimal(fileItem.getString(UTF_8));
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("longitude")) {
@@ -206,7 +225,10 @@ public class MediaServlet extends HttpServlet {
 					fileItem.delete();
 			}
 			LOGGER.info("User " + user + " uploaded media " + id);
-			response.sendRedirect(String.format(MAP_URL, URLEncoder.encode(locale, UTF_8)));
+			if (locale == null) // TODO
+				response.getWriter().flush(); //apantaei me 200 OK
+			else
+				response.sendRedirect(String.format(MAP_URL, URLEncoder.encode(locale, UTF_8)));
 		} catch (final FileUploadException e) {
 			LOGGER.log(Level.WARNING, "Error parsing request", e);
 			throw new ServletException("Error parsing request", e); //Epistrefei 500 ston client
