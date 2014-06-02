@@ -16,6 +16,7 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.geolocation.client.Geolocation;
 import com.google.gwt.geolocation.client.Position;
 import com.google.gwt.geolocation.client.PositionError;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -225,7 +226,8 @@ public class NewVideo extends Composite implements ClickHandler, EntryPoint, Goo
 			this.@gr.uoa.di.std08169.mobile.media.share.client.html.NewVideo::userMediaError(Ljava/lang/Integer;)(null);
 			return;
 		}
-		//An den uparxei to requestAnimationFrame psaxnei na to vrei me tin seira apo extension
+		//An den uparxei to requestAnimationFrame (vazei callback gia otan zwgrafistei to epomeno kare) 
+		//psaxnei na to vrei me tin seira apo extension
 		// webkit	-> Safari, Chrome
 		// moz		-> Firefox
 		// ms		-> Internet Explorer
@@ -274,14 +276,14 @@ public class NewVideo extends Composite implements ClickHandler, EntryPoint, Goo
 	
 	private void userMediaError(final Integer error) {
 		if ((error != null) && (error == 1))
-			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCapturingPhoto(MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied())); // TODO
+			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCapturingVideo(MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
 		else
-			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCapturingPhoto(MOBILE_MEDIA_SHARE_CONSTANTS.notSupported())); // TODO
+			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCapturingVideo(MOBILE_MEDIA_SHARE_CONSTANTS.notSupported()));
 	}
 	
 	private void updateElapsedTime(final Integer elapsedTime) {
 Window.alert("Elapsed time: " + elapsedTime);
-		this.elapsedTime.setText(List.formatDuration(elapsedTime));
+		this.elapsedTime.setText(List.formatDuration(elapsedTime.intValue()));
 	}
 	
 	private void userMediaSuccess(final String url) {
@@ -378,12 +380,11 @@ console.log('that: ' + that);
 	}-*/;
 	
 	private void requestError(final String error) {
-		// TODO
-		Window.alert("Request error: " + error);
+		Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCapturingVideo(error));
+		Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 	}
 	
 	private void requestSuccess() {
-		Window.alert("Request success");
-		// TODO
+		Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 	}
 }

@@ -320,9 +320,13 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 	private User selectedUser;
 	
 	public static String formatDuration(final int duration) {
+Window.alert("Duration: " + duration); // TODO remove
 		final int seconds = duration % DURATION_BASE;
+Window.alert("Seconds: " + seconds);
 		final int minutes = (duration / DURATION_BASE) % DURATION_BASE; //p.x se 63 lepta -> krataei 3 lepta
+Window.alert("Minutes: " + minutes);
 		final int hours = duration / DURATION_BASE / DURATION_BASE;
+Window.alert("Hours: " + hours);
 		return (hours > 0) ? MOBILE_MEDIA_SHARE_MESSAGES.durationFormatHoursMinutesSeconds(hours, minutes, seconds) :
 				((minutes > 0) ? MOBILE_MEDIA_SHARE_MESSAGES.durationFormatMinutesSeconds(minutes, seconds) :
 				MOBILE_MEDIA_SHARE_MESSAGES.durationFormatSeconds(seconds));

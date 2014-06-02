@@ -106,9 +106,24 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 	
 	@Override
 	public void onClick(final ClickEvent clickEvent) {
-		if (clickEvent.getSource() == download) { // TODO
-		} else if (clickEvent.getSource() == edit) { // TODO
-		} else if (clickEvent.getSource() == delete) { // TODO
+		if (clickEvent.getSource() == download) //klhsh tou servlet gia download
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.download(Window.Location.getParameter("id")));
+		else if (clickEvent.getSource() == edit)
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.editMedia(LocaleInfo.getCurrentLocale().getLocaleName(),
+					Window.Location.getParameter("id")));
+		else if ((clickEvent.getSource() == delete) && Window.confirm(MOBILE_MEDIA_SHARE_CONSTANTS.areYouSureYouWantToDeleteThisMedia())) {
+			//Diagrafh tou arxeiou apo tin vash
+			MEDIA_SERVICE.deleteMedia(Window.Location.getParameter("id"), new AsyncCallback<Void>() {
+				@Override
+				public void onFailure(final Throwable throwable) {
+					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorDeletingMedia(throwable.getMessage()));
+				}
+				
+				@Override
+				public void onSuccess(final Void _) {
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(LocaleInfo.getCurrentLocale().getLocaleName()));
+				}
+			});
 		}
 	}
 	
@@ -168,7 +183,6 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 					//o xrhsths vlepei to media giati einai diko tou 'h public
 					} else if (media.getUser().getEmail().equals(InputElement.as(Document.get().getElementById("email")).getValue()) ||
 							media.isPublic()) {
-						
 						//Gemisma tou div content analoga ton tupo
 						switch (MediaType.getMediaType(media.getType())) {
 						case APPLICATION:

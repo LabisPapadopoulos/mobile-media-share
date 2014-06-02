@@ -58,6 +58,7 @@ body {
 	background-color: white;
 	background-image: url('./images/body-bg.png');
 	background-repeat:repeat;
+	margin-top: 30px;
 }
 
 div.content {
@@ -80,6 +81,11 @@ div.header {
 	text-align: center;
 }
 
+div.userInfo {
+	clear: both;
+	text-align: center;
+}
+
 /* logo */
 img.uoa_logo {
 	width: 115px;
@@ -92,8 +98,13 @@ div.logo {
 	padding-bottom: 10px;
 }
 
+div.logo a:nth-child(1) {
+	padding-right: 20px;
+}
+
 img.logo {
 	width: 720px;
+	margin-top: 10px;
 	box-shadow: 0 0 15px #888;
 }
 
@@ -101,6 +112,8 @@ img.logo {
 div.menu {
 	clear: both;
 	padding-bottom: 30px;
+	padding-left: 14px;
+	text-align: center;
 }
 
 a.map, 
@@ -115,15 +128,20 @@ a.logout {
 	margin: 2px;
 	padding: 10px;
 	text-decoration: none;
+	padding-bottom: 14px;
+	padding-top: 11px;
+	margin-right: 3px;
 }
 
+/*
 a.logout {
 	position: absolute;
 	float: right;
-	top: 110px;
+	top: 130px;
 	margin: 5px;
 	margin-left: 20px;
 }
+*/
 
 a.map:hover, 
 a.list:hover, 
@@ -171,7 +189,7 @@ a.locale_el {
 	margin: 5px;
 	margin-left: 20px;
 	position: absolute;
-	top: 50px;
+	top: 100px;
 }
 
 a.locale_el:hover {
@@ -183,7 +201,7 @@ a.locale_en {
 	margin: 5px;
 	margin-left: 75px;
 	position: absolute;
-	top: 50px;
+	top: 100px;
 }
 
 a.locale_en:hover {

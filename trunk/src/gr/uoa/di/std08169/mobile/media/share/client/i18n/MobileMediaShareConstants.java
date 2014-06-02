@@ -165,6 +165,12 @@ public interface MobileMediaShareConstants extends Constants {
 	@DefaultStringValue("0.### MB")
 	public String sizeMegabytesFormat();
 	
+	@DefaultStringValue("Start recording")
+	public String startRecording();
+	
+	@DefaultStringValue("Stop recording")
+	public String stopRecording();
+	
 	@DefaultStringValue("Title")
 	public String title();
 
