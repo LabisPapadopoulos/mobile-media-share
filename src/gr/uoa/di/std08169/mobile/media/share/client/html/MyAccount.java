@@ -30,9 +30,9 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-public class MyAccount extends Composite implements ClickHandler, EntryPoint, KeyUpHandler {
-	public static final String IMAGE_WIDTH = "128px";
-	public static final String IMAGE_HEIGHT = "128px";
+public class MyAccount extends Composite implements ClickHandler, EntryPoint, KeyUpHandler, Runnable {
+	public static final String IMAGE_WIDTH = "256px";
+	public static final String IMAGE_HEIGHT = "256px";
 	//To interface ftiaxnei ena widget me vash to MyAccount
 	protected static interface MyAccountUiBinder extends UiBinder<Widget, MyAccount> {}
 	//metatrepei to Ui xml se java antikeimeno
@@ -49,7 +49,9 @@ public class MyAccount extends Composite implements ClickHandler, EntryPoint, Ke
 
 	@UiField
 	protected Image photo;
-	@UiField
+	//constructor tou annotation me orismata
+	//Den tha to ftiaxei to ui binder to photoSelector, alla emeis
+	@UiField(provided = true)
 	protected PhotoSelector photoSelector;
 	@UiField
 	protected TextBox name;
@@ -68,6 +70,8 @@ public class MyAccount extends Composite implements ClickHandler, EntryPoint, Ke
 	private User user;
 
 	public MyAccount() {
+		//ylopoihsh ths run() apo to Runnable
+		photoSelector = new PhotoSelector(this);
 		initWidget(MY_ACCOUNT_UI_BINDER.createAndBindUi(this));
 		photo.setWidth(IMAGE_WIDTH);
 		photo.setHeight(IMAGE_HEIGHT);
@@ -84,9 +88,36 @@ public class MyAccount extends Composite implements ClickHandler, EntryPoint, Ke
 	@Override
 	public void onClick(final ClickEvent clickEvent) {
 		if (clickEvent.getSource() == photo) {
+			//emfanish panta tis 1hs selidas
+			photoSelector.showPage(0);
 			photoSelector.setVisible(true);
 		} else if (clickEvent.getSource() == ok) {
-			Window.alert("Pathses ok!");
+			user.setName(name.getValue());
+			user.setPhoto(photoSelector.getValue());
+			//toulaxiston ena password den einai keno (keno string) ara o xrhsths hthele na ta allaxei kai
+			//epeidh den sumfwnoun metaxu tous ta egrapse lathos
+			if ((!(password.getValue().isEmpty() && password2.getValue().isEmpty())) && 
+					(!password.getValue().equals(password2.getValue()))) {
+				ok.setEnabled(false);
+				Window.alert(MOBILE_MEDIA_SHARE_CONSTANTS.passwordsDoNotMatch());
+				return;
+			}
+			USER_SERVICE.editUser(user, password.getValue().isEmpty() ? null : password.getValue(), 
+					new AsyncCallback<String>() {
+				@Override
+				public void onFailure(final Throwable throwable) {
+					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorEditingUser(throwable.getMessage()));
+					//redirect sto map
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
+							LocaleInfo.getCurrentLocale().getLocaleName())));
+				}
+
+				@Override
+				public void onSuccess(final String _) {
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
+							LocaleInfo.getCurrentLocale().getLocaleName())));
+				}
+			});
 		} else if (clickEvent.getSource() == reset) {
 			photo.setUrl((user.getPhoto() == null) ? MOBILE_MEDIA_SHARE_URLS.defaultUser() : MOBILE_MEDIA_SHARE_URLS.download(user.getPhoto()));
 			photoSelector.setValue(user.getPhoto());
@@ -140,5 +171,17 @@ public class MyAccount extends Composite implements ClickHandler, EntryPoint, Ke
 				reset.click();
 			}
 		});
+	}
+	
+	//tha klithei molis dialexei o xrhsths fwtografia 
+	@Override
+	public void run() { // TODO einai panta to null default?
+					//an dialexe th default fwtografia o xrhsths
+		photo.setUrl((photoSelector.getValue() == null) ?
+				// tote th default
+				MOBILE_MEDIA_SHARE_URLS.defaultUser() :
+					//alliws auth pou dialexe
+					MOBILE_MEDIA_SHARE_URLS.download(photoSelector.getValue()));
+		ok.setEnabled(true);
 	}
 }

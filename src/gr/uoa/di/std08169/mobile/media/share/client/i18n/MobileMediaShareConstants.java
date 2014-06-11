@@ -25,6 +25,9 @@ public interface MobileMediaShareConstants extends Constants {
 	@DefaultStringValue("Capture Photo")
 	public String capturePhoto();
 	
+	@DefaultStringValue("Close")
+	public String close();
+	
 	@DefaultStringValue("Confirm Password")
 	public String confirmPassword();
 	

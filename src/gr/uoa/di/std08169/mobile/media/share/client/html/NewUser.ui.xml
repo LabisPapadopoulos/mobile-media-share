@@ -8,6 +8,7 @@
 		<div class="content newUser">
 			<mms:Header /> <!-- Import to header sth selida -->
 			<div class="userInfo">
+			    <!-- TODO -->
 			    <h2>New User Registration</h2>
 			    <p>In order to use Mobile Media Share Web App, please insert you email and your password and press ok button.</p>
 			</div>

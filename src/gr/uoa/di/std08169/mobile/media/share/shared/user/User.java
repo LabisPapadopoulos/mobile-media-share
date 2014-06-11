@@ -8,8 +8,8 @@ package gr.uoa.di.std08169.mobile.media.share.shared.user;
  */
 public class User implements Comparable<User> {
 	private final String email;
-	private final String name;
-	private final String photo;
+	private String name;
+	private String photo;
 	private UserStatus status;
 	//To password prepei na phgainei pros th vash opote xreiazetai, alla pote na erxetai
 	
@@ -44,9 +44,17 @@ public class User implements Comparable<User> {
 	public String getName() {
 		return name;
 	}
+	
+	public void setName(final String name) {
+		this.name = name;
+	}
 
 	public String getPhoto() {
 		return photo;
+	}
+	
+	public void setPhoto(final String photo) {
+		this.photo = photo;
 	}
 	
 	@Override

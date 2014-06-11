@@ -1,15 +1,11 @@
-My Account page
-Footer
+user image in list?
 
-no header in login, new user, forgot password
+breadcrumbs & text
 
 check for admin rights
 	grep -r getElementById src/ | grep email
 
-
 calculate duration
-
-userServlet: edit password, delete user
 
 nightly build to project ston okeano
 timeout exception otan kanoume new photo apo capture
