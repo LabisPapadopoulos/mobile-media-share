@@ -283,7 +283,7 @@ public class NewVideo extends Composite implements ClickHandler, EntryPoint, Goo
 	
 	private void updateElapsedTime(final Integer elapsedTime) {
 Window.alert("Elapsed time: " + elapsedTime);
-		this.elapsedTime.setText(List.formatDuration(elapsedTime.intValue()));
+		this.elapsedTime.setText(List.formatDuration(elapsedTime));
 	}
 	
 	private void userMediaSuccess(final String url) {

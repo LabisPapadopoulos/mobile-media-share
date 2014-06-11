@@ -8,6 +8,7 @@
 		<div class="content loginPage">
 			<mms:Header /> <!-- Import to header sth selida -->
 			<div class="userInfo" style="clear: both;">
+			    <!-- TODO -->
 			    <h2>Welcome to Mobile Media Share Web App</h2>
 			    <p>Please enter your email and your password</p>
 			</div>

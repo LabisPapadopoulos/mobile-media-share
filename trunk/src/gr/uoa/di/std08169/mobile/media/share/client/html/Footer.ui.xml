@@ -11,6 +11,7 @@
     <ui:with field="constants" type="gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants" />
 	<g:HTMLPanel><!-- header -->
 	    <div class="footer">
+	        <!-- TODO -->
 		    <p>Copyright &copy; 2014, <a ui:field="administrator" target="_blank" title="labis" >Labis Papadopoulos.</a> All Rights Reserved</p>
 		</div>
 	</g:HTMLPanel>
