@@ -1,6 +1,7 @@
 package gr.uoa.di.std08169.mobile.media.share.client.html;
 
 import java.math.BigDecimal;
+
 import java.util.Date;
 
 import com.google.gwt.ajaxloader.client.AjaxLoader;
@@ -39,7 +40,11 @@ import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstan
 import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessages;
 import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceAsync;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceAsync;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.UserStatus;
 
 public class EditMedia extends Composite implements ClickHandler, EntryPoint, GoogleMap.ClickHandler, KeyUpHandler, Runnable {
 	//To interface ftiaxnei ena widget me vash to EditMedia
@@ -54,6 +59,7 @@ public class EditMedia extends Composite implements ClickHandler, EntryPoint, Go
 			GWT.create(MobileMediaShareMessages.class);
 	
 	private static final MediaServiceAsync MEDIA_SERVICE = GWT.create(MediaService.class);
+	private static final UserServiceAsync USER_SERVICE = GWT.create(UserService.class);
 	
 	@UiField
 	protected TextBox title;
@@ -67,6 +73,8 @@ public class EditMedia extends Composite implements ClickHandler, EntryPoint, Go
 	protected Button ok;
 	@UiField
 	protected Button reset;
+	
+	private User user;
 	private GoogleMap googleMap;
 	private Marker marker;
 	private Media media;
@@ -135,11 +143,34 @@ public class EditMedia extends Composite implements ClickHandler, EntryPoint, Go
 	@Override
 	public void onModuleLoad() {
 		RootPanel.get().add(this);
-		//options gia to fortwma tis vivliothikhs
-		final AjaxLoader.AjaxLoaderOptions options = AjaxLoader.AjaxLoaderOptions.newInstance();
-		options.setOtherParms(MOBILE_MEDIA_SHARE_URLS.googleMapsOptions(LocaleInfo.getCurrentLocale().getLocaleName()));
-		//Xekinaei na fortwnei Google Maps me ta options kai otan teleiwsei trexei tin run tou this (EditMedia)
-		AjaxLoader.loadApi(Map.GOOGLE_MAPS_API, Map.GOOGLE_MAPS_VERSION, this, options);
+		USER_SERVICE.getUser(InputElement.as(Document.get().getElementById("email")).getValue(), new AsyncCallback<User>() {
+			@Override
+			public void onFailure(final Throwable throwable) {
+				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingUser(
+						MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
+				//redirect sto map
+				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString( 
+						LocaleInfo.getCurrentLocale().getLocaleName())));
+			}
+
+			@Override
+			public void onSuccess(final User user) {
+				if (user == null) {
+					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingUser(
+							MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
+					//redirect sto map
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString( 
+							LocaleInfo.getCurrentLocale().getLocaleName())));
+					return;
+				}
+				EditMedia.this.user = user;
+				//options gia to fortwma tis vivliothikhs
+				final AjaxLoader.AjaxLoaderOptions options = AjaxLoader.AjaxLoaderOptions.newInstance();
+				options.setOtherParms(MOBILE_MEDIA_SHARE_URLS.googleMapsOptions(LocaleInfo.getCurrentLocale().getLocaleName()));
+				//Xekinaei na fortwnei Google Maps me ta options kai otan teleiwsei trexei tin run tou this (EditMedia)
+				AjaxLoader.loadApi(Map.GOOGLE_MAPS_API, Map.GOOGLE_MAPS_VERSION, EditMedia.this, options);
+			}
+		});
 	}
 
 	@Override
@@ -187,8 +218,8 @@ public class EditMedia extends Composite implements ClickHandler, EntryPoint, Go
 						Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
 								//me to antistoixo locale 
 								LocaleInfo.getCurrentLocale().getLocaleName())));
-					//Vrethike to media kai anhkei ston sundedemeno xrhsth 
-					} else if (media.getUser().getEmail().equals(InputElement.as(Document.get().getElementById("email")).getValue())) {
+					//Vrethike to media kai anhkei ston sundedemeno xrhsth 'h o xrhsths einai diaxeirisths
+					} else if (user.equals(media.getUser()) || (user.getStatus() == UserStatus.ADMIN)) {
 						//Topika apothikeush tou media pou tha ginei edit
 						EditMedia.this.media = media;
 						//Click sto reset gia na parei times forma, xarths kai marker

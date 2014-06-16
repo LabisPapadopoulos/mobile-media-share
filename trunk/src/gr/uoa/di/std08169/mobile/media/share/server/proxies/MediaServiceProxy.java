@@ -15,6 +15,7 @@ import gr.uoa.di.std08169.mobile.media.share.server.ExtendedMediaService;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaResult;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
 
 //Ylopoiei ena mediaservice xrhsimopoiwntas ena allo mediaService. (Wrapper)
 //Ylopoiei kai mnhmh cache gia ta apotelesmata twn anazhthsewn gia ta media
@@ -22,7 +23,7 @@ import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
 public class MediaServiceProxy implements ExtendedMediaService {
 	//abstract: den boroume na ftiaxoume auto to antikeimeno (einai san interface)
 	private abstract class GetMediaCommonArguments {
-		private final String currentUser;
+		private final User currentUser;
 		private final String title;
 		private final MediaType type;
 		private final String user;
@@ -32,7 +33,7 @@ public class MediaServiceProxy implements ExtendedMediaService {
 		private final Date editedTo;
 		private final Boolean publik;
 		
-		private GetMediaCommonArguments(final String currentUser, final String title, final MediaType type, final String user,
+		private GetMediaCommonArguments(final User currentUser, final String title, final MediaType type, final String user,
 				final Date createdFrom, final Date createdTo, final Date editedFrom, final Date editedTo, final Boolean publik) {
 			this.currentUser = currentUser;
 			this.title = title;
@@ -82,7 +83,7 @@ public class MediaServiceProxy implements ExtendedMediaService {
 		private final String orderField;
 		private final boolean ascending;
 		
-		private GetMediaAsMediaResultArguments(final String currentUser, final String title, final MediaType type, final String user,
+		private GetMediaAsMediaResultArguments(final User currentUser, final String title, final MediaType type, final String user,
 				final Date createdFrom, final Date createdTo, final Date editedFrom, final Date editedTo, final Boolean publik,
 				final Integer start, final Integer length, final String orderField, final boolean ascending) {
 			super(currentUser, title, type, user, createdFrom, createdTo, editedFrom, editedTo, publik);
@@ -122,7 +123,7 @@ public class MediaServiceProxy implements ExtendedMediaService {
 		private final BigDecimal maxLatitude;
 		private final BigDecimal maxLongitude;
 		
-		private GetMediaAsListArguments(final String currentUser, final String title, final MediaType type, final String user, final Date createdFrom,
+		private GetMediaAsListArguments(final User currentUser, final String title, final MediaType type, final String user, final Date createdFrom,
 				final Date createdTo, final Date editedFrom, final Date editedTo, final Boolean publik, final BigDecimal minLatitude,
 				final BigDecimal minLongitude, final BigDecimal maxLatitude, final BigDecimal maxLongitude) {
 			super(currentUser, title, type, user, createdFrom, createdTo, editedFrom, editedTo, publik);
@@ -169,7 +170,7 @@ public class MediaServiceProxy implements ExtendedMediaService {
 	}
 
 	@Override
-	public MediaResult getMedia(final String currentUser, final String title, final MediaType type, final String user,
+	public MediaResult getMedia(final User currentUser, final String title, final MediaType type, final String user,
 			final Date createdFrom, final Date createdTo, final Date editedFrom, final Date editedTo, final Boolean publik,
 			final Integer start, final Integer length, final String orderField, final boolean ascending) throws MediaServiceException {
 		final GetMediaAsMediaResultArguments arguments = new GetMediaAsMediaResultArguments(currentUser, title, type, user, createdFrom,
@@ -185,7 +186,7 @@ public class MediaServiceProxy implements ExtendedMediaService {
 	}
 
 	@Override
-	public List<Media> getMedia(final String currentUser, final String title, final MediaType type, final String user, final Date createdFrom,
+	public List<Media> getMedia(final User currentUser, final String title, final MediaType type, final String user, final Date createdFrom,
 			final Date createdTo, final Date editedFrom, final Date editedTo, final Boolean publik, final BigDecimal minLatitude,
 			final BigDecimal minLongitude, final BigDecimal maxLatitude, final BigDecimal maxLongitude) throws MediaServiceException {
 		final GetMediaAsListArguments arguments = new GetMediaAsListArguments(currentUser, title, type, user, createdFrom, createdTo, editedFrom,

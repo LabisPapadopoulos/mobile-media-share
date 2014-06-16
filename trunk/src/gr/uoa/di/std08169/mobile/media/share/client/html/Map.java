@@ -57,10 +57,13 @@ import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessage
 import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceAsync;
 import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserOracle;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceAsync;
 import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserSuggestion;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
 import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.UserStatus;
 
 public class Map extends Composite implements ChangeHandler, ClickHandler, EntryPoint, GoogleMap.CenterChangedHandler, 
 		GoogleMap.ZoomChangedHandler, KeyUpHandler, Marker.ClickHandler, SelectionHandler<Suggestion>, ValueChangeHandler<Date>,
@@ -110,6 +113,8 @@ public class Map extends Composite implements ChangeHandler, ClickHandler, Entry
 	//Media Service se front-end
 	private static final MediaServiceAsync MEDIA_SERVICE =
 			GWT.create(MediaService.class);
+	private static final UserServiceAsync USER_SERVICE =
+			GWT.create(UserService.class);
 	private static final DateTimeFormat DATE_FORMAT =
 			DateTimeFormat.getFormat(MOBILE_MEDIA_SHARE_CONSTANTS.dateFormat());
 
@@ -142,6 +147,7 @@ public class Map extends Composite implements ChangeHandler, ClickHandler, Entry
 	private final java.util.Map<Marker, Media> markers;
 	private final java.util.Map<MediaType, MarkerImage> markerImages;
 	private final java.util.Map<MediaType, MarkerImage> selectedMarkerImages;
+	private User currentUser;
 	private User selectedUser;
 	private GoogleMap googleMap;
 	private Marker selectedMarker;
@@ -206,14 +212,13 @@ public class Map extends Composite implements ChangeHandler, ClickHandler, Entry
 		if (selectedMarker != null) {
 			selectedMarker.setIcon(markerImages.get(MediaType.getMediaType(markers.get(selectedMarker).getType())));
 		}
-		final String currentUser = InputElement.as(Document.get().getElementById("email")).getValue();
 		//Se epilegmeno antikeimeno bainei h pio megalh tou eikona 
 		for (java.util.Map.Entry<Marker, Media> marker : markers.entrySet()) {
 			if (marker.getKey().getPosition().equals(event.getLatLng())) { // autos o marker dialexthke
 				marker.getKey().setIcon(selectedMarkerImages.get(MediaType.getMediaType(marker.getValue().getType())));
 				selectedMarker = marker.getKey();
 				download.setEnabled(true);
-				if (marker.getValue().getUser().getEmail().equals(currentUser)) {
+				if (currentUser.equals(marker.getValue().getUser()) || (currentUser.getStatus() == UserStatus.ADMIN)) {
 					edit.setEnabled(true);
 					delete.setEnabled(true);
 				}
@@ -273,11 +278,35 @@ public class Map extends Composite implements ChangeHandler, ClickHandler, Entry
 	@Override
 	public void onModuleLoad() {
 		RootPanel.get().add(this);
-		//Ajax loader: fortwnei pragmata mesw ajax
-		//Ruthmiseis gia to google maps
-		final AjaxLoader.AjaxLoaderOptions options = AjaxLoader.AjaxLoaderOptions.newInstance();
-		options.setOtherParms(MOBILE_MEDIA_SHARE_URLS.googleMapsOptions(LocaleInfo.getCurrentLocale().getLocaleName()));
-		AjaxLoader.loadApi(GOOGLE_MAPS_API, GOOGLE_MAPS_VERSION, this, options);
+		
+		USER_SERVICE.getUser(InputElement.as(Document.get().getElementById("email")).getValue(), new AsyncCallback<User>() {
+			@Override
+			public void onFailure(final Throwable throwable) {
+				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingUser(
+						MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
+				//redirect sto map
+				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString( 
+						LocaleInfo.getCurrentLocale().getLocaleName())));
+			}
+
+			@Override
+			public void onSuccess(final User user) {
+				if (user == null) {
+					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingUser(
+							MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
+					//redirect sto map
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString( 
+							LocaleInfo.getCurrentLocale().getLocaleName())));
+					return;
+				}
+				currentUser = user;
+				//Ajax loader: fortwnei pragmata mesw ajax
+				//Ruthmiseis gia to google maps
+				final AjaxLoader.AjaxLoaderOptions options = AjaxLoader.AjaxLoaderOptions.newInstance();
+				options.setOtherParms(MOBILE_MEDIA_SHARE_URLS.googleMapsOptions(LocaleInfo.getCurrentLocale().getLocaleName()));
+				AjaxLoader.loadApi(GOOGLE_MAPS_API, GOOGLE_MAPS_VERSION, Map.this, options);
+			}
+		});		
 	}
 	
 	//Otan dialegei o xrhsths sugkekrimenh protash (apo tin anazhthsh tou user)
@@ -333,9 +362,6 @@ public class Map extends Composite implements ChangeHandler, ClickHandler, Entry
 	}
 	
 	private void updateMap() {
-		//Apo to input hidden pou exei parei timh apo to session mesw tou jsp, vrisketai o currentUser
-		//InputElement.as: casting to Element se InputElement gia na paroume to value 
-		final String currentUser = InputElement.as(Document.get().getElementById("email")).getValue();
 		final String title = this.title.getValue().trim().isEmpty() ? null : this.title.getValue().trim();
 		//MediaType epeidh einai ENUM me ena string epistrefetai ena instance
 		final MediaType type = this.type.getValue(this.type.getSelectedIndex()).isEmpty() ? null :

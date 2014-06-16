@@ -57,11 +57,14 @@ import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessage
 import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceAsync;
 import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserOracle;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceAsync;
 import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserSuggestion;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaResult;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
 import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.UserStatus;
 
 //Composite: Einai widget pou einai ftiagmeno me ui xml kai periexei allous widget mesa tou (g:..., gg:..., ...)
 public class List extends Composite implements ChangeHandler, ClickHandler, EntryPoint, KeyUpHandler, 
@@ -75,7 +78,6 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 		//Kaleitai otan xreiazetai na erthoun nea dedomena (p.x SortHandler, ChangeHandler)
 		@Override
 		protected void onRangeChanged(final HasData<Media> _) { // update list rows
-			final String currentUser = InputElement.as(Document.get().getElementById("email")).getValue();
 			final String title = List.this.title.getValue().trim().isEmpty() ? null : List.this.title.getValue().trim();
 			//MediaType epeidh einai ENUM me ena string epistrefetai ena instance
 			final MediaType type = List.this.type.getValue(List.this.type.getSelectedIndex()).isEmpty() ? null :
@@ -215,6 +217,8 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 	//Media Service se front-end
 	private static final MediaServiceAsync MEDIA_SERVICE =
 			GWT.create(MediaService.class);
+	private static final UserServiceAsync USER_SERVICE =
+			GWT.create(UserService.class);
 	private static final DateTimeFormat DATE_FORMAT =
 			DateTimeFormat.getFormat(MOBILE_MEDIA_SHARE_CONSTANTS.dateFormat());
 	private static final DateTimeFormat DATE_TIME_FORMAT =
@@ -317,16 +321,13 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 	
 	private final SingleSelectionModel<Media> selectionModel; //gia highlight kai epilogh grammhs
 	private final ListDataProvider dataProvider;
+	private User currentUser;
 	private User selectedUser;
 	
 	public static String formatDuration(final int duration) {
-Window.alert("Duration: " + duration); // TODO remove
 		final int seconds = duration % DURATION_BASE;
-Window.alert("Seconds: " + seconds);
 		final int minutes = (duration / DURATION_BASE) % DURATION_BASE; //p.x se 63 lepta -> krataei 3 lepta
-Window.alert("Minutes: " + minutes);
 		final int hours = duration / DURATION_BASE / DURATION_BASE;
-Window.alert("Hours: " + hours);
 		return (hours > 0) ? MOBILE_MEDIA_SHARE_MESSAGES.durationFormatHoursMinutesSeconds(hours, minutes, seconds) :
 				((minutes > 0) ? MOBILE_MEDIA_SHARE_MESSAGES.durationFormatMinutesSeconds(minutes, seconds) :
 				MOBILE_MEDIA_SHARE_MESSAGES.durationFormatSeconds(seconds));
@@ -436,7 +437,6 @@ Window.alert("Hours: " + hours);
 		mediaTable.setSelectionModel(selectionModel);
 		//O AsyncDataProvider tha vazei dedomena stin lista (table)
 		dataProvider = new ListDataProvider();
-		dataProvider.addDataDisplay(mediaTable);
 		selectedUser = null;
 	}
 
@@ -495,7 +495,32 @@ Window.alert("Hours: " + hours);
 	@Override
 	public void onModuleLoad() { // set up HTML
 		RootPanel.get().add(this); //prosthikh sth selida (tin jsp) tou widget
-		dataProvider.onRangeChanged(null);
+		USER_SERVICE.getUser(InputElement.as(Document.get().getElementById("email")).getValue(), new AsyncCallback<User>() {
+			@Override
+			public void onFailure(final Throwable throwable) {
+				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingUser(
+						MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
+				//redirect sto map
+				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString( 
+						LocaleInfo.getCurrentLocale().getLocaleName())));
+			}
+
+			@Override
+			public void onSuccess(final User user) {
+				if (user == null) {
+					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingUser(
+							MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
+					//redirect sto map
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString( 
+							LocaleInfo.getCurrentLocale().getLocaleName())));
+					return;
+				}
+				currentUser = user;
+				//O data provider tha provalei ta dedomena tou ston pinaka
+				dataProvider.addDataDisplay(mediaTable);
+//				dataProvider.onRangeChanged(null);
+			}
+		});
 	}
 	
 	//Otan dialegei o xrhsths sugkekrimenh protash
@@ -510,12 +535,13 @@ Window.alert("Hours: " + hours);
 	public void onSelectionChange(final SelectionChangeEvent _) { // selecting a row		
 		//analoga me to epilegmeno pou edwse o xrhsths (se mia grammh)
 		final Media media = selectionModel.getSelectedObject();
-		final String currentUser = InputElement.as(Document.get().getElementById("email")).getValue();
 		//enable ta download, edit kai delete
 		download.setEnabled(media != null);
 		//edit kai delete kapoio arxeio an anhkei ston trexonta xrhsth
-		edit.setEnabled((media != null) && media.getUser().getEmail().equals(currentUser));
-		delete.setEnabled((media != null) && media.getUser().getEmail().equals(currentUser));
+		if ((media != null) && (currentUser.equals(media.getUser()) || (currentUser.getStatus() == UserStatus.ADMIN))) {
+			edit.setEnabled(true);
+			delete.setEnabled(true);
+		}
 	}
 
 	@Override

@@ -30,22 +30,24 @@ import gr.uoa.di.std08169.mobile.media.share.server.ExtendedMediaService;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaResult;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.UserStatus;
 
 public class MediaServiceImpl implements ExtendedMediaService {
 	//epistrefontai ola ta public media, alla kai ta private tou kathe xrhsth
 	private static final String GET_MEDIA = "SELECT id, type, size, duration, \"user\", created, edited, title, latitude, longitude, public " +
 											"FROM Media " +
-											"WHERE (public OR \"user\" = ?)%s%s%s%s%s%s%s%s%s " +
+											"WHERE TRUE%s%s%s%s%s%s%s%s%s%s " +
 											"LIMIT ? OFFSET ?;";
 	private static final String GET_MEDIA_2 = "SELECT id, type, size, duration, \"user\", created, edited, title, latitude, longitude, public " +
 											"FROM Media " +
-											"WHERE (public OR \"user\" = ?) " +
-											"AND (latitude >= ?) AND (latitude <= ?) " + //minlat <= latitude <= maxlat
-											"AND (longitude >= ?) AND (longitude <= ?)%s%s%s%s%s%s%s%s;"; //minlng <= longitude <= maxlng
+											"WHERE (latitude >= ?) AND (latitude <= ?) " + //minlat <= latitude <= maxlat
+											"AND (longitude >= ?) AND (longitude <= ?)%s%s%s%s%s%s%s%s%s;"; //minlng <= longitude <= maxlng
 	private static final String GET_MEDIUM = "SELECT type, size, duration, \"user\", created, edited, title, latitude, longitude, public " +
 											"FROM Media " +
 											"WHERE id = ?;";
 	//concat string se postgres -> ||
+	private static final String CURRENT_USER_FILTER = " AND (public OR \"user\" = ?)"; 
 	private static final String TITLE_FILTER = " AND match(title, ?)"; //match: sunartish stin postgres
 	private static final String TYPE_FILTER = " AND type LIKE (? || '%')"; //Typos kai meta otidhpote (%)
 	private static final String USER_FILTER = " AND (\"user\" = ?)";
@@ -60,7 +62,7 @@ public class MediaServiceImpl implements ExtendedMediaService {
 	
 	private static final String COUNT_MEDIA = 	"SELECT COUNT(*) AS total " +
 												"FROM Media " +
-												"WHERE (public OR \"user\" = ?)%s%s%s%s%s%s%s%s;";
+												"WHERE TRUE%s%s%s%s%s%s%s%s%s;";
 	
 	private static final String ADD_MEDIA = "INSERT INTO Media (id, type, size, duration, \"user\", " +
 											"created, edited, title, latitude, longitude, public) " +
@@ -89,26 +91,35 @@ public class MediaServiceImpl implements ExtendedMediaService {
 	}
 	
 	@Override
-	public MediaResult getMedia(final String currentUser, final String title, final MediaType type,
+	public MediaResult getMedia(final User currentUser, final String title, final MediaType type,
 			final String user, final Date createdFrom, final Date createdTo, final Date editedFrom,
 			final Date editedTo, final Boolean publik, final Integer start, final Integer length,
 			final String orderField, final boolean ascending) throws MediaServiceException {
 		
 		//Xtisimo tou string me oles ta pithana filtra pou exei dialexei o xrhsths
 		final String getMediaQuery = 
-				String.format(GET_MEDIA, (title == null) ? "" : TITLE_FILTER, 
-				(type == null) ? "" : TYPE_FILTER, (user == null) ? "" : USER_FILTER,
-				(createdFrom == null) ? "" : CREATED_FROM_FILTER, (createdTo == null) ? "" : CREATED_TO_FILTER, 
-				(editedFrom == null) ? "" : EDITED_FROM_FILTER, (editedTo == null) ? "" : EDITED_TO_FILTER, 
+				String.format(GET_MEDIA, 
+				(currentUser.getStatus() == UserStatus.ADMIN) ? "" : CURRENT_USER_FILTER,
+				(title == null) ? "" : TITLE_FILTER, 
+				(type == null) ? "" : TYPE_FILTER,
+				(user == null) ? "" : USER_FILTER,
+				(createdFrom == null) ? "" : CREATED_FROM_FILTER,
+				(createdTo == null) ? "" : CREATED_TO_FILTER, 
+				(editedFrom == null) ? "" : EDITED_FROM_FILTER,
+				(editedTo == null) ? "" : EDITED_TO_FILTER, 
 				(publik == null) ? "" : PUBLIC_FILTER,
-				(orderField == null) ? "" : String.format(ORDERING, orderField,
-						ascending ? ASCENDING : DESCENDING));
+				(orderField == null) ? "" : String.format(ORDERING, orderField, ascending ? ASCENDING : DESCENDING));
 		//Xtisimo string gia to plithos twn media pou uparxoun stin vash
 		final String countMediaQuery = 
-				String.format(COUNT_MEDIA, (title == null) ? "" : TITLE_FILTER, 
-				(type == null) ? "" : TYPE_FILTER, (user == null) ? "" : USER_FILTER,
-				(createdFrom == null) ? "" : CREATED_FROM_FILTER, (createdTo == null) ? "" : CREATED_TO_FILTER, 
-				(editedFrom == null) ? "" : EDITED_FROM_FILTER, (editedTo == null) ? "" : EDITED_TO_FILTER, 
+				String.format(COUNT_MEDIA,
+				(currentUser.getStatus() == UserStatus.ADMIN) ? "" : CURRENT_USER_FILTER,
+				(title == null) ? "" : TITLE_FILTER, 
+				(type == null) ? "" : TYPE_FILTER,
+				(user == null) ? "" : USER_FILTER,
+				(createdFrom == null) ? "" : CREATED_FROM_FILTER,
+				(createdTo == null) ? "" : CREATED_TO_FILTER, 
+				(editedFrom == null) ? "" : EDITED_FROM_FILTER,
+				(editedTo == null) ? "" : EDITED_TO_FILTER, 
 				(publik == null) ? "" : PUBLIC_FILTER);
 		try {
 			final Connection connection = dataSource.getConnection();
@@ -118,8 +129,10 @@ public class MediaServiceImpl implements ExtendedMediaService {
 					final PreparedStatement countMedia = connection.prepareStatement(countMediaQuery);
 					try {
 						int parameter = 1;
-						getMedia.setString(parameter, currentUser);
-						countMedia.setString(parameter++, currentUser);
+						if (currentUser.getStatus() != UserStatus.ADMIN) {
+							getMedia.setString(parameter, currentUser.getEmail());
+							countMedia.setString(parameter++, currentUser.getEmail());
+						}
 						if (title != null) {
 							getMedia.setString(parameter, title);
 							countMedia.setString(parameter++, title);
@@ -202,27 +215,34 @@ public class MediaServiceImpl implements ExtendedMediaService {
 	}
 	
 	@Override
-	public List<Media> getMedia(final String currentUser, final String title, final MediaType type, final String user, final Date createdFrom, 
+	public List<Media> getMedia(final User currentUser, final String title, final MediaType type, final String user, final Date createdFrom, 
 			final Date createdTo, final Date editedFrom, final Date editedTo, final Boolean publik, final BigDecimal minLatitude, 
 			final BigDecimal minLongitude, final BigDecimal maxLatitude, final BigDecimal maxLongitude) throws MediaServiceException {
-		//Xtisimo tou string me oles ta pithana filtra pou exei dialexei o xrhsths
+		
+				//Xtisimo tou string me oles ta pithana filtra pou exei dialexei o xrhsths
 				final String getMediaQuery = 
-						String.format(GET_MEDIA_2, (title == null) ? "" : TITLE_FILTER, 
-						(type == null) ? "" : TYPE_FILTER, (user == null) ? "" : USER_FILTER,
-						(createdFrom == null) ? "" : CREATED_FROM_FILTER, (createdTo == null) ? "" : CREATED_TO_FILTER, 
-						(editedFrom == null) ? "" : EDITED_FROM_FILTER, (editedTo == null) ? "" : EDITED_TO_FILTER, 
-						(publik == null) ? "" : PUBLIC_FILTER);
+						String.format(GET_MEDIA_2, 
+						(title == null) ? "" : TITLE_FILTER, 
+						(type == null) ? "" : TYPE_FILTER,
+						(user == null) ? "" : USER_FILTER,
+						(createdFrom == null) ? "" : CREATED_FROM_FILTER,
+						(createdTo == null) ? "" : CREATED_TO_FILTER, 
+						(editedFrom == null) ? "" : EDITED_FROM_FILTER,
+						(editedTo == null) ? "" : EDITED_TO_FILTER, 
+						(publik == null) ? "" : PUBLIC_FILTER,
+						(currentUser.getStatus() == UserStatus.ADMIN) ? "" : CURRENT_USER_FILTER); //TODO
 				try {
 					final Connection connection = dataSource.getConnection();
 					try {
 						final PreparedStatement getMedia = connection.prepareStatement(getMediaQuery);
 						try {
 							int parameter = 1;
-							getMedia.setString(parameter++, currentUser);
 							getMedia.setBigDecimal(parameter++, minLatitude);
 							getMedia.setBigDecimal(parameter++, maxLatitude);
 							getMedia.setBigDecimal(parameter++, minLongitude);
 							getMedia.setBigDecimal(parameter++, maxLongitude);
+							if (currentUser.getStatus() != UserStatus.ADMIN)
+								getMedia.setString(parameter++, currentUser.getEmail());
 							if (title != null)
 								getMedia.setString(parameter++, title);
 							if (type != null)

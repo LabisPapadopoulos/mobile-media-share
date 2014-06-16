@@ -31,10 +31,11 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 public class MyAccount extends Composite implements ClickHandler, EntryPoint, KeyUpHandler, Runnable {
-	public static final String IMAGE_WIDTH = "256px";
-	public static final String IMAGE_HEIGHT = "256px";
 	//To interface ftiaxnei ena widget me vash to MyAccount
 	protected static interface MyAccountUiBinder extends UiBinder<Widget, MyAccount> {}
+
+	private static final String IMAGE_WIDTH = "256px";
+	private static final String IMAGE_HEIGHT = "256px";
 	//metatrepei to Ui xml se java antikeimeno
 	private static final MyAccountUiBinder MY_ACCOUNT_UI_BINDER = GWT.create(MyAccountUiBinder.class);
 	private static final UserServiceAsync USER_SERVICE = GWT.create(UserService.class);
@@ -167,7 +168,7 @@ public class MyAccount extends Composite implements ClickHandler, EntryPoint, Ke
 					return;
 				}
 				MyAccount.this.user = user;
-				photoSelector.init(user.getEmail());
+				photoSelector.init(user);
 				reset.click();
 			}
 		});
