@@ -45,13 +45,22 @@
 		<constructor-arg value="${google.cloud.dataset}" />
 		<constructor-arg value="${google.cloud.account}" />
 		<constructor-arg value="${google.cloud.key.file}" />
+		<constructor-arg value="${user.service.timeout}" />
 	</bean>
 	
 	<!-- static final gr.uoa.di.std08169.mobile.media.share.server.proxies.UserServiceProxy userService = new 
 				gr.uoa.di.std08169.mobile.media.share.server.proxies.UserServiceProxy(${user.service}); -->
 	<!-- Oloi zhtane ena userService -->
-	<bean id="userService" class="gr.uoa.di.std08169.mobile.media.share.server.proxies.UserServiceProxy" scope="singleton">
-	    <constructor-arg ref="${user.service}" /> <!-- diavazei apo property to user service -->
+	<!--  bean id="userService" class="gr.uoa.di.std08169.mobile.media.share.server.proxies.UserServiceProxy" scope="singleton"> -->
+	    <!-- constructor-arg ref="${user.service}" / --> <!-- diavazei apo property to user service -->
+	<!-- /bean -->
+	
+	<bean id="userService" class="gr.uoa.di.std08169.mobile.media.share.server.gcd.UserServiceImpl" scope="singleton">
+		<!-- Orismata gia ton constuctor tou bean, pou ta travaei apo to applicationContext.properties me ta ${...} -->
+		<constructor-arg value="${google.cloud.dataset}" />
+		<constructor-arg value="${google.cloud.account}" />
+		<constructor-arg value="${google.cloud.key.file}" />
+		<constructor-arg value="${user.service.timeout}" />
 	</bean>
 	
 	<!-- static final gr.uoa.di.std08169.mobile.media.share.server.jdbc.MediaServiceImpl jdbcMediaService = new 

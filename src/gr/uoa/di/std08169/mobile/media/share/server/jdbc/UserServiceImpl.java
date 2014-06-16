@@ -1,7 +1,5 @@
 package gr.uoa.di.std08169.mobile.media.share.server.jdbc;
 
-import java.nio.ByteBuffer;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,10 +15,9 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.codec.binary.Hex;
-
 import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceException;
+import gr.uoa.di.std08169.mobile.media.share.server.Utilities;
 import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
 import gr.uoa.di.std08169.mobile.media.share.shared.user.UserResult;
 import gr.uoa.di.std08169.mobile.media.share.shared.user.UserStatus;
@@ -247,7 +244,7 @@ public class UserServiceImpl implements UserService {
 					addUser.setString(2, password);
 					addUser.setInt(3, UserStatus.PENDING.ordinal());
 					addUser.setTimestamp(4, new Timestamp(date.getTime()));
-					final String token = generateToken(email, date);
+					final String token = Utilities.generateToken(email, date);
 					addUser.setString(5, token);
 					addUser.executeUpdate();
 					LOGGER.info("User " + email + " added successfully");
@@ -293,7 +290,7 @@ public class UserServiceImpl implements UserService {
 					if (user.getStatus() == UserStatus.FORGOT) {
 						//Se Forgot katastash
 						editUser.setTimestamp(3, new Timestamp(date.getTime()));
-						token = generateToken(user.getEmail(), date);
+						token = Utilities.generateToken(user.getEmail(), date);
 						editUser.setString(4, token);
 					} else { //petaei to token
 						editUser.setNull(updatePassword ? 3 : 2, Types.TIMESTAMP);
@@ -348,24 +345,7 @@ public class UserServiceImpl implements UserService {
 			throw new UserServiceException("Error editing user " + email, e);
 		}		
 	}
-	
-	private String generateToken(final String email, final Date date) throws NoSuchAlgorithmException {
-		/**
-		 * @see http://docs.oracle.com/javase/7/docs/api/java/security/MessageDigest.html
-		 */
-		//Upologismos MD5
-		final MessageDigest digest = MessageDigest.getInstance("MD5");
-		//Desmeush buffer gia na graftei enas long (to  date) kai na diavastei san bytes
-		final ByteBuffer registrationBytes = ByteBuffer.allocate(Long.SIZE / Byte.SIZE);
-		registrationBytes.putLong(date.getTime());
-		//Me update prostithentai dedomena
-		digest.update(registrationBytes.array());
-		digest.update(email.getBytes());
-		//me to digest vgainei to teliko apotelesma kai kodikopoieitai se 16adikh morfh (apo xuma bytes)
-		//gia na borei na stalthei ws link
-		return Hex.encodeHexString(digest.digest());
-	}
-	
+
 	private List<String> getTimedoutUsers() throws UserServiceException {
 		try {
 			final Connection connection = dataSource.getConnection();

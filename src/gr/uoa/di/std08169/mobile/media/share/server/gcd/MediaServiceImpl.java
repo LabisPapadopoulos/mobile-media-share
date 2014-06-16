@@ -56,6 +56,7 @@ import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceE
 import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceException;
 import gr.uoa.di.std08169.mobile.media.share.server.ExtendedMediaService;
+import gr.uoa.di.std08169.mobile.media.share.server.Utilities;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaResult;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
