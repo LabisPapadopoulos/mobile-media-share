@@ -6,6 +6,7 @@ import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -40,6 +41,7 @@ import com.google.protobuf.ByteString;
 
 import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceException;
+import gr.uoa.di.std08169.mobile.media.share.server.Utilities;
 import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
 import gr.uoa.di.std08169.mobile.media.share.shared.user.UserResult;
 import gr.uoa.di.std08169.mobile.media.share.shared.user.UserStatus;
@@ -51,8 +53,9 @@ public class UserServiceImpl implements UserService {
 	private static final Logger LOGGER = Logger.getLogger(UserServiceImpl.class.getName());
 	
 	private final Datastore datastore;
+	private final long timeout;
 		
-	public UserServiceImpl(final String dataset, final String serviceAccount, final String keyFile) throws UserServiceException {
+	public UserServiceImpl(final String dataset, final String serviceAccount, final String keyFile, final long timeout) throws UserServiceException {
 		try {
 			//Gia kathe project h google dinei enan eikoniko logariasmo gia sundesh sto Google Data 
 			//Dhmiourgeia anagnwristikou eikonikou xrhsth
@@ -71,6 +74,7 @@ public class UserServiceImpl implements UserService {
 			datastore = DatastoreFactory.get().
 					//Dhlwnei se poio dataset (onoma vashs) tha sundethei me ta antistoixa username kai pistopoihtiko
 					create(new DatastoreOptions.Builder().dataset(dataset).credential(credential).build());
+			this.timeout = timeout; 
 		} catch (final GeneralSecurityException e) {
 			LOGGER.log(Level.WARNING, "Error initializing " + UserServiceImpl.class.getName(), e);
 			throw new UserServiceException("Error initializing " + UserServiceImpl.class.getName(), e);
@@ -85,22 +89,12 @@ public class UserServiceImpl implements UserService {
 
 	/**
 	 * @see https://developers.google.com/datastore/docs/concepts/queries#Datastore_Key_filters
-	 *
-	 *	(
-	 *		SELECT *
-	 *		FROM Users
-	 *		WHERE email = ?
-	 *	) UNION (
-	 *		SELECT *
-	 *		FROM Users
-	 *		WHERE name = ?
-	 *	);
-	 *
-	 *	SELECT * FROM Users WHERE TRUE AND (match(email, ?) OR match(name, ?)) LIMIT ?;
-	 *	foo: (match(email, ?) OR match(name, ?))
-	 *	SELECT * FROM Users WHERE TRUE AND foo = TRUE LIMIT ?
 	 *	
-	 *	
+	 *	SELECT email, status, name, photo
+	 *	FROM Users
+	 *	--	WHERE match(email, ?) OR match(name, ?)
+	 *	WHERE normalizedUser = ? -- normalizedUser -> tokens (lexeis) apo email kai onoma
+	 *	LIMIT ?;
 	 */
 	@Override
 	public UserResult getUsers(final String query, final int limit) throws UserServiceException {
@@ -110,7 +104,8 @@ public class UserServiceImpl implements UserService {
 			//Kind gia to entity pou tha gurisei to query, san: FROM User.class.getName()
 			getUsers.addKindBuilder().setName(User.class.getName());
 			//WHERE token = query
-			getUsers.setFilter(DatastoreHelper.makeFilter("token", PropertyFilter.Operator.EQUAL,
+			getUsers.setFilter(DatastoreHelper.makeFilter("normalizedUser", PropertyFilter.Operator.EQUAL,
+									//tokens (lexeis) apo email kai onoma
 					DatastoreHelper.makeValue(Utilities.normalize(query))));
 			//Orio enos parapanw apotelesmatos (limit + 1) gia na doume an uparxoun kai alla
 			getUsers.setLimit(limit + 1);
@@ -119,13 +114,14 @@ public class UserServiceImpl implements UserService {
 			final QueryResultBatch batch = datastore.runQuery(RunQueryRequest.newBuilder().setQuery(getUsers).build()).getBatch();
 			//Epitrofh twn katharwn apotelesmatwn apo to batch (Entities)
 			final List<EntityResult> entities = batch.getEntityResultList();
-			for (int i = 0; (i < limit) && (i < entities.size()); i++) { // opoio teleiwsei pio nwris, h lista 'h to limit
+			//opoio teleiwsei pio nwris, h lista 'h to limit stamataei to loop
+			for (int i = 0; (i < limit) && (i < entities.size()); i++) {
 				final Entity entity = entities.get(i).getEntity();
 				//onoma sthlhs kai timh
 				final Map<String, Value> properties = DatastoreHelper.getPropertyMap(entity);
 				final String email = entity.getKey().getPathElement(0).getName();
 				final UserStatus status = properties.containsKey("status") ?
-						UserStatus.values()[Long.valueOf(DatastoreHelper.getLong(properties.get("admin"))).intValue()] : null;
+						UserStatus.values()[Long.valueOf(DatastoreHelper.getLong(properties.get("status"))).intValue()] : null;
 				final String name = properties.containsKey("name") ? DatastoreHelper.getString(properties.get("name")) : null;
 				final String photo = properties.containsKey("photo") ? DatastoreHelper.getString(properties.get("photo")) : null;
 				users.add(new User(email, status, name, photo));
@@ -141,8 +137,8 @@ public class UserServiceImpl implements UserService {
 	/**
 	 * @see https://developers.google.com/datastore/docs/getstarted/start_java/
 	 * 
-	 *  SELECT *
-	 *	FROM Users
+	 *  SELECT status, name, photo
+	 * 	FROM Users
 	 *	WHERE email = ?;
 	 */
 	@Override
@@ -186,16 +182,61 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 	
+	/**
+	 *  SELECT email, status, name, photo
+	 *	FROM Users
+	 *	WHERE token = ? AND
+	 *  now - timeout < tokenTimestamp
+	 */
 	@Override
 	public User getUserByToken(final String token) throws UserServiceException {
-		//TODO
-		return null;
+		try {
+			//Dhmiourgeia enos QueryBuilder gia to Query getUsers
+			final Query.Builder getUserByToken = Query.newBuilder();
+			//Kind gia to entity pou tha gurisei to query, san: FROM User.class.getName()
+			getUserByToken.addKindBuilder().setName(User.class.getName());
+			//WHERE token = query
+			//Datastore.makeFilter me polla filtra: AND
+			
+			// TODO erwthsh mono gia token kai meta elegxos se java
+			getUserByToken.setFilter(DatastoreHelper.makeFilter(DatastoreHelper.makeFilter("token", PropertyFilter.Operator.EQUAL,
+					DatastoreHelper.makeValue(token)).build(),
+					//AND tokenTimestamp > now - timeout
+					DatastoreHelper.makeFilter("tokenTimestamp", PropertyFilter.Operator.GREATER_THAN,
+					DatastoreHelper.makeValue(new Date().getTime() - timeout)).build()));
+			//Apotelesma tis ekteleshs tou query (apotelesmata kai metadata gi' auta)
+			//Epitrofh twn katharwn apotelesmatwn apo to batch (Entities)
+			final List<EntityResult> entities = datastore.runQuery(RunQueryRequest.newBuilder().setQuery(getUserByToken).build()).
+					getBatch().getEntityResultList();
+			final Entity entity = (entities.size() > 0) ? entities.get(0).getEntity() : null;
+			if (entity == null) {
+				LOGGER.info("User with token " + token + " not found");
+				return null;
+			}
+			//onoma sthlhs kai timh
+			final Map<String, Value> properties = DatastoreHelper.getPropertyMap(entity);
+			final String email = entity.getKey().getPathElement(0).getName();
+			final UserStatus status = properties.containsKey("status") ?
+					UserStatus.values()[Long.valueOf(DatastoreHelper.getLong(properties.get("status"))).intValue()] : null;
+			final String name = properties.containsKey("name") ? DatastoreHelper.getString(properties.get("name")) : null;
+			final String photo = properties.containsKey("photo") ? DatastoreHelper.getString(properties.get("photo")) : null;
+			final User user = new User(email, status, name, photo);
+			LOGGER.info("Retrieved user with token " + token);
+			return user;
+		} catch (final DatastoreException e) {
+			LOGGER.log(Level.WARNING, "Error retrieving user with token " + token, e);
+			throw new UserServiceException("Error retrieving user with token " + token, e);
+		}
 	}
 
 	/**
 	 *	SELECT *
 	 *	FROM Users
 	 *	WHERE email = ?;
+	 *
+	 *	kai elegxos:
+	 *	if (user.password == password) && ((user.status == NORMAL) || (user.status == ADMIN))
+	 * 
 	 */
 	@Override
 	public boolean isValidUser(final String email, final String password) throws UserServiceException {
@@ -224,8 +265,11 @@ public class UserServiceImpl implements UserService {
 				return false;
 			}
 			final Map<String, Value> properties = DatastoreHelper.getPropertyMap(entity);
+			final UserStatus status = properties.containsKey("status") ? 
+					UserStatus.values()[Long.valueOf(DatastoreHelper.getLong(properties.get("status"))).intValue()] : null;
 			final String md5Password = properties.containsKey("password") ? DatastoreHelper.getString(properties.get("password")) : null;
-			if (password == null) {
+			//An o xrhsths den einai normal oute kai admin 'h den exei password
+			if (((status != UserStatus.NORMAL) && (status != UserStatus.ADMIN)) || (password == null)) {
 				LOGGER.info("User " + email + " is invalid");
 				return false;
 			}
@@ -244,8 +288,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	/**
-	 *  INSERT INTO Users (email, password)
-	 *	VALUES (?, md5(?));
+	 *  INSERT INTO Users (email, normalizedUser, password, status, tokenTimestamp, token)
+	 *	VALUES (?, ?, ?, ?, ?, ?);
 	 */
 	@Override
 	public String addUser(final String email, final String password) throws UserServiceException {
@@ -257,37 +301,43 @@ public class UserServiceImpl implements UserService {
 			//Thetei to transaction sto commit
 			commitRequestBuilder.setTransaction(transaction);
 			final User user = getUser(email);
-			if (user == null) { // o xrhsths den yparxei hdh
-				final Entity.Builder entityBuilder = Entity.newBuilder(); 
-				//Orismos tou kleidiou tou pinaka (primary key)
-				entityBuilder.setKey(Key.newBuilder().addPathElement(
-						//san na anoikei ston pinaka User me anagnwristiko to email tou
-						Key.PathElement.newBuilder().setKind(User.class.getName()).setName(email)));
-				//Gemisma pediwn tou (san) pinaka - tou entity
-				//prosthikh stin sthlh token tis lexeis tou mail
-				//ftiaxnoume lista apo values (me tis lexeis tou mail)
-				final List<Value> values = new ArrayList<Value>();
-				for (String token : EMAIL_REGEX.split(email))
-					values.add(DatastoreHelper.makeValue(Utilities.normalize(token)).build());
-				//san value vazoume oles tis times ths listas
-				entityBuilder.addProperty(Property.newBuilder().setName("token").setValue(DatastoreHelper.makeValue(values)));
-				//prosthikh tou pediou password me tin antistoixh timh
-				entityBuilder.addProperty(Property.newBuilder().setName("password").setValue(DatastoreHelper.makeValue(
-						//16adikh kwdikopoihsh gia apofugh periergwn xarakthrwn
-						Hex.encodeHexString(
-						//Kwdikopoihsh tou string password se MD5
-						MessageDigest.getInstance(MD5).digest(password.getBytes())
-						))));
-				// TODO add status, token, token timestamp
-				// TODO return token
-				//Fortwsh sto transaction ena insert gia to entity pou ftiaxthte
-		        commitRequestBuilder.getMutationBuilder().addInsert(entityBuilder.build());
+			if (user != null) { // o xrhsths den yparxei hdh
+				LOGGER.info("User " + email + " already exists");
+				return null;
 			}
+			final Date date = new Date();
+			final Entity.Builder entityBuilder = Entity.newBuilder(); 
+			//Orismos tou kleidiou tou pinaka (primary key)
+			entityBuilder.setKey(Key.newBuilder().addPathElement(
+					//san na anoikei ston pinaka User me anagnwristiko to email tou
+					Key.PathElement.newBuilder().setKind(User.class.getName()).setName(email)));
+			//Gemisma pediwn tou (san) pinaka - tou entity
+			//prosthikh stin sthlh token tis lexeis tou mail
+			//ftiaxnoume lista apo values (me tis lexeis tou mail)
+			final List<Value> values = new ArrayList<Value>();
+			for (String token : EMAIL_REGEX.split(email))
+				values.add(DatastoreHelper.makeValue(Utilities.normalize(token)).build());
+			//san value vazoume oles tis times ths listas
+			entityBuilder.addProperty(Property.newBuilder().setName("normalizedUser").setValue(DatastoreHelper.makeValue(values)));
+			//prosthikh tou pediou password me tin antistoixh timh
+			entityBuilder.addProperty(Property.newBuilder().setName("password").setValue(DatastoreHelper.makeValue(
+					//16adikh kwdikopoihsh gia apofugh periergwn xarakthrwn
+					Hex.encodeHexString(
+					//Kwdikopoihsh tou string password se MD5
+					MessageDigest.getInstance(MD5).digest(password.getBytes())
+					))));
+			entityBuilder.addProperty(Property.newBuilder().setName("status").setValue(
+					DatastoreHelper.makeValue(UserStatus.PENDING.ordinal())));
+			entityBuilder.addProperty(Property.newBuilder().setName("timestamp").setValue(DatastoreHelper.makeValue(date.getTime())));
+			
+			final String token = Utilities.generateToken(email, date);
+			entityBuilder.addProperty(Property.newBuilder().setName("token").setValue(DatastoreHelper.makeValue(token)));
+			//Fortwsh sto transaction ena insert gia to entity pou ftiaxthte
+	        commitRequestBuilder.getMutationBuilder().addInsert(entityBuilder.build());
 			//ginetai to commit tou panw transaction (uparxei/den uparxei o xrhsths)
 			datastore.commit(commitRequestBuilder.build());
-			LOGGER.info(((user == null) ? ("Added user " + email) : ("User " + email + " already exists")));
-//			return (user == null);
-			return null;
+			LOGGER.info("Added user " + email);
+			return token;
 		} catch (final DatastoreException e) {
 			throw new UserServiceException("Error adding user", e);
 		} catch (final NoSuchAlgorithmException e) {
