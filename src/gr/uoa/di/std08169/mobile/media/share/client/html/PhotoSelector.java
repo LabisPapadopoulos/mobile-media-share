@@ -5,6 +5,7 @@ import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceA
 import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaResult;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -27,9 +28,11 @@ import com.google.gwt.user.client.ui.Widget;
 //O PhotoSelector xrhsimopoieitai apo tin MyAccount (selida-module) gia na epilegei o xrhsths photo 
 public class PhotoSelector extends Composite implements ClickHandler {
 	protected static interface PhotoSelectorUiBinder extends UiBinder<Widget, PhotoSelector> {}
+
 	//metatrepei to Ui xml se java antikeimeno
 	private static final PhotoSelectorUiBinder PHOTO_SELECTOR_UI_BINDER = GWT.create(PhotoSelectorUiBinder.class);
-	
+	private static final String IMAGE_WIDTH = "128px";
+	private static final String IMAGE_HEIGHT = "128px";
 	private static final int ROWS = 3;
 	private static final int COLUMNS = 4;
 	private static final int PAGER_PAGES = 5;
@@ -46,20 +49,20 @@ public class PhotoSelector extends Composite implements ClickHandler {
 	protected Label pagerText;
 	//gia na klhthei otan allaxei o xrhsths eikona (trexei h run()) 
 	private final Runnable callback;
-	private String email;
+	private User user;
 	private String value;
 	
 	//Arxkopoihsh tou plegmatos eikonwn
 	public PhotoSelector(final Runnable callback) {
 		initWidget(PHOTO_SELECTOR_UI_BINDER.createAndBindUi(this));
 		close.addClickHandler(this);
-		email = null;
+		user = null;
 		value = null;
 		this.callback = callback;
 	}
 	
-	public void init(final String email) {
-		this.email = email;
+	public void init(final User user) {
+		this.user = user;
 		showPage(0);
 	}
 	
@@ -78,7 +81,7 @@ public class PhotoSelector extends Composite implements ClickHandler {
 	}
 	
 	public void showPage(final int page) {
-		MEDIA_SERVICE.getMedia(email, null, MediaType.IMAGE, email, null, null, null, null, null, 
+		MEDIA_SERVICE.getMedia(user, null, MediaType.IMAGE, user.getEmail(), null, null, null, null, null, 
 				page * ROWS * COLUMNS, ROWS * COLUMNS,
 				//eikones taxinomhmenes kata titlo
 				List.TITLE.getDataStoreName(), true, new AsyncCallback<MediaResult>() {
@@ -98,8 +101,8 @@ public class PhotoSelector extends Composite implements ClickHandler {
 					image.setUrl(MOBILE_MEDIA_SHARE_URLS.download(media.getId()));
 					image.setTitle(media.getTitle());
 					image.setAltText(media.getTitle());
-					image.setWidth(MyAccount.IMAGE_WIDTH);
-					image.setHeight(MyAccount.IMAGE_HEIGHT);
+					image.setWidth(IMAGE_WIDTH);
+					image.setHeight(IMAGE_HEIGHT);
 					//clickHandler gia kathe mia apo tis eikones
 					//(gia na dwsei to value se opoia eikona pathsei o xrhsths)
 					image.addClickHandler(new ClickHandler() {
@@ -121,8 +124,8 @@ public class PhotoSelector extends Composite implements ClickHandler {
 					image.setUrl(MOBILE_MEDIA_SHARE_URLS.defaultUser());
 					image.setTitle("Default"); // TODO constants
 					image.setAltText("Default");
-					image.setWidth(MyAccount.IMAGE_WIDTH);
-					image.setHeight(MyAccount.IMAGE_HEIGHT);
+					image.setWidth(IMAGE_WIDTH);
+					image.setHeight(IMAGE_HEIGHT);
 					//clickHandler gia kathe mia apo tis eikones
 					//(gia na dwsei to value se opoia eikona pathsei o xrhsths)
 					image.addClickHandler(new ClickHandler() {

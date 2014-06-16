@@ -13,6 +13,12 @@ public interface MobileMediaShareConstants extends Constants {
 	@DefaultStringValue("access denied")
 	public String accessDenied();
 	
+	@DefaultStringValue("Labis Papadopoulos.")
+	public String admin();
+	
+	@DefaultStringValue("All Rights Reserved")
+	public String allRightsReserved();
+
 	@DefaultStringValue("Any Type")
 	public String anyType();
 	
@@ -30,6 +36,9 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("Confirm Password")
 	public String confirmPassword();
+	
+	@DefaultStringValue("Copyright")
+	public String copyright();
 	
 	@DefaultStringValue("Created")
 	public String created();
@@ -144,6 +153,9 @@ public interface MobileMediaShareConstants extends Constants {
 
 	@DefaultStringValue("Please fill in your email to reset your password")
 	public String pleaseFillInYourEmailToResetYourPassword();
+	
+	@DefaultStringValue("Please Login to continue")
+	public String pleaseLoginToContinue();
 
 	@DefaultStringValue("Private")
 	public String _private();
@@ -153,12 +165,18 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("Reset")
 	public String reset();
+	
+	@DefaultStringValue("Reset Password")
+	public String resetPassword();
 
 	@DefaultStringValue("Return to login page")
 	public String returnToLoginPage();
 	
 	@DefaultStringValue("Size")
 	public String size();
+	
+	@DefaultStringValue("Sign up for Mobile Media Share")
+	public String signUpForMobileMediaShare();
 
 	//# -> psifio, an einai 0 den to deixnei
 	//0 -> an einai 0, tha to deixei
@@ -197,7 +215,10 @@ public interface MobileMediaShareConstants extends Constants {
 
 	@DefaultStringValue("View Media")
 	public String viewMedia();
-
+	
+	@DefaultStringValue("Welcome to Mobile Media Share")
+	public String welcomeToMobileMediaShare();
+	
 	@DefaultStringValue("You are here:")
 	public String youAreHere();
 	

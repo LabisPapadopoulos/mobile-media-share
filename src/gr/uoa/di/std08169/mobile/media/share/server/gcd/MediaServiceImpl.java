@@ -151,7 +151,7 @@ public class MediaServiceImpl implements ExtendedMediaService {
 		String DESCENDING = "DESC";
 	 */
 	@Override
-	public MediaResult getMedia(final String currentUser, final String title, final MediaType type, final String user,
+	public MediaResult getMedia(final User currentUser, final String title, final MediaType type, final String user,
 			final Date createdFrom, final Date createdTo, final Date editedFrom, final Date editedTo, final Boolean publik,
 			final Integer start, final Integer length, final String orderField, final boolean ascending) throws MediaServiceException {
 		
@@ -211,7 +211,7 @@ public class MediaServiceImpl implements ExtendedMediaService {
 		"AND (longitude >= ?) AND (longitude <= ?)%s%s%s%s%s%s%s%s;"; //minlng <= longitude <= maxlng
 	 */
 	@Override
-	public List<Media> getMedia(final String currentUser, final String title, final MediaType type, final String user,
+	public List<Media> getMedia(final User currentUser, final String title, final MediaType type, final String user,
 			final Date createdFrom, final Date createdTo, final Date editedFrom, final Date editedTo,
 			final Boolean publik, final BigDecimal minLatitude, final BigDecimal minLongitude,
 			final BigDecimal maxLatitude, final BigDecimal maxLongitude) throws MediaServiceException {
@@ -228,7 +228,7 @@ public class MediaServiceImpl implements ExtendedMediaService {
 				DatastoreHelper.makeValue(false)).build());
 		//kai mono media tou currentUser
 		myPrivateMediaFilters.add(DatastoreHelper.makeFilter("user", PropertyFilter.Operator.EQUAL,
-				DatastoreHelper.makeValue(currentUser)).build());
+				DatastoreHelper.makeValue(currentUser.getEmail())).build());
 		if (title != null) {
 			final Filter titleFilter = DatastoreHelper.makeFilter("titleToken", PropertyFilter.Operator.EQUAL,
 					//gia na petaei tonous, na mageireuei kefalaia - mikra

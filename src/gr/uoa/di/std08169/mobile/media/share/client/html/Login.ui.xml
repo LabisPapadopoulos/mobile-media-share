@@ -8,9 +8,8 @@
 		<div class="content loginPage">
 			<mms:Header /> <!-- Import to header sth selida -->
 			<div class="userInfo" style="clear: both;">
-			    <!-- TODO -->
-			    <h2>Welcome to Mobile Media Share Web App</h2>
-			    <p>Please enter your email and your password</p>
+			    <h2><ui:text from="{constants.welcomeToMobileMediaShare}" /></h2>
+			    <p><ui:text from="{constants.pleaseLoginToContinue}" /></p>
 			</div>
 			<form action="./userServlet" enctype="application/x-www-form-urlencoded" method="post" target="_self" class="loginForm"><!-- controls -->
 			    <!-- deixnei oti thelei na kanei login kai oxi forgot -->

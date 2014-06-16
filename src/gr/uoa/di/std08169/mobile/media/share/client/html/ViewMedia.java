@@ -43,8 +43,12 @@ import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstan
 import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessages;
 import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceAsync;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
+import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceAsync;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.UserStatus;
 
 public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Runnable {
 	//To interface ftiaxnei ena widget me vash to EditMedia
@@ -58,6 +62,7 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 	private static final MobileMediaShareMessages MOBILE_MEDIA_SHARE_MESSAGES =
 			GWT.create(MobileMediaShareMessages.class);
 	private static final MediaServiceAsync MEDIA_SERVICE = GWT.create(MediaService.class);
+	private static final UserServiceAsync USER_SERVICE = GWT.create(UserService.class);
 	private static final double CONTENT_WIDTH = 512.0;
 	private static final double CONTENT_HEIGHT = 512.0;
 	
@@ -91,6 +96,7 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 	@UiField
 	protected DivElement map;
 	
+	private User currentUser;
 	private GoogleMap googleMap;
 	private Marker marker;
 	
@@ -130,11 +136,34 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 	@Override
 	public void onModuleLoad() {
 		RootPanel.get().add(this);
-		//options gia to fortwma tis vivliothikhs
-		final AjaxLoader.AjaxLoaderOptions options = AjaxLoader.AjaxLoaderOptions.newInstance();
-		options.setOtherParms(MOBILE_MEDIA_SHARE_URLS.googleMapsOptions(LocaleInfo.getCurrentLocale().getLocaleName()));
-		//Xekinaei na fortwnei Google Maps me ta options kai otan teleiwsei trexei tin run tou this (EditMedia)
-		AjaxLoader.loadApi(Map.GOOGLE_MAPS_API, Map.GOOGLE_MAPS_VERSION, this, options);
+		USER_SERVICE.getUser(InputElement.as(Document.get().getElementById("email")).getValue(), new AsyncCallback<User>() {
+			@Override
+			public void onFailure(final Throwable throwable) {
+				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingUser(
+						MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
+				//redirect sto map
+				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString( 
+						LocaleInfo.getCurrentLocale().getLocaleName())));
+			}
+
+			@Override
+			public void onSuccess(final User user) {
+				if (user == null) {
+					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingUser(
+							MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
+					//redirect sto map
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString( 
+							LocaleInfo.getCurrentLocale().getLocaleName())));
+					return;
+				}
+				currentUser = user;
+				//options gia to fortwma tis vivliothikhs
+				final AjaxLoader.AjaxLoaderOptions options = AjaxLoader.AjaxLoaderOptions.newInstance();
+				options.setOtherParms(MOBILE_MEDIA_SHARE_URLS.googleMapsOptions(LocaleInfo.getCurrentLocale().getLocaleName()));
+				//Xekinaei na fortwnei Google Maps me ta options kai otan teleiwsei trexei tin run tou this (EditMedia)
+				AjaxLoader.loadApi(Map.GOOGLE_MAPS_API, Map.GOOGLE_MAPS_VERSION, ViewMedia.this, options);
+			}
+		});
 	}
 
 	@Override
@@ -180,9 +209,8 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 						Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
 								//me to antistoixo locale 
 								LocaleInfo.getCurrentLocale().getLocaleName())));
-					//o xrhsths vlepei to media giati einai diko tou 'h public
-					} else if (media.getUser().getEmail().equals(InputElement.as(Document.get().getElementById("email")).getValue()) ||
-							media.isPublic()) {
+					//o xrhsths vlepei to media giati einai diko tou 'h einai diaxeirisths 'h to media einai public
+					} else if (currentUser.equals(media.getUser()) || (currentUser.getStatus() == UserStatus.ADMIN) || media.isPublic()) {
 						//Gemisma tou div content analoga ton tupo
 						switch (MediaType.getMediaType(media.getType())) {
 						case APPLICATION:
@@ -274,7 +302,8 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 							content.appendChild(video);
 							break;
 						}
-						if (media.getUser().getEmail().equals(InputElement.as(Document.get().getElementById("email")).getValue())) {
+						//O current user peirazei to media an einai diko tou 'h an einai diaxeirisths
+						if (currentUser.equals(media.getUser()) || (currentUser.getStatus() == UserStatus.ADMIN)) {
 							edit.setEnabled(true);
 							delete.setEnabled(true);
 						}

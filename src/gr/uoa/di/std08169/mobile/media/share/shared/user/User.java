@@ -59,7 +59,7 @@ public class User implements Comparable<User> {
 	
 	@Override
 	public boolean equals(final Object object) {
-		return (object instanceof User) ? email.equals(((User) object).email) : false;
+		return (object instanceof User) && email.equals(((User) object).email);
 	}
 	
 	@Override

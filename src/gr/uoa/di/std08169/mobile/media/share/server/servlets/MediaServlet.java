@@ -39,6 +39,7 @@ public class MediaServlet extends HttpServlet {
 	private static final String MAP_URL = "./map.jsp?locale=%s";
 	private static final String UTF_8 = "UTF-8";
 	private static final String PHOTO_PREFIX = "data:image/png;base64,";
+	private static final String ON = "on";
 	private static final Logger LOGGER = Logger.getLogger(MediaServlet.class.getName());
 	//tmp directory me to opoio exei xekinhsei h JVM kai ekei tha dexetai o tomcat ta arxeia pou anevazoun oi xrhstes
 
@@ -178,8 +179,13 @@ public class MediaServlet extends HttpServlet {
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("duration")) {
 					duration = Integer.parseInt(fileItem.getString(UTF_8));
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("public")) {
-//					publik = "on".equals(fileItem.getString(UTF_8)); TODO
-					publik = Boolean.parseBoolean(fileItem.getString(UTF_8));
+					publik = Boolean.parseBoolean(fileItem.getString(UTF_8)) ||
+							//Html gia checkboxes, radiobuttons, images:
+							//otan einai tsekarismena epistrefei to value.
+							//otan den einai, epistrefei null.
+							//an einai value="timh" to value einai h timh
+							//an den uparxei value, default einai to "on"
+							ON.equalsIgnoreCase(fileItem.getString(UTF_8));
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("latitude")) {
 					latitude = new BigDecimal(fileItem.getString(UTF_8));
 				} else if (fileItem.isFormField() && fileItem.getFieldName().equals("longitude")) {

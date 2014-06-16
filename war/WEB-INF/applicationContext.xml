@@ -72,12 +72,28 @@
 		<constructor-arg value="${google.cloud.key.file}" />
 		<constructor-arg ref="userService" />
 	</bean>
-	
+
+	<!-- TODO -->	
 	<!-- static final gr.uoa.di.std08169.mobile.media.share.server.proxies.MediaServiceProxy mediaService = new 
 	gr.uoa.di.std08169.mobile.media.share.server.proxies.MediaServiceProxy(${media.service}); -->
+	<!-- 
 	<bean id="mediaService" class="gr.uoa.di.std08169.mobile.media.share.server.proxies.MediaServiceProxy" scope="singleton">
 	    <constructor-arg ref="${media.service}" />
     </bean>
+    -->
+	<bean id="mediaService" class="gr.uoa.di.std08169.mobile.media.share.server.jdbc.MediaServiceImpl" scope="singleton">
+		<!-- San orisma tha parei bean me id to ref (etoimo dataSource) -->
+		<constructor-arg ref="dataSource" />
+		<!-- value giati einai timh kai oxi kapoio allo bean -->
+		<constructor-arg value="${media.dir}" />
+		<constructor-arg value="${buffer.size}" />
+		<!-- To mediaService xrhsimopoiei to userService bean -->
+		<constructor-arg ref="userService" />
+	</bean>
+<!-- TODO -->	
+	
+	
+	
     
 	<!-- smtpHost: typou string kai singleton gia xrhsh panta tou idiou -->
 	<bean id="smtpHost" class="java.lang.String" scope="singleton">
