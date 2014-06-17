@@ -281,6 +281,7 @@ public class NewVideo extends Composite implements ClickHandler, EntryPoint, Goo
 			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCapturingVideo(MOBILE_MEDIA_SHARE_CONSTANTS.notSupported()));
 	}
 	
+	 //TODO remove
 	private void updateElapsedTime(final Integer elapsedTime) {
 Window.alert("Elapsed time: " + elapsedTime);
 		this.elapsedTime.setText(List.formatDuration(elapsedTime));

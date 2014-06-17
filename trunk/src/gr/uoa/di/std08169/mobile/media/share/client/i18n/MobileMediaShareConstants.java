@@ -55,6 +55,9 @@ public interface MobileMediaShareConstants extends Constants {
 	@DefaultStringValue("MM/dd/yyyy hh:mm:ss a")
 	public String dateTimeFormat();
 	
+	@DefaultStringValue("Default")
+	public String default_();
+	
 	@DefaultStringValue("Delete")
 	public String delete();
 	
@@ -87,9 +90,21 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("File")
 	public String file();
+	
+	@DefaultStringValue("⇤")
+	public String first();
+	
+	@DefaultStringValue("First page")
+	public String firstPage();
 
 	@DefaultStringValue("Forgot Password?")
 	public String forgotPassword_(); //logw periergou xarakthra (?)
+	
+	@DefaultStringValue("⇥")
+	public String last();
+	
+	@DefaultStringValue("Last page")
+	public String lastPage();
 	
 	@DefaultStringValue("Latitude")
 	public String latitude();
@@ -132,6 +147,12 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("New Video")
 	public String newVideo();
+
+	@DefaultStringValue("↪")
+	public String next();
+	
+	@DefaultStringValue("Next page")
+	public String nextPage();
 	
 	@DefaultStringValue("no media ID specified")
 	public String noMediaIdSpecified();
@@ -160,6 +181,12 @@ public interface MobileMediaShareConstants extends Constants {
 	@DefaultStringValue("Private")
 	public String _private();
 	
+	@DefaultStringValue("↩")
+	public String previous();
+	
+	@DefaultStringValue("Previous page")
+	public String previousPage();
+
 	@DefaultStringValue("Public")
 	public String publik();
 	
