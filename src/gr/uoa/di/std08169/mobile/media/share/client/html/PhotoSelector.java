@@ -1,5 +1,7 @@
 package gr.uoa.di.std08169.mobile.media.share.client.html;
 
+import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants;
+import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessages;
 import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceAsync;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
@@ -30,14 +32,21 @@ public class PhotoSelector extends Composite implements ClickHandler {
 	protected static interface PhotoSelectorUiBinder extends UiBinder<Widget, PhotoSelector> {}
 
 	//metatrepei to Ui xml se java antikeimeno
-	private static final PhotoSelectorUiBinder PHOTO_SELECTOR_UI_BINDER = GWT.create(PhotoSelectorUiBinder.class);
+	private static final PhotoSelectorUiBinder PHOTO_SELECTOR_UI_BINDER = 
+			GWT.create(PhotoSelectorUiBinder.class);
 	private static final String IMAGE_WIDTH = "128px";
 	private static final String IMAGE_HEIGHT = "128px";
 	private static final int ROWS = 3;
 	private static final int COLUMNS = 4;
 	private static final int PAGER_PAGES = 5;
-	private static final MediaServiceAsync MEDIA_SERVICE = GWT.create(MediaService.class);
-	private static final MobileMediaShareUrls MOBILE_MEDIA_SHARE_URLS = GWT.create(MobileMediaShareUrls.class);
+	private static final MediaServiceAsync MEDIA_SERVICE = 
+			GWT.create(MediaService.class);
+	private static final MobileMediaShareUrls MOBILE_MEDIA_SHARE_URLS = 
+			GWT.create(MobileMediaShareUrls.class);
+	private static final MobileMediaShareMessages MOBILE_MEDIA_SHARE_MESSAGES =
+			GWT.create(MobileMediaShareMessages.class);
+	private static final MobileMediaShareConstants MOBILE_MEDIA_SHARE_CONSTANTS = 
+			GWT.create(MobileMediaShareConstants.class);
 	
 	@UiField
 	protected Button close;
@@ -86,13 +95,14 @@ public class PhotoSelector extends Composite implements ClickHandler {
 				//eikones taxinomhmenes kata titlo
 				List.TITLE.getDataStoreName(), true, new AsyncCallback<MediaResult>() {
 			@Override
-			public void onFailure(final Throwable _) {
-				Window.alert("Error retrieving photos"); // TODO
+			public void onFailure(final Throwable throwable) {
+				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingMedia(throwable.getMessage()));
 			}
 			
 			@Override
 			public void onSuccess(final MediaResult result) {
-				final int totalPages = (int) Math.ceil((result.getTotal() + 1) / (float) (ROWS * COLUMNS)); //strogulopoihsh pros ta panw (+ 1 gia th default)
+														//strogulopoihsh pros ta panw (+ 1 gia th default)
+				final int totalPages = (int) Math.ceil((result.getTotal() + 1) / (float) (ROWS * COLUMNS));
 				photos.clear();
 				HorizontalPanel row = null;
 				for (int i = 0; (i < ROWS * COLUMNS) && (i < result.getMedia().size()); i++) {
@@ -119,11 +129,11 @@ public class PhotoSelector extends Composite implements ClickHandler {
 					}
 					row.add(image);
 				}
-				if (page == totalPages - 1) { // sthn teleutaia selida bazei kai th default photo
+				if (page == totalPages - 1) { //sthn teleutaia selida bazei kai th default photo
 					final Image image = new Image();
 					image.setUrl(MOBILE_MEDIA_SHARE_URLS.defaultUser());
-					image.setTitle("Default"); // TODO constants
-					image.setAltText("Default");
+					image.setTitle(MOBILE_MEDIA_SHARE_CONSTANTS.default_());
+					image.setAltText(MOBILE_MEDIA_SHARE_CONSTANTS.default_());
 					image.setWidth(IMAGE_WIDTH);
 					image.setHeight(IMAGE_HEIGHT);
 					//clickHandler gia kathe mia apo tis eikones
@@ -148,8 +158,8 @@ public class PhotoSelector extends Composite implements ClickHandler {
 				// <		
 				if (page > 0) {
 					final Anchor firstPage = new Anchor();
-					firstPage.setText("<<");
-					firstPage.setTitle("First page");
+					firstPage.setText(MOBILE_MEDIA_SHARE_CONSTANTS.first());
+					firstPage.setTitle(MOBILE_MEDIA_SHARE_CONSTANTS.firstPage());
 					firstPage.setHref("#");
 					firstPage.addClickHandler(new ClickHandler() {
 						@Override
@@ -159,8 +169,8 @@ public class PhotoSelector extends Composite implements ClickHandler {
 					});
 					pager.add(firstPage);
 					final Anchor previousPage = new Anchor();
-					previousPage.setText("<");
-					previousPage.setTitle("Previous page");
+					previousPage.setText(MOBILE_MEDIA_SHARE_CONSTANTS.previous());
+					previousPage.setTitle(MOBILE_MEDIA_SHARE_CONSTANTS.previousPage());
 					previousPage.setHref("#");
 					previousPage.addClickHandler(new ClickHandler() {
 						@Override
@@ -189,12 +199,12 @@ public class PhotoSelector extends Composite implements ClickHandler {
 					if (i == page) {
 						final InlineLabel currentPage = new InlineLabel();
 						currentPage.setText(Integer.toString(i + 1));
-						currentPage.setTitle("Page " + (i + 1)); //TODO
+						currentPage.setTitle(MOBILE_MEDIA_SHARE_MESSAGES.page(i + 1));
 						pager.add(currentPage);
 					} else {
 						final Anchor currentPage = new Anchor();
 						currentPage.setText(Integer.toString(i + 1));
-						currentPage.setTitle("Page " + (i + 1)); //TODO
+						currentPage.setTitle(MOBILE_MEDIA_SHARE_MESSAGES.page(i + 1));
 						currentPage.setHref("#");
 						final int j = i;
 						currentPage.addClickHandler(new ClickHandler() {
@@ -212,8 +222,8 @@ public class PhotoSelector extends Composite implements ClickHandler {
 				//An h trexousa selida den einai h teleutaia
 				if (page < totalPages - 1) {
 					final Anchor nextPage = new Anchor();
-					nextPage.setText(">");
-					nextPage.setTitle("Next page"); //TODO
+					nextPage.setText(MOBILE_MEDIA_SHARE_CONSTANTS.next());
+					nextPage.setTitle(MOBILE_MEDIA_SHARE_CONSTANTS.nextPage());
 					nextPage.setHref("#");
 					nextPage.addClickHandler(new ClickHandler() {
 						@Override
@@ -223,8 +233,8 @@ public class PhotoSelector extends Composite implements ClickHandler {
 					});
 					pager.add(nextPage);
 					final Anchor previousPage = new Anchor();
-					previousPage.setText(">>");
-					previousPage.setTitle("Last page");
+					previousPage.setText(MOBILE_MEDIA_SHARE_CONSTANTS.last());
+					previousPage.setTitle(MOBILE_MEDIA_SHARE_CONSTANTS.lastPage());
 					previousPage.setHref("#");
 					previousPage.addClickHandler(new ClickHandler() {
 						@Override
@@ -234,10 +244,11 @@ public class PhotoSelector extends Composite implements ClickHandler {
 					});
 					pager.add(previousPage);
 				}
-				pagerText.setText("Page " + (page + 1) + " of " + totalPages + ", displaying photos " + 
-						(page * ROWS * COLUMNS + 1) + " to " + 
-						(((page + 1) * ROWS * COLUMNS < result.getTotal() + 1) ? ((page + 1) * ROWS * COLUMNS) : (result.getTotal() + 1)) 
-						+ " of " + (result.getTotal() + 1)); //TODO
+				final int startPhoto = page * ROWS * COLUMNS + 1;
+				final int endPhoto = ((page + 1) * ROWS * COLUMNS < result.getTotal() + 1) ? ((page + 1) * ROWS * COLUMNS) :
+						(result.getTotal() + 1);
+				pagerText.setText(MOBILE_MEDIA_SHARE_MESSAGES.pageOfDisplayingPhotosToOf(page + 1, totalPages, startPhoto, endPhoto,
+						result.getTotal() + 1));
 			}
 		});
 	}

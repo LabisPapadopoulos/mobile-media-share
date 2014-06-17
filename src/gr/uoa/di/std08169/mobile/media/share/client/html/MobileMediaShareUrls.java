@@ -52,6 +52,9 @@ public interface MobileMediaShareUrls extends Messages {
 	@DefaultMessage("./newVideo.jsp?locale={0}")
 	public String newVideo(final String locale);
 	
+	@DefaultMessage("http://www.di.uoa.gr/~std08169/")
+	public String personalWebSite();
+	
 	@DefaultMessage("./images/markersBig/{0}.svg")
 	public String selectedImage(final String name);
 

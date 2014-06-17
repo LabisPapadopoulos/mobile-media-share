@@ -70,6 +70,13 @@ public interface MobileMediaShareMessages extends Messages {
 	@DefaultMessage("{0}° {1}′ {2}″ W")
 	public String longitudeFormatWest(final int degrees, final int minutes, final int seconds);
 	
+	@DefaultMessage("Page {0}")
+	public String page(final int page);
+	
+	@DefaultMessage("Page {0} of {1}, displaying photos {2} to {3} of {4}")
+	public String pageOfDisplayingPhotosToOf(final int currentPage, final int totalPages, 
+			final int startPhoto, final int endPhoto, final int totalPhotos);
+	
 	@DefaultMessage("User {0} already exists")
 	public String userAlreadyExists(final String email);
 	
