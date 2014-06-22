@@ -230,7 +230,7 @@ public class MediaServiceImpl implements ExtendedMediaService {
 						(editedFrom == null) ? "" : EDITED_FROM_FILTER,
 						(editedTo == null) ? "" : EDITED_TO_FILTER, 
 						(publik == null) ? "" : PUBLIC_FILTER,
-						(currentUser.getStatus() == UserStatus.ADMIN) ? "" : CURRENT_USER_FILTER); //TODO
+						(currentUser.getStatus() == UserStatus.ADMIN) ? "" : CURRENT_USER_FILTER);
 				try {
 					final Connection connection = dataSource.getConnection();
 					try {

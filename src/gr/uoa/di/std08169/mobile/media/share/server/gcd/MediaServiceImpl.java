@@ -61,6 +61,7 @@ import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaResult;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
 import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
+import gr.uoa.di.std08169.mobile.media.share.shared.user.UserStatus;
 
 public class MediaServiceImpl implements ExtendedMediaService {
 	/*
@@ -212,7 +213,7 @@ public class MediaServiceImpl implements ExtendedMediaService {
 		"AND (longitude >= ?) AND (longitude <= ?)%s%s%s%s%s%s%s%s;"; //minlng <= longitude <= maxlng
 	 */
 	@Override
-	public List<Media> getMedia(final User currentUser, final String title, final MediaType type, final String user,
+	public List<Media> getMedia(final User currentUser, final String title, final MediaType type, final String user, //TODO
 			final Date createdFrom, final Date createdTo, final Date editedFrom, final Date editedTo,
 			final Boolean publik, final BigDecimal minLatitude, final BigDecimal minLongitude,
 			final BigDecimal maxLatitude, final BigDecimal maxLongitude) throws MediaServiceException {
@@ -221,6 +222,8 @@ public class MediaServiceImpl implements ExtendedMediaService {
 		final List<Filter> publicMediaFilters = new ArrayList<Filter>();
 		//Lista apo filters gia to Query myPrivateMedia.
 		final List<Filter> myPrivateMediaFilters = new ArrayList<Filter>();
+		//Lista apo filters gia to Query privateMedia.
+		final List<Filter> allPrivateMediaFilters = new ArrayList<Filter>();
 		//ola ta public media
 		publicMediaFilters.add(DatastoreHelper.makeFilter("public", PropertyFilter.Operator.EQUAL,
 				DatastoreHelper.makeValue(true)).build());
@@ -230,12 +233,16 @@ public class MediaServiceImpl implements ExtendedMediaService {
 		//kai mono media tou currentUser
 		myPrivateMediaFilters.add(DatastoreHelper.makeFilter("user", PropertyFilter.Operator.EQUAL,
 				DatastoreHelper.makeValue(currentUser.getEmail())).build());
+		//mono private media opoioudhpote xrhsth (stin periptwsh tou admin) 
+		allPrivateMediaFilters.add(DatastoreHelper.makeFilter("public", PropertyFilter.Operator.EQUAL,
+				DatastoreHelper.makeValue(false)).build());
 		if (title != null) {
 			final Filter titleFilter = DatastoreHelper.makeFilter("titleToken", PropertyFilter.Operator.EQUAL,
 					//gia na petaei tonous, na mageireuei kefalaia - mikra
 					DatastoreHelper.makeValue(Utilities.normalize(title))).build();
 			publicMediaFilters.add(titleFilter);
 			myPrivateMediaFilters.add(titleFilter);
+			allPrivateMediaFilters.add(titleFilter);
 		}
 //		typePrefix: audio/
 //		type: 		audio/mp3
@@ -245,14 +252,17 @@ public class MediaServiceImpl implements ExtendedMediaService {
 					DatastoreHelper.makeValue(type.getMimeTypePrefix())).build();
 			publicMediaFilters.add(typeFilter);
 			myPrivateMediaFilters.add(typeFilter);
+			allPrivateMediaFilters.add(typeFilter);
 		}
 		if (user != null) {
 			final Filter userFilter = DatastoreHelper.makeFilter("user", PropertyFilter.Operator.EQUAL,
 					DatastoreHelper.makeValue(user)).build();
 			publicMediaFilters.add(userFilter);
 			myPrivateMediaFilters.add(userFilter);
+			allPrivateMediaFilters.add(userFilter);
 		}
-		//Dhmiourgeia enos QueryBuilder gia to Query getPublicMedia kai enos allou gia to Query getMyPrivateMedia 
+		//Dhmiourgeia enos QueryBuilder gia to Query getPublicMedia, enos gia to Query getMyPrivateMedia,
+		//kai enos allou gia to Query getPrivateMedia 
 		final Query.Builder getPublicMedia = Query.newBuilder();
 		getPublicMedia.addKindBuilder().setName(Media.class.getName());
 		getPublicMedia.setFilter(DatastoreHelper.makeFilter(publicMediaFilters));
@@ -260,22 +270,31 @@ public class MediaServiceImpl implements ExtendedMediaService {
 		//Kind gia to entity pou tha gurisoun ta queries, san: FROM Media.class.getName()
 		getMyPrivateMedia.addKindBuilder().setName(Media.class.getName());
 		getMyPrivateMedia.setFilter(DatastoreHelper.makeFilter(myPrivateMediaFilters));
+		final Query.Builder getAllPrivateMedia = Query.newBuilder();
+		getAllPrivateMedia.addKindBuilder().setName(Media.class.getName());
+		getAllPrivateMedia.setFilter(DatastoreHelper.makeFilter(allPrivateMediaFilters));
 		try {
 			//Arxikopoihsh adeiwn listwn gia na gemisoun mono an ektelestei to antistoixo query
 			List<EntityResult> publicMedia = Collections.<EntityResult>emptyList();
-			List<EntityResult> myPrivateMedia = Collections.<EntityResult>emptyList();
+			List<EntityResult> privateMedia = Collections.<EntityResult>emptyList();
 			if (publik == null) { //epistrefontai kai ta public media kai ta myPrivate media (de mas noiazei katastash public) 
 				publicMedia = datastore.runQuery(RunQueryRequest.newBuilder().setQuery(getPublicMedia).build()).getBatch().getEntityResultList();
-				myPrivateMedia = datastore.runQuery(RunQueryRequest.newBuilder().setQuery(getMyPrivateMedia).build()).getBatch().getEntityResultList();
+				privateMedia = datastore.runQuery(RunQueryRequest.newBuilder().setQuery(
+						//an o xrhsths einai admin, vlepei ola ta private media, alliws vlepei mono ta dika tou private
+						(currentUser.getStatus() == UserStatus.ADMIN) ? getAllPrivateMedia : getMyPrivateMedia).build()).
+						getBatch().getEntityResultList();
 			} else if (publik) { //epistrefontai mono ta public media
 				publicMedia = datastore.runQuery(RunQueryRequest.newBuilder().setQuery(getPublicMedia).build()).getBatch().getEntityResultList();
 			} else { //epistrefontai mono ta my private media
-				myPrivateMedia = datastore.runQuery(RunQueryRequest.newBuilder().setQuery(getMyPrivateMedia).build()).getBatch().getEntityResultList();
+				privateMedia = datastore.runQuery(RunQueryRequest.newBuilder().setQuery(
+						//an o xrhsths einai admin, vlepei ola ta private media, alliws vlepei mono ta dika tou private
+						(currentUser.getStatus() == UserStatus.ADMIN) ? getAllPrivateMedia : getMyPrivateMedia).build()).
+						getBatch().getEntityResultList();
 			}
 			final List<Media> media = new ArrayList<Media>();
 			for (EntityResult result : publicMedia)
 				media.add(parseMedia(result.getEntity()));
-			for (EntityResult result : myPrivateMedia)
+			for (EntityResult result : privateMedia)
 				media.add(parseMedia(result.getEntity()));
 
 			//Epeidh den upostirizei pollaples suntikes anisotitas sto idio Query, tha filtraroume meta

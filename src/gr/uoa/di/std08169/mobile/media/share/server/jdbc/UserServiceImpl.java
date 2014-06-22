@@ -277,7 +277,6 @@ public class UserServiceImpl implements UserService {
 				final PreparedStatement editUser = connection.prepareStatement(String.format(EDIT_USER, updatePassword ? UPDATE_PASSWORD : ""));
 				try {
 					final Date date = new Date();
-					
 					if (password != null)
 						editUser.setString(1, password);
 					else if (user.getStatus() == UserStatus.FORGOT)

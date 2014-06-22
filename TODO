@@ -2,11 +2,11 @@ user image in list?
 
 breadcrumbs & text
 
-check for admin rights
-	grep -r getElementById src/ | grep email
-
 calculate duration
 
 nightly build to project ston okeano
 timeout exception otan kanoume new photo apo capture
+
+GCD cascade
+	on delete user delete user media as well
 

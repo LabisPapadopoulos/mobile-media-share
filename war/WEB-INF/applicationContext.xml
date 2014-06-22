@@ -32,7 +32,7 @@
 
 	<!-- static final gr.uoa.di.std08169.mobile.media.share.server.jdbc.UserServiceImpl jdbcUserService = new 
 										gr.uoa.di.std08169.mobile.media.share.server.jdbc.UserServiceImpl(dataSource); -->
-	<bean id="jdbcUserService" class="gr.uoa.di.std08169.mobile.media.share.server.jdbc.UserServiceImpl" scope="singleton">
+	<bean id="jdbcUserService" class="gr.uoa.di.std08169.mobile.media.share.server.jdbc.UserServiceImpl" scope="singleton" init-method="init" destroy-method="shutdown">
 		<!-- San orisma tha parei bean me id to ref (etoimo dataSource) -->
 		<constructor-arg ref="dataSource" /> <!-- deikths se object -->
 		<constructor-arg value="${user.service.timeout}" />
@@ -40,7 +40,7 @@
 	
 	<!-- static final gr.uoa.di.std08169.mobile.media.share.server.gcd.UserServiceImpl gcdUserService = new 
 	gr.uoa.di.std08169.mobile.media.share.server.gcd.UserServiceImpl(${google.cloud.dataset}, ${google.cloud.account}, ${google.cloud.key.file}); -->
-	<bean id="gcdUserService" class="gr.uoa.di.std08169.mobile.media.share.server.gcd.UserServiceImpl" scope="singleton">
+	<bean id="gcdUserService" class="gr.uoa.di.std08169.mobile.media.share.server.gcd.UserServiceImpl" scope="singleton" init-method="init" destroy-method="shutdown">
 		<!-- Orismata gia ton constuctor tou bean, pou ta travaei apo to applicationContext.properties me ta ${...} -->
 		<constructor-arg value="${google.cloud.dataset}" />
 		<constructor-arg value="${google.cloud.account}" />
@@ -55,7 +55,7 @@
 	    <!-- constructor-arg ref="${user.service}" / --> <!-- diavazei apo property to user service -->
 	<!-- /bean -->
 	
-	<bean id="userService" class="gr.uoa.di.std08169.mobile.media.share.server.gcd.UserServiceImpl" scope="singleton">
+	<bean id="userService" class="gr.uoa.di.std08169.mobile.media.share.server.gcd.UserServiceImpl" scope="singleton" init-method="init" destroy-method="shutdown">
 		<!-- Orismata gia ton constuctor tou bean, pou ta travaei apo to applicationContext.properties me ta ${...} -->
 		<constructor-arg value="${google.cloud.dataset}" />
 		<constructor-arg value="${google.cloud.account}" />
@@ -90,16 +90,13 @@
 	    <constructor-arg ref="${media.service}" />
     </bean>
     -->
-	<bean id="mediaService" class="gr.uoa.di.std08169.mobile.media.share.server.jdbc.MediaServiceImpl" scope="singleton">
-		<!-- San orisma tha parei bean me id to ref (etoimo dataSource) -->
-		<constructor-arg ref="dataSource" />
-		<!-- value giati einai timh kai oxi kapoio allo bean -->
-		<constructor-arg value="${media.dir}" />
-		<constructor-arg value="${buffer.size}" />
-		<!-- To mediaService xrhsimopoiei to userService bean -->
+	<bean id="mediaService" class="gr.uoa.di.std08169.mobile.media.share.server.gcd.MediaServiceImpl" scope="singleton">
+	    <constructor-arg value="${google.cloud.dataset}" />
+		<constructor-arg value="${google.cloud.account}" />
+		<constructor-arg value="${google.cloud.key.file}" />
 		<constructor-arg ref="userService" />
 	</bean>
-<!-- TODO -->	
+<!-- TODO -->
 	
 	
 	
