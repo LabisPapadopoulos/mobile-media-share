@@ -1,11 +1,36 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="gr.uoa.di.std08169.mobile.media.share.android">
-    <application android:allowBackup="true" android:icon="@drawable/mobile_media_share" android:label="@string/mobileMediaShare" android:theme="@style/mobileMediaShare" >
-        <activity android:name=".MainMenu" android:label="@string/mobileMediaShare">
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="gr.uoa.di.std08169.mobile.media.share.android" >
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/mobile_media_share"
+        android:label="@string/mobileMediaShare"
+        android:theme="@style/mobileMediaShare" >
+        <activity
+            android:name="gr.uoa.di.std08169.mobile.media.share.android.MainMenu"
+            android:label="@string/mobileMediaShare" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".authentication.AuthenticatorActivity"
+            android:label="@string/title_activity_authenticator" >
+        </activity>
     </application>
+    <!-- Fernei authenticator otan zhteitai -->
+    <service android:name="gr.uoa.di.std08169.mobile.media.share.android.authentication.AuthenticatorService">
+        <intent-filter>
+            <action android:name="android.accounts.AccountAuthenticator" />
+        </intent-filter>
+        <meta-data android:name="android.accounts.AccountAuthenticator"
+            android:resource="@xml/authenticator" />
+    </service>
+
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
+
 </manifest>
