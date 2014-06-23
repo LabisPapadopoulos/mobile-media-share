@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="gr.uoa.di.std08169.mobile.media.share.android">
+    <application android:allowBackup="true" android:icon="@drawable/mobile_media_share" android:label="@string/mobileMediaShare" android:theme="@style/mobileMediaShare" >
+        <activity android:name=".MainMenu" android:label="@string/mobileMediaShare">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
