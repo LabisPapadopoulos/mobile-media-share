@@ -14,8 +14,6 @@ import android.os.Bundle;
  * @see: http://udinic.wordpress.com/2013/04/24/write-your-own-android-authenticator/
  */
 public class Authenticator extends AbstractAccountAuthenticator {
-    public static final String TYPE = "gr.uoa.di.std08169.mobile.media.share";
-
     private final Context context;
 
     public Authenticator(final Context context) {

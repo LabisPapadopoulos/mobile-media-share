@@ -17,16 +17,42 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".authentication.AuthenticatorActivity"
+            android:name="gr.uoa.di.std08169.mobile.media.share.android.authentication.AuthenticatorActivity"
             android:label="@string/title_activity_authenticator" >
+        </activity>
+        <activity
+            android:name="gr.uoa.di.std08169.mobile.media.share.android.Map"
+            android:label="@string/title_activity_map" >
+        </activity>
+        <activity
+            android:name="gr.uoa.di.std08169.mobile.media.share.android.List"
+            android:label="@string/title_activity_list" >
+        </activity>
+        <activity
+            android:name="gr.uoa.di.std08169.mobile.media.share.android.NewPhoto"
+            android:label="@string/title_activity_new_photo" >
+        </activity>
+        <activity
+            android:name="gr.uoa.di.std08169.mobile.media.share.android.NewVideo"
+            android:label="@string/title_activity_new_video" >
+        </activity>
+        <activity
+            android:name="gr.uoa.di.std08169.mobile.media.share.android.Upload"
+            android:label="@string/title_activity_upload" >
+        </activity>
+        <activity
+            android:name="gr.uoa.di.std08169.mobile.media.share.android.MyAccount"
+            android:label="@string/title_activity_my_account" >
         </activity>
     </application>
     <!-- Fernei authenticator otan zhteitai -->
-    <service android:name="gr.uoa.di.std08169.mobile.media.share.android.authentication.AuthenticatorService">
+    <service android:name="gr.uoa.di.std08169.mobile.media.share.android.authentication.AuthenticatorService" >
         <intent-filter>
             <action android:name="android.accounts.AccountAuthenticator" />
         </intent-filter>
-        <meta-data android:name="android.accounts.AccountAuthenticator"
+
+        <meta-data
+            android:name="android.accounts.AccountAuthenticator"
             android:resource="@xml/authenticator" />
     </service>
 
