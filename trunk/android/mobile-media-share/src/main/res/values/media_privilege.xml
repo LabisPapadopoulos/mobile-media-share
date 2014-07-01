@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="media_privilege">
+        <item>Any Type</item>
+        <item>Public</item>
+        <item>Private</item>
+    </string-array>
+</resources>

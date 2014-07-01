@@ -1,2 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<account-authenticator xmlns:android="http://schemas.android.com/apk/res/android" android:accountType="gr.uoa.di.std08169.mobile.media.share" android:icon="@drawable/mobile_media_share" android:label="@string/mobileMediaShare" />
+<account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accountType="gr.uoa.di.std08169.mobile.media.share.android.authentication.Authenticator"
+    android:icon="@drawable/mobile_media_share"
+    android:smallIcon="@drawable/mobile_media_share"
+    android:label="@string/mobileMediaShare"
+    android:accountPreferences="@xml/account_preferences" />

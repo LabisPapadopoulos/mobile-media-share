@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/mobileMediaShare" />
+    <SwitchPreference android:key="foo" android:title="Foo" android:summary="Foo bar buz" />
+</PreferenceScreen>
+<!--
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceCategory android:title="Udinic Preferences" />
+<CheckBoxPreference android:title="Use debug server"
+    android:key="isDebug"
+    android:summary="Connecting to a debug server instead of prod server"/>
+<SwitchPreference android:title="Debug Logs" android:key="logsVerbose" android:summary="Show debug logs on LogCat"/>
+</PreferenceScreen>
+    -->
+<!--
+<PreferenceScreen
+android:key="key1"
+android:title="@string/mobileMediaShare"
+android:summary="@string/mobileMediaShare">
+<intent
+    android:action="key1.ACTION"
+    android:targetPackage="key1.package"
+    android:targetClass="key1.class" />
+</PreferenceScreen>
+-->

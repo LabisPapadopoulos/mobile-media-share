@@ -1,10 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <string name="dateFormat">dd/MM/yy</string>
     <string name="mobileMediaShare">Mobile Media Share</string>
     <string name="settings">Settings</string>
     <string name="title_activity_authenticator">Welcome to Mobile Media Share</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="map">Map</string>
+    <string name="list">List</string>
+    <string name="logout">Logout</string>
+    <string name="myAccount">My Account</string>
+    <string name="newPhoto">New Photo</string>
+    <string name="newVideo">New Video</string>
+    <string name="upload">Upload</string>
+    <string name="title_activity_map">Map</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_list">List</string>
+    <string name="title_activity_new_photo">NewPhoto</string>
+    <string name="title_activity_new_video">NewVideo</string>
+    <string name="title_activity_upload">Upload</string>
+    <string name="title_activity_my_account">MyAccount</string>
 
 </resources>
