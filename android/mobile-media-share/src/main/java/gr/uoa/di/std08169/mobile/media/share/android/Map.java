@@ -15,9 +15,13 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -25,8 +29,13 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.google.android.gms.maps.MapFragment;
 
-public class Map extends ActionBarActivity implements AdapterView.OnItemSelectedListener, DatePickerDialog.OnDateSetListener, TextWatcher, View.OnClickListener {
+import gr.uoa.di.std08169.mobile.media.share.android.https.HttpsAsyncTask;
+import gr.uoa.di.std08169.mobile.media.share.android.https.HttpsResponse;
+
+
+public class Map extends MobileMediaShareActivity implements AdapterView.OnItemSelectedListener, DatePickerDialog.OnDateSetListener, TextWatcher, View.OnClickListener {
     private EditText title;
     private EditText user;
     private EditText createdFrom;
@@ -38,6 +47,7 @@ public class Map extends ActionBarActivity implements AdapterView.OnItemSelected
     private Button download;
     private Button edit;
     private Button delete;
+    private MapFragment map;
     private EditText selectedDateField;
 
     //EditText
@@ -48,18 +58,19 @@ public class Map extends ActionBarActivity implements AdapterView.OnItemSelected
 
     //EditText
     @Override
-    public void beforeTextChanged(final CharSequence charSequence, final int start, final int count, final int after) {}
+    public void beforeTextChanged(final CharSequence charSequence, final int start, final int count, final int after) {
+    }
 
     //createdFrom (DatePicker) - ClickListener
     @Override
     public void onClick(final View view) {
-Log.d("DEBUG", "view: " + view);
+        Log.d("DEBUG", "view: " + view);
         if (view instanceof EditText)
             selectedDateField = (EditText) view;
         final Calendar calendar = Calendar.getInstance();
-                                    //this: olh h clash pou ulopoiei to DatePickerDialog.OnDateSetListener
+        //this: olh h clash pou ulopoiei to DatePickerDialog.OnDateSetListener
         new DatePickerDialog(this, this, calendar.get(Calendar.YEAR),
-                    calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+                calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
     }
 
     @Override
@@ -166,18 +177,15 @@ Log.d("DEBUG", "view: " + view);
 
     //EditText
     @Override
-    public void onTextChanged(final CharSequence charSequence, final int start, final int count, final int after) {}
-
+    public void onTextChanged(final CharSequence charSequence, final int start, final int count, final int after) {
+    }
 
 
     private void updateMap() {
-
-
         final String title = (this.title.getText().toString().trim().length() == 0) ? null : this.title.getText().toString().trim();
         final String user = (this.user.getText().toString().trim().length() == 0) ? null : this.user.getText().toString().trim();
         final DateFormat dateFormat = new SimpleDateFormat(getResources().getString(R.string.dateFormat));
         Date createdFrom = null;
-
         try {
             createdFrom = dateFormat.parse(this.createdFrom.getText().toString().trim());
         } catch (final ParseException e) {
@@ -203,31 +211,100 @@ Log.d("DEBUG", "view: " + view);
         }
         Integer type = null;
         switch (this.type.getSelectedItemPosition()) {
-        case AdapterView.INVALID_POSITION:
-        case 0: //epilegmeno to any type
-            break;
-        default:
-            type = this.type.getSelectedItemPosition() - 1;
+            case AdapterView.INVALID_POSITION:
+            case 0: //epilegmeno to any type
+                break;
+            default:
+                type = this.type.getSelectedItemPosition() - 1;
         }
         Boolean publik = null;
         switch (this.publik.getSelectedItemPosition()) {
-        case AdapterView.INVALID_POSITION:
-        case 1:
-            publik = true;
-            break;
-        case 2:
-            publik = false;
+            case AdapterView.INVALID_POSITION:
+            case 1:
+                publik = true;
+                break;
+            case 2:
+                publik = false;
         }
-Log.d(Map.class.getName(), "Searching for title " + title + ", user " + user + ", created from " +
-        createdFrom + ", created to " + createdTo + ", edited from " + editedFrom + ", created to "
-        + createdTo + ", type " + type + ", public " + publik);
-
+        final StringBuilder url = new StringBuilder(getResources().getString(R.string.getListUrl));
+        if (title != null)
+            url.append("&title=").append(title);
+        if (type != null)
+            url.append("&type=").append(type);
+        if (user != null)
+            url.append("&user=").append(user);
+        if (createdFrom != null)
+            url.append("&createdFrom=").append(createdFrom);
+//title=%s&amp;
+//type=%s&amp;
+// user=%s&amp;
+// createdFrom=%s&amp;
+// createdTo=%s&amp;
+// editedFrom=%s&amp;
+// editedTo=%s&amp;
+// publik=%s&amp;
+// minLatitude=%s&amp;
+// minLongitude=%s&amp;
+// maxLatitude=%s&amp;
+// maxLongitude=%s
         try {
-            HttpURLConnection connection = (HttpURLConnection) new URL("http://www.example.org/").openConnection();
-            connection.setRequestMethod("POST");
+            new HttpsAsyncTask() {
+                @Override
+                protected void onPostExecute(HttpsResponse response) {
+                    if (!response.isSuccess()) {
+                        error(R.string.errorRetrievingMedia, response.getResponse());
+                        return;
+                    }
+                    try {
+                        //[ ... ] -> json Array
+                        final JSONArray list = new JSONArray(response.getResponse());
+                        for (int i = 0; i < list.length(); i++) {
+                            // { ... } -> json object
+                            final JSONObject media = list.getJSONObject(i);
+                            final String id = media.getString("id");
+                            final double latitude = media.getDouble("latitude");
+                            final double longitude = media.getDouble("longitude");
+                            final String title1 = media.getString("title");
+                            final String type1 = media.getString("type");
+                            Toast.makeText(Map.this, "id: " + id + ", title: " + title1 + ", type: " + type1 +
+                                    ", latitude: " + latitude + ", longitude: " + longitude, Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (final JSONException e) {
+                        error(R.string.errorRetrievingMedia, e.getMessage());
+                        return;
+                    }
+                }
+            }.execute(new URL(url.toString()));
         } catch (final IOException e) {
-            e.printStackTrace(); // TODO
+            error(R.string.errorRetrievingMedia, e.getMessage());
+            return;
         }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //        connection.setReq
 
         // kaloume service me bash tis times
@@ -280,5 +357,3 @@ Log.d(Map.class.getName(), "Searching for title " + title + ", user " + user + "
 //                        delete.setEnabled(false);
 //                    }
 //                });
-    }
-}

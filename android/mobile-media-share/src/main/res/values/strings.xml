@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="dateFormat">dd/MM/yy</string>
+    <string name="errorRetrievingMedia">Error retrieving media: %s</string>
     <string name="mobileMediaShare">Mobile Media Share</string>
     <string name="settings">Settings</string>
     <string name="title_activity_authenticator">Welcome to Mobile Media Share</string>
@@ -13,11 +14,16 @@
     <string name="newVideo">New Video</string>
     <string name="upload">Upload</string>
     <string name="title_activity_map">Map</string>
-    <string name="hello_world">Hello world!</string>
     <string name="title_activity_list">List</string>
     <string name="title_activity_new_photo">NewPhoto</string>
     <string name="title_activity_new_video">NewVideo</string>
     <string name="title_activity_upload">Upload</string>
     <string name="title_activity_my_account">MyAccount</string>
+
+    <!-- string name="getListUrl">https://192.168.1.5:8443/mobile-media-share/mediaServlet?action=getList</string -->
+    <string name="getListUrl">http://192.168.1.5:8080/test/test.json?foo=bar</string>
+
+
+    <!-- title=%s&amp;type=%s&amp;user=%s&amp;createdFrom=%s&amp;createdTo=%s&amp;editedFrom=%s&amp;editedTo=%s&amp;publik=%s&amp;minLatitude=%s&amp;minLongitude=%s&amp;maxLatitude=%s&amp;maxLongitude=%s -->
 
 </resources>

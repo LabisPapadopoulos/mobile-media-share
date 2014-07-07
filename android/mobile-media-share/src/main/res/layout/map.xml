@@ -193,6 +193,11 @@
                         android:text="Delete"
                         android:id="@+id/delete" />
             </LinearLayout>
+            <fragment
+                class="com.google.android.gms.maps.MapFragment"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:id="@+id/map" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
