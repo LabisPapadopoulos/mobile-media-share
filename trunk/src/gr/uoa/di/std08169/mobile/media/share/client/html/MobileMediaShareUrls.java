@@ -9,7 +9,7 @@ public interface MobileMediaShareUrls extends Messages {
 	@DefaultMessage("http://www.di.uoa.gr/{0}/")
 	public String di(final String locale);
 	
-	@DefaultMessage("./mediaServlet?id={0}")
+	@DefaultMessage("./mediaServlet?action=downloadMedia&id={0}")
 	public String download(final String id);
 	
 	@DefaultMessage("./editMedia.jsp?locale={0}&id={1}")

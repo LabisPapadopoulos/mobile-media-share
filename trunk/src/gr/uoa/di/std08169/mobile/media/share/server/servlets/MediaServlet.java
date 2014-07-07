@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.Date;
@@ -24,12 +25,15 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import com.google.gson.Gson;
+
 import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceException;
 import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceException;
 import gr.uoa.di.std08169.mobile.media.share.server.ExtendedMediaService;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
 import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
 import gr.uoa.di.std08169.mobile.media.share.shared.user.UserStatus;
 
@@ -38,6 +42,7 @@ public class MediaServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final String MAP_URL = "./map.jsp?locale=%s";
 	private static final String UTF_8 = "UTF-8";
+	private static final String APPLICATION_JSON = "application/json";
 	private static final String PHOTO_PREFIX = "data:image/png;base64,";
 	private static final String ON = "on";
 	private static final Logger LOGGER = Logger.getLogger(MediaServlet.class.getName());
@@ -76,27 +81,73 @@ public class MediaServlet extends HttpServlet {
 		}
 		try {
 			//elenxos oti o xrhsths einai gnwstos (oti uparxei stin vash)  
-			final User user = userService.getUser((String) request.getSession().getAttribute("email"));
-			if (user == null) {
+			final User currentUser = userService.getUser((String) request.getSession().getAttribute("email"));
+			if (currentUser == null) {
 				//agnwstos xrhsths (den uparxei)
 				LOGGER.warning("Access denied");
 				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
 				return;
 			}
-			final String id = request.getParameter("id");
-			if (id == null) {
+			final String action = request.getParameter("action");
+			if (action == null) {
 				LOGGER.warning("Bad request");
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request"); //400 Bad request
 				return;
 			}
-			final Media media = mediaService.getMedia(id);
-			if ((user.getStatus() == UserStatus.ADMIN) || user.equals(media.getUser()) || media.isPublic())
-				mediaService.getMedia(id, response);
-			else {
-				//Den exei dikaioma autos o xrhsths na katevasei auto to media
-				LOGGER.warning("Access denied");
-				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
-				return;				
+			if (action.equals("getList")) { //Get list gia otan to android xtupaei mesw REST gia tin Map
+				final String title = request.getParameter("title");
+				final MediaType type = (request.getParameter("type") == null) ? null :
+					MediaType.values()[Integer.parseInt(request.getParameter("type"))];
+				final String user = request.getParameter("user");
+				final Date createdFrom = (request.getParameter("createdFrom") == null) ? null :
+					new Date(Long.parseLong(request.getParameter("createdFrom")));
+				final Date createdTo = (request.getParameter("createdTo") == null) ? null :
+					new Date(Long.parseLong(request.getParameter("createdTo")));
+				final Date editedFrom = (request.getParameter("editedFrom") == null) ? null :
+					new Date(Long.parseLong(request.getParameter("editedFrom")));
+				final Date editedTo = (request.getParameter("editedTo") == null) ? null :
+					new Date(Long.parseLong(request.getParameter("editedTo")));
+				final Boolean publik = (request.getParameter("public") == null) ? null :
+					Boolean.parseBoolean(request.getParameter("public"));
+				final BigDecimal minLatitude = (request.getParameter("minLatitude") == null) ? null :
+					new BigDecimal(request.getParameter("minLatitude"));
+				final BigDecimal minLongitude = (request.getParameter("minLongitude") == null) ? null :
+					new BigDecimal(request.getParameter("minLongitude"));
+				final BigDecimal maxLatitude = (request.getParameter("maxLatitude") == null) ? null :
+					new BigDecimal(request.getParameter("maxLatitude"));
+				final BigDecimal maxLongitude = (request.getParameter("maxLongitude") == null) ? null :
+					new BigDecimal(request.getParameter("maxLongitude"));
+				
+				
+				
+				final List<Media> media = mediaService.getMedia(currentUser, title, type, user, createdFrom, 
+						createdTo, editedFrom, editedTo, publik, minLatitude, minLongitude, maxLatitude, maxLongitude);
+				response.setCharacterEncoding(UTF_8);
+				//tupos apantishs
+				response.setContentType(APPLICATION_JSON);
+				//Egrafh stin apantish tin lista me ta Media ws JSON (me xrhsh tou Google Gson)
+				final Writer writer = response.getWriter();
+				try {
+					writer.write(new Gson().toJson(media));
+				} finally {
+					writer.close();
+				}
+			} else if (action.equals("downloadMedia")) { //gia download enos media
+				final String id = request.getParameter("id");
+				if (id == null) {
+					LOGGER.warning("Bad request");
+					response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request"); //400 Bad request
+					return;
+				}
+				final Media media = mediaService.getMedia(id);
+				if ((currentUser.getStatus() == UserStatus.ADMIN) || currentUser.equals(media.getUser()) || media.isPublic())
+					mediaService.getMedia(id, response);
+				else {
+					//Den exei dikaioma autos o xrhsths na katevasei auto to media
+					LOGGER.warning("Access denied");
+					response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
+					return;				
+				}
 			}
 		} catch (final MediaServiceException e) {
 			LOGGER.log(Level.WARNING, "Error retrieving media", e); //den borese na psaxei gia to arxeio
