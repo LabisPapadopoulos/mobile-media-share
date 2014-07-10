@@ -19,11 +19,5 @@
     <string name="title_activity_new_video">NewVideo</string>
     <string name="title_activity_upload">Upload</string>
     <string name="title_activity_my_account">MyAccount</string>
-
-    <!-- string name="getListUrl">https://192.168.1.5:8443/mobile-media-share/mediaServlet?action=getList</string -->
-    <string name="getListUrl">http://192.168.1.5:8080/test/test.json?foo=bar</string>
-
-
-    <!-- title=%s&amp;type=%s&amp;user=%s&amp;createdFrom=%s&amp;createdTo=%s&amp;editedFrom=%s&amp;editedTo=%s&amp;publik=%s&amp;minLatitude=%s&amp;minLongitude=%s&amp;maxLatitude=%s&amp;maxLongitude=%s -->
-
+    <string name="getListUrl">https://snf-216465.vm.okeanos.grnet.gr/mobile-media-share/mediaServlet?action=getList</string>
 </resources>

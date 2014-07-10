@@ -29,13 +29,23 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import gr.uoa.di.std08169.mobile.media.share.android.https.HttpsAsyncTask;
 import gr.uoa.di.std08169.mobile.media.share.android.https.HttpsResponse;
 
 
 public class Map extends MobileMediaShareActivity implements AdapterView.OnItemSelectedListener, DatePickerDialog.OnDateSetListener, TextWatcher, View.OnClickListener {
+    public static final float GOOGLE_MAPS_ZOOM = 8.0f;
+    public static final double GOOGLE_MAPS_LATITUDE = 37.968546;	//DIT lat
+    public static final double GOOGLE_MAPS_LONGITUDE = 23.766968;	//DIT lng
+
     private EditText title;
     private EditText user;
     private EditText createdFrom;
@@ -125,6 +135,10 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
         delete = (Button) findViewById(R.id.edit);
 
         selectedDateField = null;
+
+        final GoogleMap map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(GOOGLE_MAPS_LATITUDE, GOOGLE_MAPS_LONGITUDE), GOOGLE_MAPS_ZOOM));
     }
 
     @Override
@@ -226,6 +240,16 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
             case 2:
                 publik = false;
         }
+        final GoogleMap map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+
+        //notio-dutika, katw aristera
+        final double minLatitude = map.getProjection().getVisibleRegion().latLngBounds.southwest.latitude;
+        final double minLongitude = map.getProjection().getVisibleRegion().latLngBounds.southwest.longitude;
+        //voreio-anatolika, panw dexia
+        final double maxLatitude = map.getProjection().getVisibleRegion().latLngBounds.northeast.latitude;
+        final double maxLongitude = map.getProjection().getVisibleRegion().latLngBounds.northeast.longitude;
+
+
         final StringBuilder url = new StringBuilder(getResources().getString(R.string.getListUrl));
         if (title != null)
             url.append("&title=").append(title);
@@ -235,20 +259,20 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
             url.append("&user=").append(user);
         if (createdFrom != null)
             url.append("&createdFrom=").append(createdFrom);
-//title=%s&amp;
-//type=%s&amp;
-// user=%s&amp;
-// createdFrom=%s&amp;
-// createdTo=%s&amp;
-// editedFrom=%s&amp;
-// editedTo=%s&amp;
-// publik=%s&amp;
-// minLatitude=%s&amp;
-// minLongitude=%s&amp;
-// maxLatitude=%s&amp;
-// maxLongitude=%s
+        if (createdTo != null)
+            url.append("&createdTo=").append(createdTo);
+        if (editedFrom != null)
+            url.append("&editedFrom=").append(editedFrom);
+        if (editedTo != null)
+            url.append("&editedTo=").append(editedTo);
+        if (publik != null)
+            url.append("&publik=").append(publik);
+        url.append("&minLatitude=").append(minLatitude);
+        url.append("&minLongitude=").append(minLongitude);
+        url.append("&maxLatitude=").append(maxLatitude);
+        url.append("&maxLongitude=").append(maxLongitude);
         try {
-            new HttpsAsyncTask() {
+            new HttpsAsyncTask(getApplicationContext()) {
                 @Override
                 protected void onPostExecute(HttpsResponse response) {
                     if (!response.isSuccess()) {
@@ -268,6 +292,10 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
                             final String type1 = media.getString("type");
                             Toast.makeText(Map.this, "id: " + id + ", title: " + title1 + ", type: " + type1 +
                                     ", latitude: " + latitude + ", longitude: " + longitude, Toast.LENGTH_SHORT).show();
+                            map.addMarker(new MarkerOptions()
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.map)) //TODO
+                                    .anchor(0.5f, 1.0f) // Anchors the marker on the bottom center
+                                    .position(new LatLng(latitude, longitude)));
                         }
                     } catch (final JSONException e) {
                         error(R.string.errorRetrievingMedia, e.getMessage());
