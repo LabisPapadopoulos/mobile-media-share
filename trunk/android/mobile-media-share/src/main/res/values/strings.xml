@@ -20,4 +20,6 @@
     <string name="title_activity_upload">Upload</string>
     <string name="title_activity_my_account">MyAccount</string>
     <string name="getListUrl">https://snf-216465.vm.okeanos.grnet.gr/mobile-media-share/mediaServlet?action=getList</string>
+    <string name="getResultUrl">https://snf-216465.vm.okeanos.grnet.gr/mobile-media-share/mediaServlet?action=getResult</string>
+    <string name="getMediaUrl">https://snf-216465.vm.okeanos.grnet.gr/mobile-media-share/mediaServlet?action=getMedia</string>
 </resources>

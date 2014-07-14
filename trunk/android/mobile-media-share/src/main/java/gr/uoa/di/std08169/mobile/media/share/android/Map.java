@@ -1,11 +1,11 @@
 package gr.uoa.di.std08169.mobile.media.share.android;
 
 import android.app.DatePickerDialog;
-import android.support.v7.app.ActionBarActivity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,24 +28,36 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import gr.uoa.di.std08169.mobile.media.share.android.https.HttpsAsyncTask;
 import gr.uoa.di.std08169.mobile.media.share.android.https.HttpsResponse;
 
 
-public class Map extends MobileMediaShareActivity implements AdapterView.OnItemSelectedListener, DatePickerDialog.OnDateSetListener, TextWatcher, View.OnClickListener {
+public class Map extends MobileMediaShareActivity implements AdapterView.OnItemSelectedListener,
+        DatePickerDialog.OnDateSetListener, GoogleMap.OnMarkerClickListener, TextWatcher, View.OnClickListener {
     public static final float GOOGLE_MAPS_ZOOM = 8.0f;
     public static final double GOOGLE_MAPS_LATITUDE = 37.968546;	//DIT lat
     public static final double GOOGLE_MAPS_LONGITUDE = 23.766968;	//DIT lng
+    private static final float MARKER_ANCHOR_X = 0.5f;
+    private static final float MARKER_ANCHOR_Y = 1.0f;
 
+    //antistoixia mediatype se eikonidia gia markers
+    private java.util.Map<MediaType, BitmapDescriptor> markerImages;
+    //antistoixia mediatype se eikonidia gia selected markers
+    private java.util.Map<MediaType, BitmapDescriptor> selectedMarkerImages;
     private EditText title;
     private EditText user;
     private EditText createdFrom;
@@ -54,11 +66,14 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
     private EditText editedTo;
     private Spinner type;
     private Spinner publik;
-    private Button download;
+    private Button view;
     private Button edit;
     private Button delete;
-    private MapFragment map;
+    private Button download;
     private EditText selectedDateField;
+    //poios marker antistoixei se poio id (media)
+    private java.util.Map<Marker, Media> media;
+    private Marker selectedMarker;
 
     //EditText
     @Override
@@ -71,22 +86,49 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
     public void beforeTextChanged(final CharSequence charSequence, final int start, final int count, final int after) {
     }
 
-    //createdFrom (DatePicker) - ClickListener
+    //onClickListener - DatePicker(createdFrom k.l.p.) & buttons
     @Override
     public void onClick(final View view) {
-        Log.d("DEBUG", "view: " + view);
-        if (view instanceof EditText)
+        if (view instanceof EditText) {
             selectedDateField = (EditText) view;
-        final Calendar calendar = Calendar.getInstance();
-        //this: olh h clash pou ulopoiei to DatePickerDialog.OnDateSetListener
-        new DatePickerDialog(this, this, calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+            final Calendar calendar = Calendar.getInstance();
+            //this: olh h clash pou ulopoiei to DatePickerDialog.OnDateSetListener
+            new DatePickerDialog(this, this, calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+        } else if (view == this.view) {
+            selectedDateField = null;
+Toast.makeText(this, "View: " + media.get(selectedMarker).getId(), Toast.LENGTH_LONG).show();
+        } else if (view == edit) {
+            selectedDateField = null;
+Toast.makeText(this, "Edit: " + media.get(selectedMarker).getId(), Toast.LENGTH_LONG).show();
+        } else if (view == delete) {
+            selectedDateField = null;
+Toast.makeText(this, "Delete: " + media.get(selectedMarker).getId(), Toast.LENGTH_LONG).show();
+        } else if (view == download) {
+            selectedDateField = null;
+Toast.makeText(this, "Download: " + media.get(selectedMarker).getId(), Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.map);
+
+        markerImages = new HashMap<MediaType, BitmapDescriptor>();
+        selectedMarkerImages = new HashMap<MediaType, BitmapDescriptor>();
+
+        //Gemisma twn hashMaps
+        for(MediaType mediaType : MediaType.values()) {
+            //Fortwma eikonas san bitmap (apo png) gia allagh megethous
+            final Bitmap bitmap = BitmapFactory.decodeResource(getResources(), mediaType.getDrawable());
+            //prosthhkh eikonas sta megala eikonidia
+            selectedMarkerImages.put(mediaType, BitmapDescriptorFactory.fromBitmap(bitmap));
+            //prosthhkh eikonas sta mikra eikonidia
+            markerImages.put(mediaType, BitmapDescriptorFactory.fromBitmap(
+                    //allagh megethous eikonas sto miso
+                    Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / 2, bitmap.getHeight() / 2, true)));
+        }
 
         title = (EditText) findViewById(R.id.title);
         title.addTextChangedListener(this);
@@ -130,15 +172,33 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
         publik.setAdapter(adapterPublic);
         publik.setOnItemSelectedListener(this);
 
-        download = (Button) findViewById(R.id.download);
+        view = (Button) findViewById(R.id.view);
         edit = (Button) findViewById(R.id.edit);
-        delete = (Button) findViewById(R.id.edit);
+        delete = (Button) findViewById(R.id.delete);
+        download = (Button) findViewById(R.id.download);
+
+        view.setEnabled(false);
+        edit.setEnabled(false);
+        delete.setEnabled(false);
+        download.setEnabled(false);
+
+        view.setOnClickListener(this);
+        edit.setOnClickListener(this);
+        delete.setOnClickListener(this);
+        download.setOnClickListener(this);
 
         selectedDateField = null;
 
-        final GoogleMap map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
-        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(GOOGLE_MAPS_LATITUDE, GOOGLE_MAPS_LONGITUDE), GOOGLE_MAPS_ZOOM));
+        try {
+            MapsInitializer.initialize(getApplicationContext());
+            final GoogleMap map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+            map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(GOOGLE_MAPS_LATITUDE, GOOGLE_MAPS_LONGITUDE), GOOGLE_MAPS_ZOOM));
+            map.setOnMarkerClickListener(this);
+            media = new HashMap<Marker, Media>();
+        } catch (final GooglePlayServicesNotAvailableException e) {
+            error(R.string.errorRetrievingMedia, "error loading Google Maps");
+        }
     }
 
     @Override
@@ -171,6 +231,62 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
         updateMap();
     }
 
+    //OnMarkerClickListener
+    @Override
+    public boolean onMarkerClick(final Marker marker) {
+        // xedialexe to selected marker
+        if (selectedMarker != null) {
+
+            // TODO delete selected marker and recreate it
+
+            selectedMarker.setIcon(markerImages.get(MediaType.getMediaType(media.get(selectedMarker).getType())));
+
+
+
+        }
+        //Se epilegmeno antikeimeno bainei h pio megalh tou eikona
+        final GoogleMap map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+        map.clear();
+        for (final Iterator<java.util.Map.Entry<Marker, Media>> i = media.entrySet().iterator(); i.hasNext(); ) {
+            final java.util.Map.Entry<Marker, Media> entry = i.next();
+            if (entry.getKey().getPosition().equals(marker.getPosition())) {
+                final Marker newMarker = map.addMarker(new MarkerOptions().
+                        //eikonidio tou marker analoga to type
+                        icon(selectedMarkerImages.get(MediaType.getMediaType(entry.getValue().getType()))).
+                        //topothethsh eikonas akrivws panw apo to shmeio pou einai ston xarth,
+                        //to "velaki" tis eikonas einai stin mesh tou katw merous
+                        anchor(MARKER_ANCHOR_X, MARKER_ANCHOR_Y).
+                        //thesh tou marker ston xarth
+                        position(new LatLng(entry.getValue().getLatitude(), entry.getValue().getLongitude())).
+                        //titlos marker
+                        title(entry.getValue().getTitle()));
+                media.put(newMarker, entry.getValue());
+                selectedMarker = newMarker;
+                view.setEnabled(true);
+                download.setEnabled(true);
+                if (true) { // TODO
+                    //                if (currentUser.equals(media.get(newMarker).getUser()) || (currentUser.getStatus() == UserStatus.ADMIN)) {
+                    edit.setEnabled(true);
+                    delete.setEnabled(true);
+                }
+                break;
+            } else {
+                final Marker newMarker = map.addMarker(new MarkerOptions().
+                        //eikonidio tou marker analoga to type
+                                icon(markerImages.get(MediaType.getMediaType(entry.getValue().getType()))).
+                        //topothethsh eikonas akrivws panw apo to shmeio pou einai ston xarth,
+                                //to "velaki" tis eikonas einai stin mesh tou katw merous
+                                anchor(MARKER_ANCHOR_X, MARKER_ANCHOR_Y).
+                        //thesh tou marker ston xarth
+                                position(new LatLng(entry.getValue().getLatitude(), entry.getValue().getLongitude())).
+                        //titlos marker
+                                title(entry.getValue().getTitle()));
+            }
+            i.remove();
+        }
+        return false;
+    }
+
     //Spinner
     @Override
     public void onNothingSelected(final AdapterView<?> adapterView) {
@@ -178,15 +294,11 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(final MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        return ((item.getItemId() == R.id.action_settings) || super.onOptionsItemSelected(item));
     }
 
     //EditText
@@ -199,25 +311,25 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
         final String title = (this.title.getText().toString().trim().length() == 0) ? null : this.title.getText().toString().trim();
         final String user = (this.user.getText().toString().trim().length() == 0) ? null : this.user.getText().toString().trim();
         final DateFormat dateFormat = new SimpleDateFormat(getResources().getString(R.string.dateFormat));
-        Date createdFrom = null;
+        Date createdFrom;
         try {
             createdFrom = dateFormat.parse(this.createdFrom.getText().toString().trim());
         } catch (final ParseException e) {
             createdFrom = null;
         }
-        Date createdTo = null;
+        Date createdTo;
         try {
             createdTo = dateFormat.parse(this.createdTo.getText().toString().trim());
         } catch (final ParseException e) {
             createdTo = null;
         }
-        Date editedFrom = null;
+        Date editedFrom;
         try {
             editedFrom = dateFormat.parse(this.editedFrom.getText().toString().trim());
         } catch (final ParseException e) {
             editedFrom = null;
         }
-        Date editedTo = null;
+        Date editedTo;
         try {
             editedTo = dateFormat.parse(this.editedTo.getText().toString().trim());
         } catch (final ParseException e) {
@@ -282,106 +394,35 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
                     try {
                         //[ ... ] -> json Array
                         final JSONArray list = new JSONArray(response.getResponse());
+                        media.clear();
                         for (int i = 0; i < list.length(); i++) {
                             // { ... } -> json object
                             final JSONObject media = list.getJSONObject(i);
-                            final String id = media.getString("id");
-                            final double latitude = media.getDouble("latitude");
-                            final double longitude = media.getDouble("longitude");
-                            final String title1 = media.getString("title");
-                            final String type1 = media.getString("type");
-                            Toast.makeText(Map.this, "id: " + id + ", title: " + title1 + ", type: " + type1 +
-                                    ", latitude: " + latitude + ", longitude: " + longitude, Toast.LENGTH_SHORT).show();
-                            map.addMarker(new MarkerOptions()
-                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.map)) //TODO
-                                    .anchor(0.5f, 1.0f) // Anchors the marker on the bottom center
-                                    .position(new LatLng(latitude, longitude)));
+                            final Marker marker = map.addMarker(new MarkerOptions().
+                                    //eikonidio tou marker analoga to type
+                                    icon(markerImages.get(MediaType.getMediaType(media.getString("type")))).
+                                    //topothethsh eikonas akrivws panw apo to shmeio pou einai ston xarth,
+                                    //to "velaki" tis eikonas einai stin mesh tou katw merous
+                                    anchor(MARKER_ANCHOR_X, MARKER_ANCHOR_Y).
+                                    //thesh tou marker ston xarth
+                                    position(new LatLng(media.getDouble("latitude"), media.getDouble("longitude"))).
+                                    //titlos marker
+                                    title(media.getString("title")));
+                            Map.this.media.put(marker, new Media(media.getString("id"), media.getString("title"),
+                                    media.getString("type"), media.getString("user"),
+                                    media.getDouble("latitude"), media.getDouble("longitude")));
                         }
+                        selectedMarker = null;
+                        download.setEnabled(false);
+                        edit.setEnabled(false);
+                        delete.setEnabled(false);
                     } catch (final JSONException e) {
                         error(R.string.errorRetrievingMedia, e.getMessage());
-                        return;
                     }
                 }
             }.execute(new URL(url.toString()));
         } catch (final IOException e) {
             error(R.string.errorRetrievingMedia, e.getMessage());
-            return;
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//        connection.setReq
-
-        // kaloume service me bash tis times
-
-//        final BigDecimal minLatitude = new BigDecimal(googleMap.getBounds().getSouthWest().lat());
-//        final BigDecimal minLongitude = new BigDecimal(googleMap.getBounds().getSouthWest().lng());
-//        //epistrefei ta voreio-anatolika (suntetagmenes tetragwnou pou kaluptei o xarths)
-//        final BigDecimal maxLatitude = new BigDecimal(googleMap.getBounds().getNorthEast().lat());
-//        final BigDecimal maxLongitude = new BigDecimal(googleMap.getBounds().getNorthEast().lng());
-//        MEDIA_SERVICE.getMedia(currentUser, title, type, (selectedUser == null) ? null : selectedUser.getEmail(),
-//                createdFrom, createdTo, editedFrom, editedTo, publik, minLatitude, minLongitude, maxLatitude, maxLongitude,
-//                new AsyncCallback<List<Media>>() {
-//                    @Override
-//                    public void onFailure(final Throwable throwable) {//se front-end ston browser
-//                        for (java.util.Map.Entry<Marker, Media> marker : markers.entrySet())
-//                            //svinei ton marker apo ton xarth
-//                            marker.getKey().setMap((GoogleMap) null);
-//                        markers.clear(); //adeiasma listas apo markers
-//                        selectedMarker = null;
-//                        download.setEnabled(false);
-//                        edit.setEnabled(false);
-//                        delete.setEnabled(false);
-//                    }
-//
-//                    @Override
-//                    public void onSuccess(final List<Media> result) {
-//                        for (java.util.Map.Entry<Marker, Media> marker : markers.entrySet())
-//                            //svinei ton marker apo ton xarth
-//                            marker.getKey().setMap((GoogleMap) null);
-//                        markers.clear(); //adeiasma tou map apo markers
-//                        //Ruthmiseis gia ta shmeia ston xarth
-//                        final MarkerOptions options = MarkerOptions.create();
-//                        options.setMap(googleMap);
-//                        options.setClickable(true);
-//                        //Shmeia ston xarth gia kathe media
-//                        for (Media media : result) {
-//                            final Marker marker = Marker.create(options);
-//                            //doubleValue: to gurnaei se double apo bigDecimal
-//                            marker.setPosition(LatLng.create(media.getLatitude().doubleValue(), media.getLongitude().doubleValue()));
-//                            marker.setTitle(media.getTitle());
-//                            //vriskei tin katallhlh eikona gia sugkekrimeno tupo antikeimenou apo to hashMap
-//                            marker.setIcon(markerImages.get(MediaType.getMediaType(media.getType())));
-//                            marker.addClickListener(Map.this);
-//                            marker.addDblClickListener(Map.this.new DoubleClickHandler());
-//                            markers.put(marker, media);
-//                        }
-//                        selectedMarker = null;
-//                        download.setEnabled(false);
-//                        edit.setEnabled(false);
-//                        delete.setEnabled(false);
-//                    }
-//                });

@@ -47,14 +47,6 @@ public abstract class HttpsAsyncTask extends AsyncTask<URL, Void, HttpsResponse>
 
             //Xtisimo tou Get request gia lhpsh media
             final HttpGet request = new HttpGet(urls[0].toString());
-//            request.addHeader();
-
-//            request.addHeader(BasicScheme.authenticate(
-//                    new UsernamePasswordCredentials("haralambos9094@gmail.com", "202cb962ac59075b964b07152d234b70"),
-//                    "UTF-8", false));
-
-
-
 
             //Ektelei thn eperwthsh ston server
             final HttpResponse response = client.execute(request);
@@ -73,6 +65,7 @@ public abstract class HttpsAsyncTask extends AsyncTask<URL, Void, HttpsResponse>
                 while ((line = input.readLine()) != null)
                     json.append(line).append('\n');
                 Log.i(HttpsAsyncTask.class.getName(), "Retrieved " + response.getEntity().getContentLength() + " bytes from " + urls[0]);
+Log.d("---> JSON response: ", json.toString());
                 return new HttpsResponse(true, json.toString());
             } finally {
                 input.close();
