@@ -33,6 +33,7 @@ import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceException;
 import gr.uoa.di.std08169.mobile.media.share.server.ExtendedMediaService;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.Media;
+import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaResult;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
 import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
 import gr.uoa.di.std08169.mobile.media.share.shared.user.UserStatus;
@@ -126,6 +127,56 @@ public class MediaServlet extends HttpServlet {
 				//tupos apantishs
 				response.setContentType(APPLICATION_JSON);
 				//Egrafh stin apantish tin lista me ta Media ws JSON (me xrhsh tou Google Gson)
+				final Writer writer = response.getWriter();
+				try {
+					writer.write(new Gson().toJson(media));
+				} finally {
+					writer.close();
+				}
+			} else if (action.equals("getResult")) { //Get result gia otan to android xtupaei mesw REST gia tin List
+				final String title = request.getParameter("title");
+				final MediaType type = (request.getParameter("type") == null) ? null :
+					MediaType.values()[Integer.parseInt(request.getParameter("type"))];
+				final String user = request.getParameter("user");
+				final Date createdFrom = (request.getParameter("createdFrom") == null) ? null :
+					new Date(Long.parseLong(request.getParameter("createdFrom")));
+				final Date createdTo = (request.getParameter("createdTo") == null) ? null :
+					new Date(Long.parseLong(request.getParameter("createdTo")));
+				final Date editedFrom = (request.getParameter("editedFrom") == null) ? null :
+					new Date(Long.parseLong(request.getParameter("editedFrom")));
+				final Date editedTo = (request.getParameter("editedTo") == null) ? null :
+					new Date(Long.parseLong(request.getParameter("editedTo")));
+				final Boolean publik = (request.getParameter("public") == null) ? null : //TODO
+					Boolean.parseBoolean(request.getParameter("public"));
+				
+				final Integer start = (request.getParameter("start") == null) ? null :
+					Integer.parseInt(request.getParameter("start"));
+				final Integer length = (request.getParameter("length") == null) ? null :
+					Integer.parseInt(request.getParameter("length"));
+				final String orderField = (request.getParameter("orderField") == null) ? null : 
+					request.getParameter("orderField");
+				final Boolean ascending = (request.getParameter("ascending") == null) ? null :
+					Boolean.parseBoolean(request.getParameter("ascending"));
+				
+				final MediaResult mediaResult = mediaService.getMedia(currentUser, title, type, user, createdFrom,
+						createdTo, editedFrom, editedTo, publik, start, length, orderField, ascending);
+				response.setCharacterEncoding(UTF_8);
+				response.setContentType(APPLICATION_JSON);
+				
+				final Writer writer = response.getWriter();
+				try {
+					writer.write(new Gson().toJson(mediaResult));
+				} finally {
+					writer.close();
+				}
+
+			} else if (action.equals("getMedia")) { //Get enos media gia otan to android xtupaei mesw REST gia tin View Media TODO
+				final String id = request.getParameter("id");
+				final Media media = mediaService.getMedia(id);
+				
+				response.setCharacterEncoding(UTF_8);
+				response.setContentType(APPLICATION_JSON);
+				
 				final Writer writer = response.getWriter();
 				try {
 					writer.write(new Gson().toJson(media));

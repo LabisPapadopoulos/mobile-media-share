@@ -65,7 +65,8 @@
                     android:ems="10"
                     android:id="@+id/createdFrom"
                     android:clickable="true"
-                    android:focusable="true" />
+                    android:focusable="true"
+                    android:inputType="date" />
             </LinearLayout>
             <LinearLayout
                 android:orientation="horizontal"
@@ -84,7 +85,8 @@
                     android:ems="10"
                     android:id="@+id/createdTo"
                     android:clickable="true"
-                    android:focusable="true" />
+                    android:focusable="true"
+                    android:inputType="date" />
             </LinearLayout>
             <LinearLayout
                 android:orientation="horizontal"
@@ -103,7 +105,8 @@
                     android:ems="10"
                     android:id="@+id/editedFrom"
                     android:clickable="true"
-                    android:focusable="true" />
+                    android:focusable="true"
+                    android:inputType="date" />
             </LinearLayout>
             <LinearLayout
                 android:orientation="horizontal"
@@ -122,7 +125,8 @@
                     android:ems="10"
                     android:id="@+id/editedTo"
                     android:clickable="true"
-                    android:focusable="true" />
+                    android:focusable="true"
+                    android:inputType="date" />
             </LinearLayout>
             <LinearLayout
                 android:orientation="horizontal"
@@ -205,6 +209,12 @@
                     android:text="Delete"
                     android:id="@+id/delete" />
             </LinearLayout>
+            <TableLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/table"
+                android:paddingTop="10dp">
+            </TableLayout>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
