@@ -1,5 +1,7 @@
 package gr.uoa.di.std08169.mobile.media.share.android;
 
+import java.util.Objects;
+
 /**
  * Created by labis on 7/14/14.
  */
@@ -59,5 +61,22 @@ public class Media {
 
     public double getLongitude() {
         return longitude;
+    }
+
+    //Override tin equals kai hashCode gia na ginetai swsta h sugrish otan benous se collections
+    //gia na mhn berdepsei idia pragmata
+    @Override
+    public boolean equals(final Object object) {
+        return (object instanceof Media) && id.equals(((Media) object).id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return id;
     }
 }
