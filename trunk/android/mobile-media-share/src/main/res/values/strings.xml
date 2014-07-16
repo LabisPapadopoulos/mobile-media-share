@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="authenticationError">Authentication error: %s</string>
     <string name="dateFormat">dd/MM/yy</string>
     <string name="errorRetrievingMedia">Error retrieving media: %s</string>
+    <string name="invalidCredentials">invalid credentials</string>
     <string name="mobileMediaShare">Mobile Media Share</string>
     <string name="settings">Settings</string>
     <string name="title_activity_authenticator">Welcome to Mobile Media Share</string>
@@ -19,6 +21,7 @@
     <string name="title_activity_new_video">NewVideo</string>
     <string name="title_activity_upload">Upload</string>
     <string name="title_activity_my_account">MyAccount</string>
+    <string name="getCurrentUserUrl">https://snf-216465.vm.okeanos.grnet.gr/mobile-media-share/userServlet</string>
     <string name="getListUrl">https://snf-216465.vm.okeanos.grnet.gr/mobile-media-share/mediaServlet?action=getList</string>
     <string name="getResultUrl">https://snf-216465.vm.okeanos.grnet.gr/mobile-media-share/mediaServlet?action=getResult</string>
     <string name="getMediaUrl">https://snf-216465.vm.okeanos.grnet.gr/mobile-media-share/mediaServlet?action=getMedia</string>

@@ -3,6 +3,7 @@ package gr.uoa.di.std08169.mobile.media.share.android;
 import android.app.DatePickerDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.CamcorderProfile;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -116,6 +117,7 @@ Toast.makeText(this, "Download: " + selectedMedia.getId(), Toast.LENGTH_LONG).sh
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.map);
 
         markerImages = new HashMap<MediaType, BitmapDescriptor>();
@@ -200,6 +202,7 @@ Toast.makeText(this, "Download: " + selectedMedia.getId(), Toast.LENGTH_LONG).sh
             map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(GOOGLE_MAPS_LATITUDE, GOOGLE_MAPS_LONGITUDE), GOOGLE_MAPS_ZOOM));
             map.setOnMarkerClickListener(this);
+            requestUser();
         } catch (final GooglePlayServicesNotAvailableException e) {
             error(R.string.errorRetrievingMedia, "error loading Google Maps");
         }
@@ -266,8 +269,8 @@ Toast.makeText(this, "Download: " + selectedMedia.getId(), Toast.LENGTH_LONG).sh
                 selectedMedia = medium;
                 view.setEnabled(true);
                 download.setEnabled(true);
-                if (true) { // TODO
-                    //                if (currentUser.equals(media.get(newMarker).getUser()) || (currentUser.getStatus() == UserStatus.ADMIN)) {
+                final User currentUser = getCurrentUser();
+                if (currentUser.equals(medium.getUser()) || (currentUser.getStatus() == UserStatus.ADMIN)) { //TODO
                     edit.setEnabled(true);
                     delete.setEnabled(true);
                 }
