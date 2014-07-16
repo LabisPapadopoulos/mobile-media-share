@@ -146,7 +146,7 @@ public class MediaServlet extends HttpServlet {
 					new Date(Long.parseLong(request.getParameter("editedFrom")));
 				final Date editedTo = (request.getParameter("editedTo") == null) ? null :
 					new Date(Long.parseLong(request.getParameter("editedTo")));
-				final Boolean publik = (request.getParameter("public") == null) ? null : //TODO
+				final Boolean publik = (request.getParameter("public") == null) ? null :
 					Boolean.parseBoolean(request.getParameter("public"));
 				
 				final Integer start = (request.getParameter("start") == null) ? null :
@@ -155,7 +155,7 @@ public class MediaServlet extends HttpServlet {
 					Integer.parseInt(request.getParameter("length"));
 				final String orderField = (request.getParameter("orderField") == null) ? null : 
 					request.getParameter("orderField");
-				final Boolean ascending = (request.getParameter("ascending") == null) ? null :
+				final boolean ascending = (request.getParameter("ascending") == null) ? false :
 					Boolean.parseBoolean(request.getParameter("ascending"));
 				
 				final MediaResult mediaResult = mediaService.getMedia(currentUser, title, type, user, createdFrom,
@@ -170,8 +170,13 @@ public class MediaServlet extends HttpServlet {
 					writer.close();
 				}
 
-			} else if (action.equals("getMedia")) { //Get enos media gia otan to android xtupaei mesw REST gia tin View Media TODO
+			} else if (action.equals("getMedia")) { //Get enos media gia otan to android xtupaei mesw REST gia tin View Media
 				final String id = request.getParameter("id");
+				if (id == null) {
+					LOGGER.warning("Bad request");
+					response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request"); //400 Bad request
+					return;
+				}
 				final Media media = mediaService.getMedia(id);
 				
 				response.setCharacterEncoding(UTF_8);
@@ -333,7 +338,7 @@ public class MediaServlet extends HttpServlet {
 					fileItem.delete();
 			}
 			LOGGER.info("User " + user + " uploaded media " + id);
-			if (locale == null) // TODO
+			if (locale == null)
 				response.getWriter().flush(); //apantaei me 200 OK
 			else
 				response.sendRedirect(String.format(MAP_URL, URLEncoder.encode(locale, UTF_8)));

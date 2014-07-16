@@ -1,6 +1,7 @@
 package gr.uoa.di.std08169.mobile.media.share.server.servlets;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.net.URLEncoder;
 import java.util.Locale;
 import java.util.Properties;
@@ -27,6 +28,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+
+import com.google.gson.Gson;
 
 import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceException;
@@ -63,7 +66,8 @@ public class UserServlet extends HttpServlet {
 	private static final String RESET_PASSWORD_URL = "./resetPassword.html?locale=%s&token=%s";
 	private static final String UTF_8 = "utf-8";
 	private static final String HTML_MIME_TYPE = "text/html;charset=utf-8";
-	private static final Logger LOGGER = Logger.getLogger(UserServlet.class.getName()); 
+	private static final Logger LOGGER = Logger.getLogger(UserServlet.class.getName());
+	private static final String APPLICATION_JSON = "application/json";
 	
 	private UserService userService; //Java Bean
 	private Session session;
@@ -114,35 +118,55 @@ public class UserServlet extends HttpServlet {
 	public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
 		final String token = request.getParameter("token");
 		final String locale = request.getParameter("locale");
-		if (token == null) {
-			LOGGER.warning("No token specified");
-			//Auta pou zhtaei o xrhsths einai akura
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No token specified"); //400 Bad Request
-			return;
-		}
 		try {
-			final User user = userService.getUserByToken(token);
-			if (user == null) {
-				LOGGER.warning("Invalid token " + token);
-				//Den anagnwrizei to token pou dinei o xrhsths (den uparxei 'h exei lhxei) - 404
-				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Invalid token");
-				return;
-			}
-			if (user.getStatus() == UserStatus.PENDING) { //action register
-				user.setStatus(UserStatus.NORMAL);
-				userService.editUser(user, null);
-				LOGGER.info("User " + user.getEmail() + " activated their account");
-				//teleiwnei tin apanthsh
-				response.sendRedirect(String.format(MAP_URL, URLEncoder.encode(locale, UTF_8)));
-			} else if (user.getStatus() == UserStatus.FORGOT) { //action reset
-				LOGGER.info("User " + user.getEmail() + " initialized password reset");
-				//teleiwnei tin apanthsh
-				response.sendRedirect(String.format(RESET_PASSWORD_URL, URLEncoder.encode(locale, UTF_8),
-						URLEncoder.encode(token, UTF_8)));
-			} else { //periptwsh pou exei xrhsimopoihthei token apo mail pou den einai egkuro
-				LOGGER.warning("Invalid status " + user.getStatus() + " for user " + user.getEmail());
-				//O xrhsths den einai pending h forgot
-				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid status");
+			if ((token == null) || (locale == null)) { //klhsh apo kinito gia apostolh twn plhroforiwn tou trexontos xrhsth
+				final String email = (String) request.getSession().getAttribute("email");
+				if (email == null) {
+					LOGGER.warning("No user is logged in");
+					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Login required"); //401
+					return;
+				}
+				final User user = userService.getUser(email);
+				if (user == null) {
+					LOGGER.warning("User " + email + " does not exist");
+					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Login required"); //401
+					return;
+				}
+				//return se json ton user
+				response.setCharacterEncoding(UTF_8);
+				//tupos apantishs
+				response.setContentType(APPLICATION_JSON);
+				//Egrafh stin apantish tin lista me ta Media ws JSON (me xrhsh tou Google Gson)
+				final Writer writer = response.getWriter();
+				try {
+					writer.write(new Gson().toJson(user));
+				} finally {
+					writer.close();
+				}
+			} else { //klhsh apo e-mail energopoihsh 'h epanafora logariasmou
+				final User user = userService.getUserByToken(token);
+				if (user == null) {
+					LOGGER.warning("Invalid token " + token);
+					//Den anagnwrizei to token pou dinei o xrhsths (den uparxei 'h exei lhxei) - 404
+					response.sendError(HttpServletResponse.SC_NOT_FOUND, "Invalid token");
+					return;
+				}
+				if (user.getStatus() == UserStatus.PENDING) { //action register
+					user.setStatus(UserStatus.NORMAL);
+					userService.editUser(user, null);
+					LOGGER.info("User " + user.getEmail() + " activated their account");
+					//teleiwnei tin apanthsh
+					response.sendRedirect(String.format(MAP_URL, URLEncoder.encode(locale, UTF_8)));
+				} else if (user.getStatus() == UserStatus.FORGOT) { //action reset
+					LOGGER.info("User " + user.getEmail() + " initialized password reset");
+					//teleiwnei tin apanthsh
+					response.sendRedirect(String.format(RESET_PASSWORD_URL, URLEncoder.encode(locale, UTF_8),
+							URLEncoder.encode(token, UTF_8)));
+				} else { //periptwsh pou exei xrhsimopoihthei token apo mail pou den einai egkuro
+					LOGGER.warning("Invalid status " + user.getStatus() + " for user " + user.getEmail());
+					//O xrhsths den einai pending h forgot
+					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid status");
+				}
 			}
 		} catch (final UserServiceException e) {
 			LOGGER.log(Level.WARNING, "Error updating user with token " + token, e);

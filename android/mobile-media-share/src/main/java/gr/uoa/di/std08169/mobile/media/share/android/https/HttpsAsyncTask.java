@@ -65,7 +65,6 @@ public abstract class HttpsAsyncTask extends AsyncTask<URL, Void, HttpsResponse>
                 while ((line = input.readLine()) != null)
                     json.append(line).append('\n');
                 Log.i(HttpsAsyncTask.class.getName(), "Retrieved " + response.getEntity().getContentLength() + " bytes from " + urls[0]);
-Log.d("---> JSON response: ", json.toString());
                 return new HttpsResponse(true, json.toString());
             } finally {
                 input.close();
@@ -84,16 +83,7 @@ Log.d("---> JSON response: ", json.toString());
         //ta stelnei san na htan forma
         request.addHeader("Content-Type", "application/x-www-form-urlencoded");
         request.setEntity(new StringEntity("action=login&email=haralambos9094%40gmail.com&password=123&url=http:%2F%2Fwww.example.org%2F&locale=en"));
-
-
-//        final HttpParams httpParams = new BasicHttpParams();
-//        httpParams.setParameter("action", "login");
-//        httpParams.setParameter("email", "haralambos9094@gmail.com");
-//        httpParams.setParameter("password", "123");
-//        httpParams.setParameter("locale", "en");
-//        httpParams.setParameter("url", "http://www.example.org/");
-//        request.setParams(httpParams);
-        final HttpResponse response = client.execute(request);
+       final HttpResponse response = client.execute(request);
         if (response.getStatusLine().getStatusCode() != 200)
             throw new IOException("Login failed (" + response.getStatusLine().getStatusCode() + ")");
     }

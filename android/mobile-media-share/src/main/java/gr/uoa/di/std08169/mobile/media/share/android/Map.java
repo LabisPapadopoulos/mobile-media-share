@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,7 +30,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -53,6 +56,7 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
     public static final double GOOGLE_MAPS_LONGITUDE = 23.766968;	//DIT lng
     private static final float MARKER_ANCHOR_X = 0.5f;
     private static final float MARKER_ANCHOR_Y = 1.0f;
+    private static final double MIN_DISTANCE = 0.000001;
 
     //antistoixia mediatype se eikonidia gia markers
     private java.util.Map<MediaType, BitmapDescriptor> markerImages;
@@ -71,9 +75,8 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
     private Button delete;
     private Button download;
     private EditText selectedDateField;
-    //poios marker antistoixei se poio id (media)
-    private java.util.Map<Marker, Media> media;
-    private Marker selectedMarker;
+    private Set<Media> media;
+    private Media selectedMedia;
 
     //EditText
     @Override
@@ -97,16 +100,16 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
                     calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
         } else if (view == this.view) {
             selectedDateField = null;
-Toast.makeText(this, "View: " + media.get(selectedMarker).getId(), Toast.LENGTH_LONG).show();
+Toast.makeText(this, "View: " + selectedMedia.getId(), Toast.LENGTH_LONG).show();
         } else if (view == edit) {
             selectedDateField = null;
-Toast.makeText(this, "Edit: " + media.get(selectedMarker).getId(), Toast.LENGTH_LONG).show();
+Toast.makeText(this, "Edit: " + selectedMedia.getId(), Toast.LENGTH_LONG).show();
         } else if (view == delete) {
             selectedDateField = null;
-Toast.makeText(this, "Delete: " + media.get(selectedMarker).getId(), Toast.LENGTH_LONG).show();
+Toast.makeText(this, "Delete: " + selectedMedia.getId(), Toast.LENGTH_LONG).show();
         } else if (view == download) {
             selectedDateField = null;
-Toast.makeText(this, "Download: " + media.get(selectedMarker).getId(), Toast.LENGTH_LONG).show();
+Toast.makeText(this, "Download: " + selectedMedia.getId(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -188,6 +191,8 @@ Toast.makeText(this, "Download: " + media.get(selectedMarker).getId(), Toast.LEN
         download.setOnClickListener(this);
 
         selectedDateField = null;
+        media = new HashSet<Media>();
+        selectedMedia = null;
 
         try {
             MapsInitializer.initialize(getApplicationContext());
@@ -195,7 +200,6 @@ Toast.makeText(this, "Download: " + media.get(selectedMarker).getId(), Toast.LEN
             map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(GOOGLE_MAPS_LATITUDE, GOOGLE_MAPS_LONGITUDE), GOOGLE_MAPS_ZOOM));
             map.setOnMarkerClickListener(this);
-            media = new HashMap<Marker, Media>();
         } catch (final GooglePlayServicesNotAvailableException e) {
             error(R.string.errorRetrievingMedia, "error loading Google Maps");
         }
@@ -234,34 +238,32 @@ Toast.makeText(this, "Download: " + media.get(selectedMarker).getId(), Toast.LEN
     //OnMarkerClickListener
     @Override
     public boolean onMarkerClick(final Marker marker) {
-        // xedialexe to selected marker
-        if (selectedMarker != null) {
-
-            // TODO delete selected marker and recreate it
-
-            selectedMarker.setIcon(markerImages.get(MediaType.getMediaType(media.get(selectedMarker).getType())));
-
-
-
-        }
-        //Se epilegmeno antikeimeno bainei h pio megalh tou eikona
         final GoogleMap map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+        //svhsimo olwn twn markers apo to xarth kai apo to hashmap
         map.clear();
-        for (final Iterator<java.util.Map.Entry<Marker, Media>> i = media.entrySet().iterator(); i.hasNext(); ) {
-            final java.util.Map.Entry<Marker, Media> entry = i.next();
-            if (entry.getKey().getPosition().equals(marker.getPosition())) {
-                final Marker newMarker = map.addMarker(new MarkerOptions().
-                        //eikonidio tou marker analoga to type
-                        icon(selectedMarkerImages.get(MediaType.getMediaType(entry.getValue().getType()))).
-                        //topothethsh eikonas akrivws panw apo to shmeio pou einai ston xarth,
-                        //to "velaki" tis eikonas einai stin mesh tou katw merous
-                        anchor(MARKER_ANCHOR_X, MARKER_ANCHOR_Y).
-                        //thesh tou marker ston xarth
-                        position(new LatLng(entry.getValue().getLatitude(), entry.getValue().getLongitude())).
-                        //titlos marker
-                        title(entry.getValue().getTitle()));
-                media.put(newMarker, entry.getValue());
-                selectedMarker = newMarker;
+        selectedMedia = null;
+        view.setEnabled(false);
+        download.setEnabled(false);
+        edit.setEnabled(false);
+        delete.setEnabled(false);
+        //prospelash olwn twn media kai xana dhmiourgia twn markers stin idia katastash me ton epilegmeno me megaluterh eikona
+        for (Media medium : media) {
+            //an to trexon media antistoixei ston epilegmeno marker
+            final boolean selected = (Math.abs(marker.getPosition().latitude - medium.getLatitude()) < MIN_DISTANCE) &&
+                    (Math.abs(marker.getPosition().longitude - medium.getLongitude()) < MIN_DISTANCE);
+            map.addMarker(new MarkerOptions().
+                    //eikonidio tou marker analoga to type
+                    //an einai epilegmenos o marker, vazei megalh eikona, alliws mikrh
+                    icon((selected ? selectedMarkerImages : markerImages).get(MediaType.getMediaType(medium.getType()))).
+                    //topothethsh eikonas akrivws panw apo to shmeio pou einai ston xarth,
+                    //to "velaki" tis eikonas einai stin mesh tou katw merous
+                    anchor(MARKER_ANCHOR_X, MARKER_ANCHOR_Y).
+                    //thesh tou marker ston xarth
+                    position(new LatLng(medium.getLatitude(), medium.getLongitude())).
+                    //titlos marker
+                    title(medium.getTitle()));
+            if (selected) {
+                selectedMedia = medium;
                 view.setEnabled(true);
                 download.setEnabled(true);
                 if (true) { // TODO
@@ -269,20 +271,7 @@ Toast.makeText(this, "Download: " + media.get(selectedMarker).getId(), Toast.LEN
                     edit.setEnabled(true);
                     delete.setEnabled(true);
                 }
-                break;
-            } else {
-                final Marker newMarker = map.addMarker(new MarkerOptions().
-                        //eikonidio tou marker analoga to type
-                                icon(markerImages.get(MediaType.getMediaType(entry.getValue().getType()))).
-                        //topothethsh eikonas akrivws panw apo to shmeio pou einai ston xarth,
-                                //to "velaki" tis eikonas einai stin mesh tou katw merous
-                                anchor(MARKER_ANCHOR_X, MARKER_ANCHOR_Y).
-                        //thesh tou marker ston xarth
-                                position(new LatLng(entry.getValue().getLatitude(), entry.getValue().getLongitude())).
-                        //titlos marker
-                                title(entry.getValue().getTitle()));
             }
-            i.remove();
         }
         return false;
     }
@@ -354,6 +343,7 @@ Toast.makeText(this, "Download: " + media.get(selectedMarker).getId(), Toast.LEN
         }
         final GoogleMap map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 
+        //Fernei mono pragmata pou einai entos ths oraths perioxhs tou xarth (getVisibleRegion())
         //notio-dutika, katw aristera
         final double minLatitude = map.getProjection().getVisibleRegion().latLngBounds.southwest.latitude;
         final double minLongitude = map.getProjection().getVisibleRegion().latLngBounds.southwest.longitude;
@@ -397,22 +387,22 @@ Toast.makeText(this, "Download: " + media.get(selectedMarker).getId(), Toast.LEN
                         media.clear();
                         for (int i = 0; i < list.length(); i++) {
                             // { ... } -> json object
-                            final JSONObject media = list.getJSONObject(i);
-                            final Marker marker = map.addMarker(new MarkerOptions().
+                            final Media media = new Media(list.getJSONObject(i).getString("id"), list.getJSONObject(i).getString("title"),
+                                    list.getJSONObject(i).getString("type"), list.getJSONObject(i).getString("user"),
+                                    list.getJSONObject(i).getDouble("latitude"), list.getJSONObject(i).getDouble("longitude"));
+                            Map.this.media.add(media);
+                            map.addMarker(new MarkerOptions().
                                     //eikonidio tou marker analoga to type
-                                    icon(markerImages.get(MediaType.getMediaType(media.getString("type")))).
+                                            icon(markerImages.get(MediaType.getMediaType(media.getType()))).
                                     //topothethsh eikonas akrivws panw apo to shmeio pou einai ston xarth,
-                                    //to "velaki" tis eikonas einai stin mesh tou katw merous
-                                    anchor(MARKER_ANCHOR_X, MARKER_ANCHOR_Y).
+                                            //to "velaki" tis eikonas einai stin mesh tou katw merous
+                                            anchor(MARKER_ANCHOR_X, MARKER_ANCHOR_Y).
                                     //thesh tou marker ston xarth
-                                    position(new LatLng(media.getDouble("latitude"), media.getDouble("longitude"))).
+                                            position(new LatLng(media.getLatitude(), media.getLongitude())).
                                     //titlos marker
-                                    title(media.getString("title")));
-                            Map.this.media.put(marker, new Media(media.getString("id"), media.getString("title"),
-                                    media.getString("type"), media.getString("user"),
-                                    media.getDouble("latitude"), media.getDouble("longitude")));
+                                            title(media.getTitle()));
                         }
-                        selectedMarker = null;
+                        selectedMedia = null;
                         download.setEnabled(false);
                         edit.setEnabled(false);
                         delete.setEnabled(false);
