@@ -5,7 +5,7 @@
 		xmlns:mms="urn:import:gr.uoa.di.std08169.mobile.media.share.client.html"> <!-- mms: mobile-media-share -->
 	<ui:with field="constants" type="gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareConstants" />
 	<g:HTMLPanel ui:field="htmlPanel">
-		<div class="content editMediaPage">
+		<div class="content myAccount">
 			<mms:Header /> <!-- Import to header sth selida -->
 			<mms:Menu />
 			<!-- Breadcrumb -->
