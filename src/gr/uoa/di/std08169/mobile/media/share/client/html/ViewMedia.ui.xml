@@ -16,43 +16,44 @@
 				<g:Button ui:field="edit" text="{constants.edit}" />
 				<g:Button ui:field="delete" text="{constants.delete}" />
 			</p>
-			<p>
-				<span class="label"><ui:text from="{constants.title}" /></span>
-				<g:InlineLabel ui:field="title" />
-			</p>
-			<p>
-				<span class="label"><ui:text from="{constants.type}" /></span>
-				<g:InlineHTML ui:field="type" />
-			</p>
-			<p>
-				<span class="label"><ui:text from="{constants.size}" /></span>
-				<g:InlineLabel ui:field="size" />
-			</p>
-			<p>
-				<span class="label"><ui:text from="{constants.duration}" /></span>
-				<g:InlineLabel ui:field="duration" />
-			</p>
-			<p>
-				<span class="label"><ui:text from="{constants.user}" /></span>
-				<g:InlineLabel ui:field="user" />
-			</p>
-			<p>
-				<span class="label"><ui:text from="{constants.created}" /></span>
-				<g:InlineLabel ui:field="created" />
-			</p>
-			<p>
-				<span class="label"><ui:text from="{constants.edited}" /></span>
-				<g:InlineLabel ui:field="edited" />
-			</p>
-			<p>
-				<span class="label"><ui:text from="{constants.publik}" /></span>
-				<g:InlineHTML ui:field="publik" />
-			</p>
-			<p>
-				<span class="label"><ui:text from="{constants.latitudeLongitude}" /></span>
-				<g:InlineLabel ui:field="latitudeLongitude" />
-			</p>
-			<img src="./images/view.jpg" class="viewMediaFile" alt="{constants.viewMedia}" />
+			<table>
+				<tr>
+					<td><span class="label"><ui:text from="{constants.title}" /></span></td>
+					<td><g:InlineLabel ui:field="title" /></td>
+				</tr>
+				<tr>
+					<td><span class="label"><ui:text from="{constants.type}" /></span></td>
+					<td><g:InlineHTML ui:field="type" /></td>
+				</tr>
+				<tr>
+					<td><span class="label"><ui:text from="{constants.size}" /></span></td>
+					<td><g:InlineLabel ui:field="size" /></td>
+				</tr>
+				<tr>
+					<td><span class="label"><ui:text from="{constants.duration}" /></span></td>
+					<td><g:InlineLabel ui:field="duration" /></td>
+				</tr>
+				<tr>
+					<td><span class="label"><ui:text from="{constants.user}" /></span></td>
+					<td><g:InlineLabel ui:field="user" /></td>
+				</tr>
+				<tr>
+					<td><span class="label"><ui:text from="{constants.created}" /></span></td>
+					<td><g:InlineLabel ui:field="created" /></td>
+				</tr>
+				<tr>
+					<td><span class="label"><ui:text from="{constants.edited}" /></span></td>
+					<td><g:InlineLabel ui:field="edited" /></td>
+				</tr>
+				<tr>
+					<td><span class="label"><ui:text from="{constants.publik}" /></span></td>
+					<td><g:InlineHTML ui:field="publik" /></td>
+				</tr>
+				<tr>
+					<td><span class="label"><ui:text from="{constants.latitudeLongitude}" /></span></td>
+					<td><g:InlineLabel ui:field="latitudeLongitude" /></td>
+				</tr>
+			</table>
 			<div ui:field="map" class="mediaMap"></div>
 		</div>
 		<mms:Footer />
