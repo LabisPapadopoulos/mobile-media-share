@@ -222,6 +222,7 @@ public class MediaServiceImpl implements ExtendedMediaService {
 				//Xtisimo tou string me oles ta pithana filtra pou exei dialexei o xrhsths
 				final String getMediaQuery = 
 						String.format(GET_MEDIA_2, 
+						(currentUser.getStatus() == UserStatus.ADMIN) ? "" : CURRENT_USER_FILTER, 
 						(title == null) ? "" : TITLE_FILTER, 
 						(type == null) ? "" : TYPE_FILTER,
 						(user == null) ? "" : USER_FILTER,
@@ -229,8 +230,7 @@ public class MediaServiceImpl implements ExtendedMediaService {
 						(createdTo == null) ? "" : CREATED_TO_FILTER, 
 						(editedFrom == null) ? "" : EDITED_FROM_FILTER,
 						(editedTo == null) ? "" : EDITED_TO_FILTER, 
-						(publik == null) ? "" : PUBLIC_FILTER,
-						(currentUser.getStatus() == UserStatus.ADMIN) ? "" : CURRENT_USER_FILTER);
+						(publik == null) ? "" : PUBLIC_FILTER);
 				try {
 					final Connection connection = dataSource.getConnection();
 					try {
