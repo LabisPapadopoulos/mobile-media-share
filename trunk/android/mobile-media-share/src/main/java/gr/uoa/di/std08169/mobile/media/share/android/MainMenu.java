@@ -1,32 +1,27 @@
 package gr.uoa.di.std08169.mobile.media.share.android;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.accounts.AccountManagerFuture;
-import android.accounts.AuthenticatorException;
-import android.accounts.OperationCanceledException;
+import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
-import java.io.IOException;
-
-import gr.uoa.di.std08169.mobile.media.share.android.authentication.Authenticator;
-
-
-public class MainMenu extends ActionBarActivity implements View.OnClickListener {
+/**
+ * @see <a href="http://stackoverflow.com/questions/14117476/how-to-quit-an-application-programmatically-through-button-click">Quit application programmatically</a>
+ */
+public class MainMenu extends MobileMediaShareActivity implements View.OnClickListener {
     private LinearLayout map;
     private LinearLayout list;
     private LinearLayout newPhoto;
     private LinearLayout newVideo;
     private LinearLayout upload;
     private LinearLayout myAccount;
-    //logout
+    private LinearLayout logout;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -67,6 +62,17 @@ public class MainMenu extends ActionBarActivity implements View.OnClickListener 
         upload.setOnClickListener(this);
         myAccount = (LinearLayout) findViewById(R.id.myAccount);
         myAccount.setOnClickListener(this);
+        logout = (LinearLayout) findViewById(R.id.logout);
+        logout.setOnClickListener(this);
+
+//        requestUser();
+
+        final ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo wifiConnection = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        final NetworkInfo mobileConnection = connManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+
+        if (!wifiConnection.isConnected() && !mobileConnection.isConnected())
+            Toast.makeText(this, "Please Connect to the Internet", Toast.LENGTH_LONG).show();
     }
 
 
@@ -104,6 +110,11 @@ public class MainMenu extends ActionBarActivity implements View.OnClickListener 
             clazz = Upload.class;
         else if (myAccount.equals(view))
             clazz = MyAccount.class;
+        else if (logout.equals(view)) {
+            moveTaskToBack(true);
+            MainMenu.this.finish();
+            android.os.Process.killProcess(android.os.Process.myPid());
+        }
 
         if (clazz != null) {
             final Intent activityIntent = new Intent(getApplicationContext(), clazz);

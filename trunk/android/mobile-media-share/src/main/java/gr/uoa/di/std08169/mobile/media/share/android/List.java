@@ -1,8 +1,10 @@
 package gr.uoa.di.std08169.mobile.media.share.android;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.graphics.Color;
-import android.support.v7.app.ActionBarActivity;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -10,38 +12,44 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import org.apache.http.HttpResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
-import gr.uoa.di.std08169.mobile.media.share.android.https.HttpsAsyncTask;
-import gr.uoa.di.std08169.mobile.media.share.android.https.HttpsResponse;
+import gr.uoa.di.std08169.mobile.media.share.android.ListView.ListMedia;
+import gr.uoa.di.std08169.mobile.media.share.android.ListView.ListViewAdapter;
+import gr.uoa.di.std08169.mobile.media.share.android.http.GetAsyncTask;
+import gr.uoa.di.std08169.mobile.media.share.android.http.HttpClient;
+import gr.uoa.di.std08169.mobile.media.share.android.user.User;
+import gr.uoa.di.std08169.mobile.media.share.android.user.UserStatus;
 
 
-public class List extends MobileMediaShareActivity implements
+public class List extends MobileMediaShareActivity implements /* AdapterView.OnItemClickListener, */
         AdapterView.OnItemSelectedListener, DatePickerDialog.OnDateSetListener, TextWatcher,
         View.OnClickListener {
+    private static final String UTF_8 = "UTF-8";
 
     private EditText title;
     private EditText user;
@@ -53,11 +61,19 @@ public class List extends MobileMediaShareActivity implements
     private Spinner type;
     private Spinner publik;
     private Spinner pageSize;
-    private Button download;
+    private Button view;
     private Button edit;
     private Button delete;
+    private Button download;
     private EditText selectedDateField;
-    private TableLayout table;
+
+    private ListView listView;
+    private java.util.List<ListMedia> mediaList;
+    private ListViewAdapter listViewAdapter;
+
+    final Context context = this;
+    private String selectedId;
+    private boolean selectedMedia;
 
     //TextChangedListener
     @Override
@@ -73,14 +89,58 @@ public class List extends MobileMediaShareActivity implements
     //createdFrom (DatePicker) - ClickListener
     @Override
     public void onClick(final View view) {
-Log.d("DEBUG", "view: " + view);
-        if (view instanceof EditText)
+        if (view instanceof EditText) {
             selectedDateField = (EditText) view;
-        final Calendar calendar = Calendar.getInstance();
-        //1o this: olh h clash pou ulopoiei to DatePickerDialog.OnDateSetListener
-        //2o this: callback
-        new DatePickerDialog(this, this, calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+            final Calendar calendar = Calendar.getInstance();
+            //1o this: olh h clash pou ulopoiei to DatePickerDialog.OnDateSetListener
+            //2o this: callback
+            new DatePickerDialog(this, this, calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+
+        } else if (view == this.view) {
+            selectedDateField = null;
+            selectedId = listViewAdapter.getMediaId();
+            if (selectedId == null) {
+                Toast.makeText(this, "Please select a media to view", Toast.LENGTH_LONG).show();
+                return;
+            }
+            final Intent activityIntent = new Intent(getApplicationContext(), ViewMedia.class);
+            activityIntent.putExtra("id", selectedId);
+            activityIntent.putExtra("currentUser", currentUser.getEmail());
+            activityIntent.putExtra("userStatus", currentUser.getStatus().toString());
+            activityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(activityIntent);
+        } else if (view == edit) {
+            selectedDateField = null;
+            selectedId = listViewAdapter.getMediaId();
+            if (selectedId == null) {
+                Toast.makeText(this, "Please select a media to edit", Toast.LENGTH_LONG).show();
+                return;
+            }
+            final Intent activityIntent = new Intent(getApplicationContext(), EditMedia.class);
+            activityIntent.putExtra("id", selectedId);
+            activityIntent.putExtra("currentUser", currentUser.getEmail());
+            activityIntent.putExtra("userStatus", currentUser.getStatus().toString());
+            activityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(activityIntent);
+        } else if (view == this.delete) {
+            selectedDateField = null;
+            selectedId = listViewAdapter.getMediaId();
+            if (selectedId == null) {
+                Toast.makeText(this, "Please select a media to delete", Toast.LENGTH_LONG).show();
+                return;
+            }
+            deleteMedia();
+        } else if (view == download) {
+            selectedDateField = null;
+            selectedId = listViewAdapter.getMediaId();
+            if (selectedId == null) {
+                Toast.makeText(this, "Please select a media to download", Toast.LENGTH_LONG).show();
+                return;
+            }
+Toast.makeText(this, "Download under construction", Toast.LENGTH_LONG).show();
+        }
+
     }
 
     @Override
@@ -141,12 +201,19 @@ Log.d("DEBUG", "view: " + view);
         pageSize.setAdapter(adapterPageSize);
         pageSize.setOnItemSelectedListener(this);
 
-        download = (Button) findViewById(R.id.download);
+        view = (Button) findViewById(R.id.view);
+        view.setOnClickListener(this);
         edit = (Button) findViewById(R.id.edit);
-        delete = (Button) findViewById(R.id.edit);
+        edit.setOnClickListener(this);
+        delete = (Button) findViewById(R.id.delete);
+        delete.setOnClickListener(this);
+        download = (Button) findViewById(R.id.download);
+        download.setOnClickListener(this);
 
-        table = (TableLayout) findViewById(R.id.table);
-        table.removeAllViews();
+        listView = (ListView) findViewById(R.id.list);
+//        listView.setOnItemClickListener(this);
+        mediaList = new ArrayList<ListMedia>();
+        selectedMedia = false;
 
         selectedDateField = null;
     }
@@ -189,7 +256,7 @@ Log.d("DEBUG", "view: " + view);
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        if (id == R.id.settings) {
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -202,6 +269,7 @@ Log.d("DEBUG", "view: " + view);
     }
 
     private void updateList() {
+        mediaList.clear();
         final String title = (this.title.getText().toString().trim().length() == 0) ? null :
                 this.title.getText().toString().trim();
         final String user = (this.user.getText().toString().trim().length() == 0) ? null :
@@ -257,7 +325,8 @@ Log.d("DEBUG", "view: " + view);
                 pageSize = (this.pageSize.getSelectedItemPosition() + 1) * 10;
         }
 
-        final StringBuilder url = new StringBuilder(getResources().getString(R.string.getResultUrl));
+        final StringBuilder url = new StringBuilder(String.format(getResources().getString(R.string.getResultUrl),
+                getResources().getString(R.string.baseUrl)));
         if (title != null)
             url.append("&title=").append(title);
         if (type != null)
@@ -282,121 +351,128 @@ Log.d("DEBUG", "view: " + view);
 
 Log.i("URL: ", url.toString());
         try {
-            new HttpsAsyncTask(getApplicationContext()) {
+            final HttpResponse response = new GetAsyncTask(this, new URL(url.toString())).execute().get();
+            if (response == null) {
+                error(R.string.errorRetrievingMedia, getResources().getString(R.string.connectionError));
+                return;
+            }
+            if (response.getStatusLine().getStatusCode() != HttpClient.HTTP_OK) {
+                error(R.string.errorRetrievingMedia, response.getStatusLine().getReasonPhrase());
+                return;
+            }
+            final StringBuilder json = new StringBuilder();
+            final BufferedReader input = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            try {
+                String line;
+                while ((line = input.readLine()) != null)
+                    json.append(line);
+            } finally {
+                input.close();
+            }
 
-                @Override
-                protected void onPostExecute(HttpsResponse response) {
-                    table.removeAllViews();
-                    if (!response.isSuccess()) {
-                        error(R.string.errorRetrievingMedia, response.getResponse());
-                        return;
-                    }
-                    try {
-                        final JSONObject list = new JSONObject(response.getResponse());
-                        final JSONArray mediaArray = list.getJSONArray("media");
-                        for(int i = 0; i < mediaArray.length(); i++) {
-                            final JSONObject media = mediaArray.getJSONObject(i);
-                            final String id = media.getString("id");
-                            final String type = media.getString("type");
-                            final int size = media.getInt("size");
-                            final double duration = media.getDouble("duration");
+            final JSONObject list = new JSONObject(json.toString());
+            final JSONArray mediaArray = list.getJSONArray("media");
+            for(int i = 0; i < mediaArray.length(); i++) {
+                final JSONObject media = mediaArray.getJSONObject(i);
+                final String id = media.getString("id");
+                final String mediaType = media.getString("type");
+                final int size = media.getInt("size");
+                final double duration = media.getDouble("duration");
 
-                            final JSONObject user = media.getJSONObject("user");
-                            final String email = user.getString("email");
-                            final String status = user.getString("status");
+                final JSONObject jsonUser = media.getJSONObject("user");
+                final String email = jsonUser.getString("email");
+                final String status = jsonUser.getString("status");
 
-                            final String created = media.getString("created");
-                            final String edited = media.getString("edited");
-                            final String title = media.getString("title");
-                            final double latitude = media.getDouble("latitude");
-                            final double longitude = media.getDouble("longitude");
-                            final boolean publik = media.getBoolean("publik");
+                final String created = media.getString("created");
+                final String edited = media.getString("edited");
+                final String mediaTitle = media.getString("title");
+                final double latitude = media.getDouble("latitude");
+                final double longitude = media.getDouble("longitude");
+                final boolean mediaPublik = media.getBoolean("publik");
 
-//Log.d("---DEBUG---", "id: " + id + ", title: " + title + ", type: " + type + ", latitude: " + latitude + ", longitude: " + longitude);
-//Title    Type	 Size	Duration	User	Created	Edited	Latitude	Longitude	Public
-//                            final View ruler = new View(getApplicationContext());
-//                            ruler.setBackgroundColor(0xFF00FF00);
-//                            theParent.addView(ruler,
-//                                    new ViewGroup.LayoutParams( ViewGroup.LayoutParams.WRAP_CONTENT, 2));
+                final User mediaUser = new User(email, UserStatus.valueOf(status), null, null);
+                mediaList.add(new ListMedia(id, mediaTitle, mediaType, mediaUser, latitude, longitude,
+                        size, duration, created, edited, mediaPublik));
+            }
 
-                            final TableRow row1 = new TableRow(getApplicationContext());
-//                            TableRow.LayoutParams layoutParams = new TableRow.LayoutParams(TableRow.LayoutParams.)
+            listViewAdapter = new ListViewAdapter(List.this, R.layout.list_view, mediaList);
+            listView.setAdapter(listViewAdapter);
 
-                            final TextView titleView = new TextView(getApplicationContext());
-                            titleView.setText("Title: " + title);
-                            titleView.setTextColor(Color.BLACK);
-                            titleView.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    Toast.makeText(List.this, "id: " + id, Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                            row1.addView(titleView);
-
-                            final TextView typeView = new TextView(getApplicationContext());
-                            typeView.setText("Type: " + type);
-                            row1.addView(typeView);
-                            table.addView(row1);
-
-                            final TableRow row2 = new TableRow(getApplicationContext());
-                            final TextView sizeView = new TextView(getApplicationContext());
-                            sizeView.setText("Size: " + size);
-                            row2.addView(sizeView);
-
-                            final TextView durationView = new TextView(getApplicationContext());
-                            durationView.setText("Duration: " + duration);
-                            row2.addView(durationView);
-                            table.addView(row2);
-
-                            final TableRow row3 = new TableRow(getApplicationContext());
-                            final TextView userView = new TextView(getApplicationContext());
-                            userView.setText("User: " + email);
-                            row3.addView(userView);
-
-                            final TextView createdView = new TextView(getApplicationContext());
-                            createdView.setText("Created:" + created);
-                            row3.addView(createdView);
-                            table.addView(row3);
-
-                            final TableRow row4 = new TableRow(getApplicationContext());
-                            final TextView editedView = new TextView(getApplicationContext());
-                            editedView.setText("Edited: " + edited);
-                            row4.addView(editedView);
-
-                            final TextView latitudeView = new TextView(getApplicationContext());
-                            latitudeView.setText("Latitude: " + latitude);
-                            row4.addView(latitudeView);
-                            table.addView(row4);
-
-                            final TableRow row5 = new TableRow(getApplicationContext());
-                            final TextView longitudeView = new TextView(getApplicationContext());
-                            longitudeView.setText("Longitude: " + longitude);
-                            row5.addView(longitudeView);
-
-                            final TextView publicView = new TextView(getApplicationContext());
-                            publicView.setText("Public: " + publik);
-                            row5.addView(publicView);
-                            table.addView(row5);
-                        }
-
-                        final int total = list.getInt("total");
-                    } catch (final JSONException e) {
-                        error(R.string.errorRetrievingMedia, response.getResponse());
-                        return;
-                    }
-                }
-            }.execute(new URL(url.toString()));
+            final int total = list.getInt("total");
+        } catch (final ExecutionException e) {
+            error(R.string.errorRetrievingMedia, e.getMessage());
+        } catch (final InterruptedException e) {
+            error(R.string.errorRetrievingMedia, e.getMessage());
         } catch (final IOException e) {
             error(R.string.errorRetrievingMedia, e.getMessage());
-            return;
+        } catch (final JSONException e) {
+            error(R.string.errorRetrievingMedia, e.getMessage());
         }
     }
 
-    private void clearTable() {
-        for (int i = 0; i < table.getChildCount(); i++) {
-            final View child = table.getChildAt(i);
-            if (child instanceof TableRow)
-                ((ViewGroup) child).removeAllViews();
-        }
+    private void deleteMedia() {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+        alertDialogBuilder.setTitle("Are tou sure you want to delete this media?");
+
+        alertDialogBuilder.setMessage("Click yes to delete!").setCancelable(false).
+                setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // if this button is clicked, close
+                        // current activity
+                        //Delete Media
+//                        try {
+//                            final String url = String.format(getResources().getString(R.string.deleteMediaUrl),
+//                                    getResources().getString(R.string.secureBaseUrl),
+//                                    URLEncoder.encode(List.this.selectedId, UTF_8));
+//
+//                            new HttpsDeleteAsyncTask(getApplicationContext()) {
+//
+//                                @Override
+//                                protected void onPostExecute(HttpsResponse response) {
+//                                    if (!response.isSuccess()) {
+//                                        error(R.string.errorDeletingMedia, response.getResponse());
+//                                        return;
+//                                    }
+//                                    Toast.makeText(List.this, response.getResponse(), Toast.LENGTH_LONG).show();
+//                                    Log.d(List.class.getName(), response.getResponse());
+//                                    final Intent activityIntent = new Intent(getApplicationContext(), Map.class);
+//                                    activityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                                    List.this.finish();
+//                                    startActivity(activityIntent);
+//                                }
+//                            }.execute(new URL(url));
+//
+//                        } catch (final IOException e) {
+//                            error(R.string.errorDeletingMedia, e.getMessage());
+//                        }
+                    }
+                }).
+                setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // if this button is clicked, just close
+                        // the dialog box and do nothing
+                        dialog.cancel();
+                    }
+                });
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        // show it
+        alertDialog.show();
     }
+
+//    //Adapter.OnItemClickListener
+//    @Override
+//    public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+////        ListMedia mediaList = (ListMedia) listViewAdapter.getItem(position);
+//        if ((position == listViewAdapter.getSelectedPosition()) && (selectedMedia == false)) { //TODO
+//            view.setBackgroundColor(Color.YELLOW);
+//            selectedMedia = true;
+//        }
+//
+//        if ((position == listViewAdapter.getSelectedPosition()) && (selectedMedia == true)) {
+//            view.setBackgroundColor(Color.TRANSPARENT);
+//            selectedMedia = false;
+//        }
+//
+//    }
 }

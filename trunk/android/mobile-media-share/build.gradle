@@ -20,6 +20,8 @@ android {
 
 dependencies {
     compile 'com.android.support:appcompat-v7:19.1.0'
-    compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.google.android.gms:play-services:3.+'
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile files('libs/httpmime-4.3.jar')
+    compile files('libs/httpcore-4.3-beta1.jar')
 }

@@ -3,5 +3,4 @@
     android:accountType="gr.uoa.di.std08169.mobile.media.share.android.authentication.Authenticator"
     android:icon="@drawable/mobile_media_share"
     android:smallIcon="@drawable/mobile_media_share"
-    android:label="@string/mobileMediaShare"
-    android:accountPreferences="@xml/account_preferences" />
+    android:label="@string/mobileMediaShare" />
