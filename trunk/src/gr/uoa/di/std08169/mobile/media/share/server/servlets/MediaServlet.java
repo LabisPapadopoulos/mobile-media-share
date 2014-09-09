@@ -118,9 +118,7 @@ public class MediaServlet extends HttpServlet {
 					new BigDecimal(request.getParameter("maxLatitude"));
 				final BigDecimal maxLongitude = (request.getParameter("maxLongitude") == null) ? null :
 					new BigDecimal(request.getParameter("maxLongitude"));
-				
-				
-				
+
 				final List<Media> media = mediaService.getMedia(currentUser, title, type, user, createdFrom, 
 						createdTo, editedFrom, editedTo, publik, minLatitude, minLongitude, maxLatitude, maxLongitude);
 				response.setCharacterEncoding(UTF_8);
@@ -231,6 +229,58 @@ public class MediaServlet extends HttpServlet {
 				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
 				return;
 			}
+			final String action = request.getParameter("action");
+			if ("editMedia".equals(action)) { //TODO edit media gia post apo android
+				try {
+					final String id = request.getParameter("id");
+					final String title = request.getParameter("title");
+					final Boolean publik = (request.getParameter("public") == null) ? null :
+						Boolean.parseBoolean(request.getParameter("public"));
+					final BigDecimal latitude = (request.getParameter("latitude") == null) ? null : 
+						new BigDecimal(request.getParameter("latitude"));
+					final BigDecimal longitude = (request.getParameter("longitude") == null) ? null : 
+						new BigDecimal(request.getParameter("longitude"));
+					if (id == null) {
+						LOGGER.warning("Bad request");
+						response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request"); //400 Bad request
+						return;
+					}
+					final Media media = mediaService.getMedia(id);
+					if (user.getEmail().equals(media.getUser().getEmail()) || user.getStatus() == UserStatus.ADMIN) {
+						if (title != null)
+							media.setTitle(title);
+						if (publik != null)
+							media.setPublic(publik);
+						if ((latitude != null) && (longitude != null)) {
+							media.setLatitude(latitude);
+							media.setLongitude(longitude);
+						}
+						media.setEdited(new Date());
+						mediaService.editMedia(media);
+						
+						//return se json ton user
+						response.setCharacterEncoding(UTF_8);
+						//tupos apantishs
+						response.setContentType(APPLICATION_JSON);
+						//Egrafh stin apantish tin lista me ta Media ws JSON (me xrhsh tou Google Gson)
+						final Writer writer = response.getWriter();
+						try {
+							writer.write(new Gson().toJson("Media " + media.getTitle() + " edited succesfully"));
+						} finally {
+							writer.close();
+						}	
+					} else {
+						//Den exei dikaioma autos o xrhsths na epexergastei auto to media
+						LOGGER.warning("Access denied");
+						response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
+						return;	
+					}
+				} catch (final MediaServiceException e) {
+					LOGGER.log(Level.WARNING, "Error retrieving media", e); //den borese na psaxei gia to arxeio
+					throw new ServletException("Error retrieving media", e); //Internal Server Error 500
+				}
+			}
+
 			if (!ServletFileUpload.isMultipartContent(request)) {
 				LOGGER.warning("Request content type is not multipart/form-data");
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request content type is not multipart/form-data"); //400 Bad Request
@@ -352,5 +402,56 @@ public class MediaServlet extends HttpServlet {
 			LOGGER.log(Level.WARNING, "Access denied", e);
 			response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
 		}
-	}	
+	}
+	
+	/**
+	 * Delete enos media apo android
+	 */
+	@Override
+	public void doDelete(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
+		//elenxos oti uparxei email sto session
+		if ((String) request.getSession().getAttribute("email") == null) {
+			//agnwstos xrhsths (den exei kanei login)
+			LOGGER.warning("Authentication required");
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication required"); //401 Unauthorized
+			return;
+		}
+		try {
+			//elenxos oti o xrhsths einai gnwstos (oti uparxei stin vash)  
+			final User currentUser = userService.getUser((String) request.getSession().getAttribute("email"));
+			if (currentUser == null) {
+				//agnwstos xrhsths (den uparxei)
+				LOGGER.warning("Access denied");
+				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
+				return;
+			}
+			final String id = request.getParameter("id");
+			if (id == null) {
+				LOGGER.warning("Bad request");
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request"); //400 Bad request
+				return;
+			}
+			final Media media = mediaService.getMedia(id);
+			if (currentUser.getEmail().equals(media.getUser().getEmail()) || (currentUser.getStatus() == UserStatus.ADMIN)) {
+				mediaService.deleteMedia(id);
+				//return se json ton user
+				response.setCharacterEncoding(UTF_8);
+				//tupos apantishs
+				response.setContentType(APPLICATION_JSON);
+				//den exoume tipota na poume, apla paei 200 OK
+				response.getWriter().close();
+			} else {
+				//Den exei dikaioma autos o xrhsths na diagrapsei auto to media
+				LOGGER.warning("Access denied");
+				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
+				return;	
+			}
+		} catch (final MediaServiceException e) {
+			LOGGER.log(Level.WARNING, "Error executing request", e);
+			throw new ServletException("Error executing request", e); //Epistrefei 500 ston client
+		} catch (final UserServiceException e) {
+			LOGGER.log(Level.WARNING, "Access denied", e);
+			response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
+		}
+	}
 }
