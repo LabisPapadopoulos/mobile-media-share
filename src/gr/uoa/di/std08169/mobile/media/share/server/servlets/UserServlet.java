@@ -262,6 +262,7 @@ public class UserServlet extends HttpServlet {
 		final String locale = request.getParameter("locale");
 		final String url = request.getParameter("url");
 		final String token = request.getParameter("token");
+		final boolean redirect = (request.getParameter("redirect") == null) ? true : Boolean.parseBoolean(request.getParameter("redirect"));
 		
 		if (LOGIN_ACTION.equals(action)) { //login stin forma
 			if (email == null) {
@@ -306,8 +307,11 @@ public class UserServlet extends HttpServlet {
 					response.sendRedirect(url);
 				} else {
 					LOGGER.info("User " + email + " entered invalid credentials");
-					response.sendRedirect(String.format(LOGIN_URL, URLEncoder.encode(locale, UTF_8),
-							URLEncoder.encode(url, UTF_8)));
+					if (redirect)
+						response.sendRedirect(String.format(LOGIN_URL, URLEncoder.encode(locale, UTF_8),
+								URLEncoder.encode(url, UTF_8)));
+					else
+						response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
 				}
 			} catch (final UserServiceException e) {
 				LOGGER.log(Level.WARNING, "Error validating user " + email, e);
@@ -410,6 +414,53 @@ public class UserServlet extends HttpServlet {
 			} catch (final UserServiceException e) {
 				LOGGER.log(Level.WARNING, "Error resetting password for user with token " + token, e);
 				throw new ServletException("Error resetting password", e); //Epistrefei 500 ston client
+			}
+		} else if ("editUser".equals(action)) { //TODO edit user stin othonh my account apo to android
+			if (email == null) {
+				LOGGER.warning("No email specified");
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No email specified"); //400 Bad Request
+				return;
+			}
+			try {
+				final User user = userService.getUser(email);
+				if (user == null) {
+					LOGGER.warning("User not found");
+					response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not found"); //404 Not Found
+					return;
+				}
+				if ((user.getStatus() != UserStatus.NORMAL) && (user.getStatus() != UserStatus.ADMIN)) {
+					LOGGER.warning("Invalid status " + user.getStatus() + " for user " + user.getEmail());
+					//O xrhsths den einai normal h admin
+					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid status");
+					return;
+				}
+				
+				final String name = request.getParameter("name");
+				final String photo = request.getParameter("photo");
+				
+				if (name != null)
+					user.setName(name);
+				if (photo != null)
+					user.setPhoto(photo);
+
+				userService.editUser(user, (password != null) ? password : null);
+				LOGGER.info("User " + user.getEmail() + " updated succesfully");
+				
+				//return se json ton user
+				response.setCharacterEncoding(UTF_8);
+				//tupos apantishs
+				response.setContentType(APPLICATION_JSON);
+				//Egrafh stin apantish tin lista me ta Media ws JSON (me xrhsh tou Google Gson)
+				final Writer writer = response.getWriter();
+				try {
+					writer.write(new Gson().toJson("User " + user.getEmail() + " updated succesfully"));
+				} finally {
+					writer.close();
+				}
+				
+			} catch (final UserServiceException e) {
+				LOGGER.log(Level.WARNING, "Error resetting password for user " + email, e);
+				throw new ServletException("Error resetting password", e); //Epistrefei 500 ston client				
 			}
 		} else { // sumperilamvanomenou tou null
 			LOGGER.warning("Unknown action " + action);

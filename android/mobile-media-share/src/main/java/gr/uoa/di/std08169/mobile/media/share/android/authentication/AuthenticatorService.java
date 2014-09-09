@@ -8,13 +8,13 @@ import android.util.Log;
 
 /**
  * Created by labis on 6/23/14.
+ * Service pou trexei sto background kai dinei ton Authenticator
  */
 public class AuthenticatorService extends Service {
+    //Molis zhthsei kapoios (opoiadhpote activity) na sundethei tou dinei ton Authenticator
+    //IBinder gia na kanei access ston authenticator (asugxrona)
     @Override
     public IBinder onBind(final Intent intent) {
-Log.d(AuthenticatorService.class.getName(), "Intent action: " + intent.getAction());
-Log.d(AuthenticatorService.class.getName(), "Binder: " + new Authenticator(this).getIBinder());
-        return AccountManager.ACTION_AUTHENTICATOR_INTENT.equals(intent.getAction()) ?
-                new Authenticator(this).getIBinder() : null;
+        return new Authenticator(this).getIBinder();
     }
 }
