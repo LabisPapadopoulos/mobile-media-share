@@ -12,11 +12,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -38,10 +40,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.concurrent.ExecutionException;
 
-import gr.uoa.di.std08169.mobile.media.share.android.ListView.ListMedia;
 import gr.uoa.di.std08169.mobile.media.share.android.ListView.ListViewAdapter;
 import gr.uoa.di.std08169.mobile.media.share.android.http.GetAsyncTask;
 import gr.uoa.di.std08169.mobile.media.share.android.http.HttpClient;
+import gr.uoa.di.std08169.mobile.media.share.android.media.Media;
 import gr.uoa.di.std08169.mobile.media.share.android.user.User;
 import gr.uoa.di.std08169.mobile.media.share.android.user.UserStatus;
 
@@ -68,7 +70,7 @@ public class List extends MobileMediaShareActivity implements /* AdapterView.OnI
     private EditText selectedDateField;
 
     private ListView listView;
-    private java.util.List<ListMedia> mediaList;
+    private java.util.List<Media> mediaList;
     private ListViewAdapter listViewAdapter;
 
     final Context context = this;
@@ -212,7 +214,7 @@ Toast.makeText(this, "Download under construction", Toast.LENGTH_LONG).show();
 
         listView = (ListView) findViewById(R.id.list);
 //        listView.setOnItemClickListener(this);
-        mediaList = new ArrayList<ListMedia>();
+        mediaList = new ArrayList<Media>();
         selectedMedia = false;
 
         selectedDateField = null;
@@ -334,13 +336,13 @@ Toast.makeText(this, "Download under construction", Toast.LENGTH_LONG).show();
         if (user != null)
             url.append("&user=").append(user);
         if (createdFrom != null)
-            url.append("&createdFrom=").append(createdFrom);
+            url.append("&createdFrom=").append(createdFrom.getTime());
         if (createdTo != null)
-            url.append("&createdTo=").append(createdTo);
+            url.append("&createdTo=").append(createdTo.getTime());
         if (editedFrom != null)
-            url.append("&editedFrom=").append(editedFrom);
+            url.append("&editedFrom=").append(editedFrom.getTime());
         if (editedTo != null)
-            url.append("&editedTo=").append(editedTo);
+            url.append("&editedTo=").append(editedTo.getTime());
         if (publik != null)
             url.append("&publik=").append(publik);
 
@@ -391,12 +393,14 @@ Log.i("URL: ", url.toString());
                 final boolean mediaPublik = media.getBoolean("publik");
 
                 final User mediaUser = new User(email, UserStatus.valueOf(status), null, null);
-                mediaList.add(new ListMedia(id, mediaTitle, mediaType, mediaUser, latitude, longitude,
-                        size, duration, created, edited, mediaPublik));
+//                mediaList.add(new Media(id, mediaTitle, mediaType, mediaUser, latitude, longitude,
+//                        size, duration, created, edited, mediaPublik)); //TODO
             }
-
-            listViewAdapter = new ListViewAdapter(List.this, R.layout.list_view, mediaList);
-            listView.setAdapter(listViewAdapter);
+//TODO
+//            listViewAdapter = new ListViewAdapter(List.this, R.layout.list_view, mediaList);
+//            listView.setAdapter(listViewAdapter);
+//            //metraei to megethos tis listView gia na topothetithei oloklhrhs mesa sto ScrollView
+//            getListViewSize(listView);
 
             final int total = list.getInt("total");
         } catch (final ExecutionException e) {
@@ -408,6 +412,31 @@ Log.i("URL: ", url.toString());
         } catch (final JSONException e) {
             error(R.string.errorRetrievingMedia, e.getMessage());
         }
+    }
+
+    /**
+     * @see <a href="http://www.androidhub4you.com/2012/12/listview-into-scrollview-in-android.html">ListView into ScrollView in Android</a>
+     * @param myListView
+     */
+    public void getListViewSize(ListView myListView) {
+        ListAdapter myListAdapter = myListView.getAdapter();
+        if (myListAdapter == null) {
+            //do nothing return null
+            return;
+        }
+        //set listAdapter in loop for getting final size
+        int totalHeight = 0;
+        for (int size = 0; size < myListAdapter.getCount(); size++) {
+            View listItem = myListAdapter.getView(size, null, myListView);
+            listItem.measure(0, 0);
+            totalHeight += listItem.getMeasuredHeight();
+        }
+        //setting listview item in adapter
+        ViewGroup.LayoutParams params = myListView.getLayoutParams();
+        params.height = totalHeight + (myListView.getDividerHeight() * (myListAdapter.getCount() - 1));
+        myListView.setLayoutParams(params);
+        // print height of adapter on log
+//        Log.i("height of listItem:", String.valueOf(totalHeight));
     }
 
     private void deleteMedia() {

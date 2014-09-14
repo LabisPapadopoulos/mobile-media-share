@@ -26,6 +26,7 @@ import android.widget.Spinner;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.DateFormat;
@@ -73,9 +74,9 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
     public static final float GOOGLE_MAPS_ZOOM = 8.0f;
     public static final double GOOGLE_MAPS_LATITUDE = 37.968546;	//DIT lat
     public static final double GOOGLE_MAPS_LONGITUDE = 23.766968;	//DIT lng
-    private static final float MARKER_ANCHOR_X = 0.5f;
-    private static final float MARKER_ANCHOR_Y = 1.0f;
-    private static final double MIN_DISTANCE = 0.000001;
+    public static final float MARKER_ANCHOR_X = 0.5f;
+    public static final float MARKER_ANCHOR_Y = 1.0f;
+    public static final double MIN_DISTANCE = 0.000001;
     private static final String DOWNLOAD_ENTITY = "email=%s&id=%s";
 
     //antistoixia mediatype se eikonidia gia markers
@@ -124,22 +125,18 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
             selectedDateField = null;
             final Intent activityIntent = new Intent(getApplicationContext(), ViewMedia.class);
             activityIntent.putExtra("id", selectedMedia.getId());
-            activityIntent.putExtra("currentUser", currentUser.getEmail());
-            activityIntent.putExtra("userStatus", currentUser.getStatus().toString());
             activityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(activityIntent);
         } else if (view == edit) {
             selectedDateField = null;
             final Intent activityIntent = new Intent(getApplicationContext(), EditMedia.class);
             activityIntent.putExtra("id", selectedMedia.getId());
-            activityIntent.putExtra("currentUser", currentUser.getEmail());
-            activityIntent.putExtra("userStatus", currentUser.getStatus().toString());
             activityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(activityIntent);
         } else if (view == delete) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-            alertDialogBuilder.setTitle("Are you sure you want to delete this media?");
-            alertDialogBuilder.setMessage("Are you sure you want to delete media " + Map.this.selectedMedia.getTitle() + "?").setCancelable(false).
+            alertDialogBuilder.setTitle("Are you sure you want to delete this media?"); // TODO
+            alertDialogBuilder.setMessage("Are you sure you want to delete media " + selectedMedia.getTitle() + "?").setCancelable(false). // TODO
                     setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         public void onClick(final DialogInterface dialog, final int id) {
                             selectedDateField = null;
@@ -251,7 +248,7 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
             map.setOnMarkerClickListener(this);
             map.setOnCameraChangeListener(this);
         } catch (final GooglePlayServicesNotAvailableException e) {
-            error(R.string.errorRetrievingMedia, "error loading Google Maps");
+            error(R.string.errorRetrievingMedia, e.getMessage());
         }
     }
 
@@ -303,10 +300,10 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
         edit.setEnabled(false);
         delete.setEnabled(false);
         //prospelash olwn twn media kai xana dhmiourgia twn markers stin idia katastash me ton epilegmeno me megaluterh eikona
-        for (Media medium : media) {
+        for (final Media medium : media) {
             //an to trexon media antistoixei ston epilegmeno marker
-            final boolean selected = (Math.abs(marker.getPosition().latitude - medium.getLatitude()) < MIN_DISTANCE) &&
-                    (Math.abs(marker.getPosition().longitude - medium.getLongitude()) < MIN_DISTANCE);
+            final boolean selected = (Math.abs(marker.getPosition().latitude - medium.getLatitude().doubleValue()) < MIN_DISTANCE) &&
+                    (Math.abs(marker.getPosition().longitude - medium.getLongitude().doubleValue()) < MIN_DISTANCE);
             map.addMarker(new MarkerOptions().
                     //eikonidio tou marker analoga to type
                     //an einai epilegmenos o marker, vazei megalh eikona, alliws mikrh
@@ -315,7 +312,7 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
                     //to "velaki" tis eikonas einai stin mesh tou katw merous
                     anchor(MARKER_ANCHOR_X, MARKER_ANCHOR_Y).
                     //thesh tou marker ston xarth
-                    position(new LatLng(medium.getLatitude(), medium.getLongitude())).
+                    position(new LatLng(medium.getLatitude().doubleValue(), medium.getLongitude().doubleValue())).
                     //titlos marker
                     title(medium.getTitle()));
             if (selected) {
@@ -451,20 +448,24 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
             for (int i = 0; i < list.length(); i++) {
                 // { ... } -> json object
                 final String id = list.getJSONObject(i).getString("id");
-                final String mediaTitle = list.getJSONObject(i).getString("title");
-                final String mediaType = list.getJSONObject(i).getString("type");
-                //{"status":"NORMAL","photo":"0f80f606-72b7-4618-8688-2b947a989c47","email":"haralambos9094@gmail.com","name":"labis"}
-                String userString = list.getJSONObject(i).getString("user");
-                JSONObject userJsonObject = new JSONObject(userString);
-                final String email = userJsonObject.getString("email");
-                final UserStatus status = UserStatus.valueOf(userJsonObject.getString("status"));
-                final String name = (userString.contains("\"name\"")) ? userJsonObject.getString("name") : null;
-                final String photo = (userString.contains("\"photo\"")) ? userJsonObject.getString("photo") : null;
+                final String jsonType = list.getJSONObject(i).getString("type");
+                final long size = list.getJSONObject(i).getLong("size");
+                final int duration = list.getJSONObject(i).getInt("duration");
+                final JSONObject jsonUser = list.getJSONObject(i).getJSONObject("user");
+                final String email = jsonUser.getString("email");
+                final UserStatus status = UserStatus.valueOf(jsonUser.getString("status"));
+                final String name = jsonUser.has("name") ? jsonUser.getString("name") : null;
+                final String photo = jsonUser.has("photo") ? jsonUser.getString("photo") : null;
                 final User mediaUser = new User(email, status, name, photo);
-                final double latitude = list.getJSONObject(i).getDouble("latitude");
-                final double longitude = list.getJSONObject(i).getDouble("longitude");
-                final Media media = new Media(id, mediaTitle, mediaType, mediaUser, latitude, longitude);
-                Map.this.media.add(media);
+                final Date created = new Date(list.getJSONObject(i).getLong("created"));
+                final Date edited = new Date(list.getJSONObject(i).getLong("edited"));
+                final String jsonTitle = list.getJSONObject(i).getString("title");
+                final BigDecimal latitude = new BigDecimal(list.getJSONObject(i).getDouble("latitude"));
+                final BigDecimal longitude = new BigDecimal(list.getJSONObject(i).getDouble("longitude"));
+                final Boolean jsonPublic = list.getJSONObject(i).getBoolean("public");
+                final Media media = new Media(id, jsonType, size, duration, mediaUser, created, edited,
+                        jsonTitle, latitude, longitude, jsonPublic);
+                this.media.add(media);
                 map.addMarker(new MarkerOptions().
                         //eikonidio tou marker analoga to type
                         icon(markerImages.get(MediaType.getMediaType(media.getType()))).
@@ -472,7 +473,7 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
                         //to "velaki" tis eikonas einai stin mesh tou katw merous
                         anchor(MARKER_ANCHOR_X, MARKER_ANCHOR_Y).
                         //thesh tou marker ston xarth
-                        position(new LatLng(media.getLatitude(), media.getLongitude())).
+                        position(new LatLng(media.getLatitude().doubleValue(), media.getLongitude().doubleValue())).
                         //titlos marker
                         title(media.getTitle()));
             }
@@ -495,8 +496,8 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
         try {
             final String url = String.format(getResources().getString(R.string.deleteMediaUrl),
                     getResources().getString(R.string.baseUrl),
-                    URLEncoder.encode(Map.this.selectedMedia.getId(), UTF_8));
-            final HttpResponse response = new DeleteAsyncTask(Map.this, new URL(url)).execute().get();
+                    URLEncoder.encode(selectedMedia.getId(), UTF_8));
+            final HttpResponse response = new DeleteAsyncTask(this, new URL(url)).execute().get();
             if (response == null) //An null, den exei diktuo
                 error(R.string.errorDeletingMedia, getResources().getString(R.string.connectionError));
             else if ((response.getStatusLine().getStatusCode() == HttpClient.HTTP_UNAUTHORIZED) && login()) { //paei gia login
