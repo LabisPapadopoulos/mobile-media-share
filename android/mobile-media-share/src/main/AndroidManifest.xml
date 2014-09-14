@@ -33,27 +33,27 @@
         </activity>
         <activity
             android:name="gr.uoa.di.std08169.mobile.media.share.android.Map"
-            android:label="@string/title_activity_map" >
+            android:label="@string/map" >
         </activity>
         <activity
             android:name="gr.uoa.di.std08169.mobile.media.share.android.List"
-            android:label="@string/title_activity_list" >
+            android:label="@string/list" >
         </activity>
         <activity
             android:name="gr.uoa.di.std08169.mobile.media.share.android.NewPhoto"
-            android:label="@string/title_activity_new_photo" >
+            android:label="@string/newPhoto" >
         </activity>
         <activity
             android:name="gr.uoa.di.std08169.mobile.media.share.android.NewVideo"
-            android:label="@string/title_activity_new_video" >
+            android:label="@string/newVideo" >
         </activity>
         <activity
             android:name="gr.uoa.di.std08169.mobile.media.share.android.Upload"
-            android:label="@string/title_activity_upload" >
+            android:label="@string/upload" >
         </activity>
         <activity
             android:name="gr.uoa.di.std08169.mobile.media.share.android.MyAccount"
-            android:label="@string/title_activity_my_account" >
+            android:label="@string/myAccount" >
         </activity>
         <activity
             android:name="gr.uoa.di.std08169.mobile.media.share.android.FileExplorer.FileChooser"
@@ -65,11 +65,11 @@
         </activity>
         <activity
             android:name="gr.uoa.di.std08169.mobile.media.share.android.ViewMedia"
-            android:label="@string/title_activity_view_media" >
+            android:label="@string/viewMedia" >
         </activity>
         <activity
             android:name="gr.uoa.di.std08169.mobile.media.share.android.EditMedia"
-            android:label="@string/title_activity_edit_media" >
+            android:label="@string/editMedia" >
         </activity>
         <!-- Fernei authenticator otan zhteitai -->
         <service android:name="gr.uoa.di.std08169.mobile.media.share.android.authentication.AuthenticatorService" >
