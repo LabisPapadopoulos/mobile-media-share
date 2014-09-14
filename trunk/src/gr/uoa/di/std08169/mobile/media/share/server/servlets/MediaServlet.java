@@ -26,6 +26,8 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaService;
 import gr.uoa.di.std08169.mobile.media.share.client.services.media.MediaServiceException;
@@ -66,6 +68,57 @@ public class MediaServlet extends HttpServlet {
 				getBean("bufferSize", Integer.class);
 		userService = (UserService) WebApplicationContextUtils.getWebApplicationContext(getServletContext()).
 				getBean("userService", UserService.class);
+	}
+	
+	/**
+	 * Delete enos media apo android
+	 */
+	@Override
+	public void doDelete(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
+		//elenxos oti uparxei email sto session
+		if ((String) request.getSession().getAttribute("email") == null) {
+			//agnwstos xrhsths (den exei kanei login)
+			LOGGER.warning("Authentication required");
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication required"); //401 Unauthorized
+			return;
+		}
+		try {
+			//elenxos oti o xrhsths einai gnwstos (oti uparxei stin vash)  
+			final User currentUser = userService.getUser((String) request.getSession().getAttribute("email"));
+			if (currentUser == null) {
+				//agnwstos xrhsths (den uparxei)
+				LOGGER.warning("Access denied");
+				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
+				return;
+			}
+			final String id = request.getParameter("id");
+			if (id == null) {
+				LOGGER.warning("Bad request");
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request"); //400 Bad request
+				return;
+			}
+			final Media media = mediaService.getMedia(id);
+			if (currentUser.getEmail().equals(media.getUser().getEmail()) || (currentUser.getStatus() == UserStatus.ADMIN)) {
+				mediaService.deleteMedia(id);
+				//return se json ton user
+				response.setCharacterEncoding(UTF_8);
+				//tupos apantishs
+				response.setContentType(APPLICATION_JSON);
+				//den exoume tipota na poume, apla paei 200 OK
+				response.getWriter().close();
+			} else {
+				//Den exei dikaioma autos o xrhsths na diagrapsei auto to media
+				LOGGER.warning("Access denied");
+				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
+				return;	
+			}
+		} catch (final MediaServiceException e) {
+			LOGGER.log(Level.WARNING, "Error executing request", e);
+			throw new ServletException("Error executing request", e); //Epistrefei 500 ston client
+		} catch (final UserServiceException e) {
+			LOGGER.log(Level.WARNING, "Access denied", e);
+			response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
+		}
 	}
 	
 	/**
@@ -118,7 +171,6 @@ public class MediaServlet extends HttpServlet {
 					new BigDecimal(request.getParameter("maxLatitude"));
 				final BigDecimal maxLongitude = (request.getParameter("maxLongitude") == null) ? null :
 					new BigDecimal(request.getParameter("maxLongitude"));
-
 				final List<Media> media = mediaService.getMedia(currentUser, title, type, user, createdFrom, 
 						createdTo, editedFrom, editedTo, publik, minLatitude, minLongitude, maxLatitude, maxLongitude);
 				response.setCharacterEncoding(UTF_8);
@@ -127,7 +179,24 @@ public class MediaServlet extends HttpServlet {
 				//Egrafh stin apantish tin lista me ta Media ws JSON (me xrhsh tou Google Gson)
 				final Writer writer = response.getWriter();
 				try {
-					writer.write(new Gson().toJson(media));
+					final Gson gson = new Gson();
+					final JsonArray jsonMedia = new JsonArray();
+					for (final Media medium : media) {
+						final JsonObject jsonMedium = new JsonObject();
+						jsonMedium.addProperty("id", medium.getId());
+						jsonMedium.addProperty("type", medium.getType());
+						jsonMedium.addProperty("size", medium.getSize());
+						jsonMedium.addProperty("duration", medium.getDuration());
+						jsonMedium.add("user", gson.toJsonTree(medium.getUser())); //to grafei ws antikeimeno
+						jsonMedium.addProperty("created", medium.getCreated().getTime()); //to grafei ws long
+						jsonMedium.addProperty("edited", medium.getEdited().getTime());
+						jsonMedium.addProperty("title", medium.getTitle());
+						jsonMedium.addProperty("latitude", medium.getLatitude().doubleValue()); //to grafei ws double
+						jsonMedium.addProperty("longitude", medium.getLongitude().doubleValue());
+						jsonMedium.addProperty("public", medium.isPublic());
+						jsonMedia.add(jsonMedium);
+					}
+					writer.write(gson.toJson(jsonMedia));
 				} finally {
 					writer.close();
 				}
@@ -146,7 +215,6 @@ public class MediaServlet extends HttpServlet {
 					new Date(Long.parseLong(request.getParameter("editedTo")));
 				final Boolean publik = (request.getParameter("public") == null) ? null :
 					Boolean.parseBoolean(request.getParameter("public"));
-				
 				final Integer start = (request.getParameter("start") == null) ? null :
 					Integer.parseInt(request.getParameter("start"));
 				final Integer length = (request.getParameter("length") == null) ? null :
@@ -155,7 +223,6 @@ public class MediaServlet extends HttpServlet {
 					request.getParameter("orderField");
 				final boolean ascending = (request.getParameter("ascending") == null) ? false :
 					Boolean.parseBoolean(request.getParameter("ascending"));
-				
 				final MediaResult mediaResult = mediaService.getMedia(currentUser, title, type, user, createdFrom,
 						createdTo, editedFrom, editedTo, publik, start, length, orderField, ascending);
 				response.setCharacterEncoding(UTF_8);
@@ -163,11 +230,30 @@ public class MediaServlet extends HttpServlet {
 				
 				final Writer writer = response.getWriter();
 				try {
-					writer.write(new Gson().toJson(mediaResult));
+					final Gson gson = new Gson();
+					final JsonObject jsonResult = new JsonObject();
+					final JsonArray jsonMedia = new JsonArray();
+					for (final Media medium : mediaResult.getMedia()) {
+						final JsonObject jsonMedium = new JsonObject();
+						jsonMedium.addProperty("id", medium.getId());
+						jsonMedium.addProperty("type", medium.getType());
+						jsonMedium.addProperty("size", medium.getSize());
+						jsonMedium.addProperty("duration", medium.getDuration());
+						jsonMedium.add("user", gson.toJsonTree(medium.getUser())); //to grafei ws antikeimeno
+						jsonMedium.addProperty("created", medium.getCreated().getTime()); //to grafei ws long
+						jsonMedium.addProperty("edited", medium.getEdited().getTime());
+						jsonMedium.addProperty("title", medium.getTitle());
+						jsonMedium.addProperty("latitude", medium.getLatitude().doubleValue()); //to grafei ws double
+						jsonMedium.addProperty("longitude", medium.getLongitude().doubleValue());
+						jsonMedium.addProperty("public", medium.isPublic());
+						jsonMedia.add(jsonMedium);
+					}
+					jsonResult.add("media", jsonMedia); //to grafei stin thesh media
+					jsonResult.addProperty("total", mediaResult.getTotal());
+					writer.write(gson.toJson(jsonResult));
 				} finally {
 					writer.close();
 				}
-
 			} else if (action.equals("getMedia")) { //Get enos media gia otan to android xtupaei mesw REST gia tin View Media
 				final String id = request.getParameter("id");
 				if (id == null) {
@@ -176,13 +262,24 @@ public class MediaServlet extends HttpServlet {
 					return;
 				}
 				final Media media = mediaService.getMedia(id);
-				
 				response.setCharacterEncoding(UTF_8);
 				response.setContentType(APPLICATION_JSON);
-				
 				final Writer writer = response.getWriter();
 				try {
-					writer.write(new Gson().toJson(media));
+					final Gson gson = new Gson();
+					final JsonObject jsonMedia = new JsonObject();
+					jsonMedia.addProperty("id", media.getId());
+					jsonMedia.addProperty("type", media.getType());
+					jsonMedia.addProperty("size", media.getSize());
+					jsonMedia.addProperty("duration", media.getDuration());
+					jsonMedia.add("user", gson.toJsonTree(media.getUser())); //to grafei ws antikeimeno
+					jsonMedia.addProperty("created", media.getCreated().getTime()); //to grafei ws long
+					jsonMedia.addProperty("edited", media.getEdited().getTime());
+					jsonMedia.addProperty("title", media.getTitle());
+					jsonMedia.addProperty("latitude", media.getLatitude().doubleValue()); //to grafei ws double
+					jsonMedia.addProperty("longitude", media.getLongitude().doubleValue());
+					jsonMedia.addProperty("public", media.isPublic());
+					writer.write(gson.toJson(jsonMedia));
 				} finally {
 					writer.close();
 				}
@@ -229,58 +326,6 @@ public class MediaServlet extends HttpServlet {
 				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
 				return;
 			}
-			final String action = request.getParameter("action");
-			if ("editMedia".equals(action)) { //TODO edit media gia post apo android
-				try {
-					final String id = request.getParameter("id");
-					final String title = request.getParameter("title");
-					final Boolean publik = (request.getParameter("public") == null) ? null :
-						Boolean.parseBoolean(request.getParameter("public"));
-					final BigDecimal latitude = (request.getParameter("latitude") == null) ? null : 
-						new BigDecimal(request.getParameter("latitude"));
-					final BigDecimal longitude = (request.getParameter("longitude") == null) ? null : 
-						new BigDecimal(request.getParameter("longitude"));
-					if (id == null) {
-						LOGGER.warning("Bad request");
-						response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request"); //400 Bad request
-						return;
-					}
-					final Media media = mediaService.getMedia(id);
-					if (user.getEmail().equals(media.getUser().getEmail()) || user.getStatus() == UserStatus.ADMIN) {
-						if (title != null)
-							media.setTitle(title);
-						if (publik != null)
-							media.setPublic(publik);
-						if ((latitude != null) && (longitude != null)) {
-							media.setLatitude(latitude);
-							media.setLongitude(longitude);
-						}
-						media.setEdited(new Date());
-						mediaService.editMedia(media);
-						
-						//return se json ton user
-						response.setCharacterEncoding(UTF_8);
-						//tupos apantishs
-						response.setContentType(APPLICATION_JSON);
-						//Egrafh stin apantish tin lista me ta Media ws JSON (me xrhsh tou Google Gson)
-						final Writer writer = response.getWriter();
-						try {
-							writer.write(new Gson().toJson("Media " + media.getTitle() + " edited succesfully"));
-						} finally {
-							writer.close();
-						}	
-					} else {
-						//Den exei dikaioma autos o xrhsths na epexergastei auto to media
-						LOGGER.warning("Access denied");
-						response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
-						return;	
-					}
-				} catch (final MediaServiceException e) {
-					LOGGER.log(Level.WARNING, "Error retrieving media", e); //den borese na psaxei gia to arxeio
-					throw new ServletException("Error retrieving media", e); //Internal Server Error 500
-				}
-			}
-
 			if (!ServletFileUpload.isMultipartContent(request)) {
 				LOGGER.warning("Request content type is not multipart/form-data");
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request content type is not multipart/form-data"); //400 Bad Request
@@ -405,47 +450,56 @@ public class MediaServlet extends HttpServlet {
 	}
 	
 	/**
-	 * Delete enos media apo android
+	 * Edit enos media apo to android
 	 */
 	@Override
-	public void doDelete(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
-		//elenxos oti uparxei email sto session
+	public void doPut(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
 		if ((String) request.getSession().getAttribute("email") == null) {
-			//agnwstos xrhsths (den exei kanei login)
 			LOGGER.warning("Authentication required");
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication required"); //401 Unauthorized
 			return;
 		}
 		try {
-			//elenxos oti o xrhsths einai gnwstos (oti uparxei stin vash)  
-			final User currentUser = userService.getUser((String) request.getSession().getAttribute("email"));
-			if (currentUser == null) {
-				//agnwstos xrhsths (den uparxei)
+			final User user = userService.getUser((String) request.getSession().getAttribute("email"));
+			if (user == null) {
 				LOGGER.warning("Access denied");
 				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
 				return;
 			}
 			final String id = request.getParameter("id");
-			if (id == null) {
-				LOGGER.warning("Bad request");
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad request"); //400 Bad request
+			final String title = request.getParameter("title");
+			final Boolean publik = (request.getParameter("public") == null) ? null : Boolean.parseBoolean(request.getParameter("public"));
+			final BigDecimal latitude = (request.getParameter("latitude") == null) ? null : new BigDecimal(request.getParameter("latitude"));
+			final BigDecimal longitude = (request.getParameter("longitude") == null) ? null : new BigDecimal(request.getParameter("longitude"));
+			if ((id == null)) {
+				LOGGER.warning("No media specified");
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No media specified"); //400 Bad Request
+				return;
+			}
+			if (title == null) {
+				LOGGER.warning("No title specified");
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No title specified"); //400 Bad Request
+				return;
+			}
+			if (publik == null) {
+				LOGGER.warning("No public specified");
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No public specified"); //400 Bad Request
+				return;
+			}
+			if((latitude == null) || (longitude == null)) {
+				LOGGER.warning("No location specified");
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No location specified"); //400 Bad Request
 				return;
 			}
 			final Media media = mediaService.getMedia(id);
-			if (currentUser.getEmail().equals(media.getUser().getEmail()) || (currentUser.getStatus() == UserStatus.ADMIN)) {
-				mediaService.deleteMedia(id);
-				//return se json ton user
-				response.setCharacterEncoding(UTF_8);
-				//tupos apantishs
-				response.setContentType(APPLICATION_JSON);
-				//den exoume tipota na poume, apla paei 200 OK
-				response.getWriter().close();
-			} else {
-				//Den exei dikaioma autos o xrhsths na diagrapsei auto to media
-				LOGGER.warning("Access denied");
-				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
-				return;	
-			}
+			media.setTitle(title);
+			media.setPublic(publik);
+			media.setLatitude(latitude);
+			media.setLatitude(longitude);
+			media.setEdited(new Date());
+			mediaService.editMedia(media);
+			LOGGER.info("User " + user + " edited media " + id);
+			response.getWriter().flush(); //apantaei me 200 OK
 		} catch (final MediaServiceException e) {
 			LOGGER.log(Level.WARNING, "Error executing request", e);
 			throw new ServletException("Error executing request", e); //Epistrefei 500 ston client
@@ -454,4 +508,5 @@ public class MediaServlet extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"); //403 Forbidden
 		}
 	}
+	
 }
