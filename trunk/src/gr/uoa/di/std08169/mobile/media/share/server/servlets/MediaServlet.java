@@ -495,7 +495,7 @@ public class MediaServlet extends HttpServlet {
 			media.setTitle(title);
 			media.setPublic(publik);
 			media.setLatitude(latitude);
-			media.setLatitude(longitude);
+			media.setLongitude(longitude);
 			media.setEdited(new Date());
 			mediaService.editMedia(media);
 			LOGGER.info("User " + user + " edited media " + id);

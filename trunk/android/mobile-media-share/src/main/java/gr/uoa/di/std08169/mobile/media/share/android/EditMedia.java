@@ -225,6 +225,8 @@ public class EditMedia extends MobileMediaShareActivity implements TextWatcher, 
 
     private void editMedia() {
         try {
+            //Apostolh san query parameters gia na diavazontai apo to servlet ws parametroi apo to request.
+            //Me tin tin entity tha eprepe na diavazotan apo to servlet san inptut stream
             final String url = String.format(getResources().getString(R.string.editMediaUrl),
                     getResources().getString(R.string.baseUrl),
                     URLEncoder.encode(id, UTF_8),
