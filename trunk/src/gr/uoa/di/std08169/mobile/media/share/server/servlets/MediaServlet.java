@@ -471,7 +471,7 @@ public class MediaServlet extends HttpServlet {
 			final Boolean publik = (request.getParameter("public") == null) ? null : Boolean.parseBoolean(request.getParameter("public"));
 			final BigDecimal latitude = (request.getParameter("latitude") == null) ? null : new BigDecimal(request.getParameter("latitude"));
 			final BigDecimal longitude = (request.getParameter("longitude") == null) ? null : new BigDecimal(request.getParameter("longitude"));
-			if ((id == null)) {
+			if (id == null) {
 				LOGGER.warning("No media specified");
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No media specified"); //400 Bad Request
 				return;
