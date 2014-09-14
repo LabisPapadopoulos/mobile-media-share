@@ -3,6 +3,7 @@ package gr.uoa.di.std08169.mobile.media.share.android.authentication;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -12,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import gr.uoa.di.std08169.mobile.media.share.android.MainMenu;
 import gr.uoa.di.std08169.mobile.media.share.android.R;
@@ -23,6 +25,8 @@ public class Login extends ActionBarActivity implements View.OnClickListener, Te
     private Button ok;
     private Button reset;
     private Button cancel;
+    private TextView newUser;
+    private TextView forgotPassword;
 
     @Override
     public void afterTextChanged(final Editable editable) {
@@ -54,6 +58,16 @@ public class Login extends ActionBarActivity implements View.OnClickListener, Te
             reset.setEnabled(false);
         } else if (view == cancel) {
             finish(); //termatizei to activity kai ara tin efarmogh
+        } else if (view == newUser) {
+            final Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(String.format(getResources().getString(R.string.newUserUrl),
+                    getResources().getString(R.string.baseUrl))));
+            startActivity(intent);
+        } else if (view == forgotPassword) {
+            final Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(String.format(getResources().getString(R.string.forgotPasswordUrl),
+                    getResources().getString(R.string.baseUrl))));
+            startActivity(intent);
         }
     }
     @Override
@@ -65,18 +79,21 @@ public class Login extends ActionBarActivity implements View.OnClickListener, Te
         ok = (Button) findViewById(R.id.ok);
         reset = (Button) findViewById(R.id.reset);
         cancel = (Button) findViewById(R.id.cancel);
+        newUser = (TextView) findViewById(R.id.newUser);
+        forgotPassword = (TextView) findViewById(R.id.forgotPassword);
         email.addTextChangedListener(this);
         password.addTextChangedListener(this);
         ok.setOnClickListener(this);
         reset.setOnClickListener(this);
         cancel.setOnClickListener(this);
+        newUser.setOnClickListener(this);
+        forgotPassword.setOnClickListener(this);
         ok.setEnabled(false);
         reset.setEnabled(false);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.login, menu);
         return true;
