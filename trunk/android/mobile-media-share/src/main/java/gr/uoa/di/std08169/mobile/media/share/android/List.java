@@ -31,6 +31,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -375,32 +376,32 @@ Log.i("URL: ", url.toString());
             final JSONObject list = new JSONObject(json.toString());
             final JSONArray mediaArray = list.getJSONArray("media");
             for(int i = 0; i < mediaArray.length(); i++) {
-                final JSONObject media = mediaArray.getJSONObject(i);
-                final String id = media.getString("id");
-                final String mediaType = media.getString("type");
-                final int size = media.getInt("size");
-                final double duration = media.getDouble("duration");
-
-                final JSONObject jsonUser = media.getJSONObject("user");
+                final JSONObject jsonMedia = mediaArray.getJSONObject(i);
+                final String id = jsonMedia.getString("id");
+                final String jsonType = jsonMedia.getString("type");
+                final int size = jsonMedia.getInt("size");
+                final int duration = jsonMedia.getInt("duration");
+                final JSONObject jsonUser = jsonMedia.getJSONObject("user");
                 final String email = jsonUser.getString("email");
-                final String status = jsonUser.getString("status");
-
-                final String created = media.getString("created");
-                final String edited = media.getString("edited");
-                final String mediaTitle = media.getString("title");
-                final double latitude = media.getDouble("latitude");
-                final double longitude = media.getDouble("longitude");
-                final boolean mediaPublik = media.getBoolean("publik");
-
-                final User mediaUser = new User(email, UserStatus.valueOf(status), null, null);
-//                mediaList.add(new Media(id, mediaTitle, mediaType, mediaUser, latitude, longitude,
-//                        size, duration, created, edited, mediaPublik)); //TODO
+                final UserStatus status = UserStatus.valueOf(jsonUser.getString("status"));
+                final String name = jsonUser.has("name") ? jsonUser.getString("name") : null;
+                final String photo = jsonUser.has("photo") ? jsonUser.getString("photo") : null;
+                final User mediaUser = new User(email, status, name, photo);
+                final Date created = new Date(jsonMedia.getLong("created"));
+                final Date edited = new Date(jsonMedia.getLong("edited"));
+                final String jsonTitle = jsonMedia.getString("title");
+                final BigDecimal latitude = new BigDecimal(jsonMedia.getDouble("latitude"));
+                final BigDecimal longitude = new BigDecimal(jsonMedia.getDouble("longitude"));
+                final Boolean jsonPublic = jsonMedia.getBoolean("public");
+                final Media media = new Media(id, jsonType, size, duration, mediaUser, created, edited,
+                        jsonTitle, latitude, longitude, jsonPublic);
+                mediaList.add(media);
             }
 //TODO
-//            listViewAdapter = new ListViewAdapter(List.this, R.layout.list_view, mediaList);
-//            listView.setAdapter(listViewAdapter);
-//            //metraei to megethos tis listView gia na topothetithei oloklhrhs mesa sto ScrollView
-//            getListViewSize(listView);
+            listViewAdapter = new ListViewAdapter(List.this, R.layout.list_view, mediaList);
+            listView.setAdapter(listViewAdapter);
+            //metraei to megethos tis listView gia na topothetithei oloklhrhs mesa sto ScrollView
+            getListViewSize(listView);
 
             final int total = list.getInt("total");
         } catch (final ExecutionException e) {
@@ -435,8 +436,6 @@ Log.i("URL: ", url.toString());
         ViewGroup.LayoutParams params = myListView.getLayoutParams();
         params.height = totalHeight + (myListView.getDividerHeight() * (myListAdapter.getCount() - 1));
         myListView.setLayoutParams(params);
-        // print height of adapter on log
-//        Log.i("height of listItem:", String.valueOf(totalHeight));
     }
 
     private void deleteMedia() {

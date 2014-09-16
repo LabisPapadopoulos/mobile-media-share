@@ -5,14 +5,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -24,10 +25,21 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+
 import java.io.File;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.concurrent.ExecutionException;
 
 import gr.uoa.di.std08169.mobile.media.share.android.FileExplorer.FileChooser;
+import gr.uoa.di.std08169.mobile.media.share.android.http.HttpClient;
+import gr.uoa.di.std08169.mobile.media.share.android.http.PostAsyncTask;
 
 
 public class Upload extends MobileMediaShareActivity implements GoogleMap.OnMapClickListener, TextWatcher,
@@ -36,8 +48,9 @@ public class Upload extends MobileMediaShareActivity implements GoogleMap.OnMapC
     private static final int REQUEST_PATH = 1;
     private static final BigDecimal DEGREES_BASE = new BigDecimal(60);
 
-    private EditText file;
+    private EditText fileName;
     private Button browse;
+    private File file;
     private EditText title;
     private CheckBox isPublic;
     private TextView latlng;
@@ -45,12 +58,10 @@ public class Upload extends MobileMediaShareActivity implements GoogleMap.OnMapC
     private Button reset;
     private Marker marker;
     private ProgressDialog progress;
-    private String currentFileName;
-    private String absolutePath;
 
     //TextChangedListener
     @Override
-    public void afterTextChanged(final Editable editable) { // TODO
+    public void afterTextChanged(final Editable editable) {
         enableOkReset();
     }
 
@@ -67,27 +78,32 @@ public class Upload extends MobileMediaShareActivity implements GoogleMap.OnMapC
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
         // See which child activity is calling us back.
         if ((requestCode == REQUEST_PATH) && (resultCode == RESULT_OK)) {
-            currentFileName = data.getStringExtra("GetFileName");
-            absolutePath = data.getStringExtra("GetPath") + File.separator + currentFileName;
-            file.setText(currentFileName); // TODO
-            Log.d("--> Absolute Path: ", absolutePath);
+            file = new File(data.getStringExtra("GetPath") + File.separator + data.getStringExtra("GetFileName"));
+            fileName.setText(file.getName());
             enableOkReset();
         }
     }
 
     //OnClickListener
     @Override
-    public void onClick(View view) { // TODO
-        if (view == file) {
+    public void onClick(final View view) {
+        if (view == fileName) {
             browse(view);
         } else if (view == browse) {
             browse(view);
         } else if (view == isPublic) {
             enableOkReset();
         } else if (view == ok) {
+            //progress.show();
+            //Toast.makeText(Upload.this, "Uploading file, please wait...", Toast.LENGTH_LONG).show();
             upload();
         } else if (view == reset) {
-
+            fileName.setText("");
+            file = null;
+            title.setText("");
+            isPublic.setChecked(false);
+            marker.setPosition(new LatLng(Map.GOOGLE_MAPS_LATITUDE, Map.GOOGLE_MAPS_LONGITUDE));
+            enableOkReset();
         }
     }
 
@@ -95,8 +111,8 @@ public class Upload extends MobileMediaShareActivity implements GoogleMap.OnMapC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.upload);
-        file = (EditText) findViewById(R.id.file);
-        file.setOnClickListener(this);
+        fileName = (EditText) findViewById(R.id.file);
+        fileName.setOnClickListener(this);
         browse = (Button) findViewById(R.id.browse);
         browse.setOnClickListener(this);
         title = (EditText) findViewById(R.id.title);
@@ -122,14 +138,14 @@ public class Upload extends MobileMediaShareActivity implements GoogleMap.OnMapC
             map.setOnMapClickListener(this);
             latlng.setText("(" + formatLatitude(new BigDecimal(Map.GOOGLE_MAPS_LATITUDE)) + ", " +
                     formatLongitude(new BigDecimal(Map.GOOGLE_MAPS_LONGITUDE)) +")"); // TODO
-        } catch (GooglePlayServicesNotAvailableException e) {
-            error(R.string.errorRetrievingMedia, e.getMessage());
+        } catch (final GooglePlayServicesNotAvailableException e) {
+            error(R.string.errorUploadingMedia, e.getMessage());
         }
         progress = new ProgressDialog(this);
         progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progress.setIndeterminate(true);
-        progress.setTitle("Uploading File"); // TODO
-        progress.setMessage("Waiting..."); // TODO
+        progress.setTitle("Uploading file");
+        progress.setMessage("Waiting...");
     }
 
     @Override
@@ -161,59 +177,52 @@ public class Upload extends MobileMediaShareActivity implements GoogleMap.OnMapC
     public void onTextChanged(final CharSequence charSequence, final int start, final int count, final int after) {}
 
     private void enableOkReset() {
-
+        final boolean enable = !((file == null) || title.getText().toString().isEmpty());
+        ok.setEnabled(enable);
+        reset.setEnabled(enable);
     }
 
     private void upload() {
-        final String absoluteFilePath = absolutePath;
-        final String title = this.title.getText().toString();
-        final boolean publik = (isPublic.isChecked()) ? true : false;
-//        final String latitude = this.latitude; //TODO
-//        final String longitude = this.longitude; //TODO
-
-        /* Process Bar */
-        progress.show();
-        final int totalProgressTime = 100;
-
-        final Thread progressThread = new Thread(){
-
-            @Override
-            public void run(){
-
-                int jumpTime = 0;
-                while(jumpTime < totalProgressTime){
-                    try {
-                        sleep(200);
-                        jumpTime += 5;
-                        progress.setProgress(jumpTime);
-                    } catch (InterruptedException e) { }
-                }
-
+        try {
+            final String title = this.title.getText().toString();
+            final boolean publik = isPublic.isChecked();
+            final BigDecimal latitude = new BigDecimal(marker.getPosition().latitude);
+            final BigDecimal longitude = new BigDecimal(marker.getPosition().longitude);
+            final String url = String.format(getResources().getString(R.string.uploadMediaUrl), getResources().getString(R.string.baseUrl));
+            //progress.show();
+            final ContentType type = ContentType.create(
+                    MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                            MimeTypeMap.getFileExtensionFromUrl(file.toURI().toURL().toString())));
+            final HttpEntity httpEntity = MultipartEntityBuilder.create().setCharset(Charset.forName(UTF_8)).
+                    setStrictMode().
+                    addBinaryBody("file", file, type, file.getName()).
+                    addTextBody("title", title).
+                    addTextBody("public", Boolean.toString(publik)).
+                    addTextBody("latitude", latitude.toString()).
+                    addTextBody("longitude", longitude.toString()).build();
+            final HttpResponse response = new PostAsyncTask(this, new URL(url), httpEntity,
+                    httpEntity.getContentType().getValue()).execute().get();
+            if (response == null) {
+                error(R.string.errorUploadingMedia, getResources().getString(R.string.connectionError));
+                return;
             }
-        };
-        progressThread.start();
-
-//        new PostAsyncTask(getApplicationContext()){
-//
-//            @Override
-//            protected void onPostExecute(HttpsResponse response) {
-//                if (!response.isSuccess()) {
-//                    Toast.makeText(Upload.this, "Error Sending Media", Toast.LENGTH_LONG).show();
-//Log.d(Upload.class.getName(), response.getResponse());
-//                    return;
-//                }
-//
-//                progress.cancel();
-//                progressThread.interrupt();
-//
-//                Toast.makeText(Upload.this, "File Uploaded Successfully", Toast.LENGTH_LONG).show();
-//Log.d(Upload.class.getName(), response.getResponse());
-//                final Intent activityIntent = new Intent(getApplicationContext(), Map.class);
-//                activityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                startActivity(activityIntent);
-//                Upload.this.finish();
-//            }
-//        }.execute(absoluteFilePath, title, Boolean.toString(publik), latitude, longitude);
+            if ((response.getStatusLine().getStatusCode() == HttpClient.HTTP_UNAUTHORIZED) && login()) {
+                upload();
+            }
+            if (response.getStatusLine().getStatusCode() != HttpClient.HTTP_OK) {
+                error(R.string.errorUploadingMedia, response.getStatusLine().getReasonPhrase());
+                return;
+            }
+            finish();
+        } catch (final ExecutionException e) {
+            error(R.string.errorUploadingMedia, e.getMessage());
+        } catch (final InterruptedException e) {
+            error(R.string.errorUploadingMedia, e.getMessage());
+        } catch (final MalformedURLException e) {
+            error(R.string.errorUploadingMedia, e.getMessage());
+        } finally {
+            //progress.dismiss();
+        }
     }
 
     public static String formatLatitude(final BigDecimal latitude) { // TODO
