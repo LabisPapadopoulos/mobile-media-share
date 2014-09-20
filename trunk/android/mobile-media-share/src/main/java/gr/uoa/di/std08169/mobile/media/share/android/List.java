@@ -2,13 +2,12 @@ package gr.uoa.di.std08169.mobile.media.share.android;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,7 +17,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -33,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.text.DateFormat;
@@ -42,6 +41,7 @@ import java.util.Calendar;
 import java.util.concurrent.ExecutionException;
 
 import gr.uoa.di.std08169.mobile.media.share.android.ListView.ListViewAdapter;
+import gr.uoa.di.std08169.mobile.media.share.android.http.DeleteAsyncTask;
 import gr.uoa.di.std08169.mobile.media.share.android.http.GetAsyncTask;
 import gr.uoa.di.std08169.mobile.media.share.android.http.HttpClient;
 import gr.uoa.di.std08169.mobile.media.share.android.media.Media;
@@ -49,18 +49,15 @@ import gr.uoa.di.std08169.mobile.media.share.android.user.User;
 import gr.uoa.di.std08169.mobile.media.share.android.user.UserStatus;
 
 
-public class List extends MobileMediaShareActivity implements /* AdapterView.OnItemClickListener, */
+public class List extends MobileMediaShareActivity implements AdapterView.OnItemClickListener,
         AdapterView.OnItemSelectedListener, DatePickerDialog.OnDateSetListener, TextWatcher,
         View.OnClickListener {
-    private static final String UTF_8 = "UTF-8";
-
     private EditText title;
     private EditText user;
     private EditText createdFrom;
     private EditText createdTo;
     private EditText editedFrom;
     private EditText editedTo;
-    private View currentView;
     private Spinner type;
     private Spinner publik;
     private Spinner pageSize;
@@ -69,14 +66,11 @@ public class List extends MobileMediaShareActivity implements /* AdapterView.OnI
     private Button delete;
     private Button download;
     private EditText selectedDateField;
+    private Media selectedMedia;
 
     private ListView listView;
     private java.util.List<Media> mediaList;
     private ListViewAdapter listViewAdapter;
-
-    final Context context = this;
-    private String selectedId;
-    private boolean selectedMedia;
 
     //TextChangedListener
     @Override
@@ -99,48 +93,39 @@ public class List extends MobileMediaShareActivity implements /* AdapterView.OnI
             //2o this: callback
             new DatePickerDialog(this, this, calendar.get(Calendar.YEAR),
                     calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
-
         } else if (view == this.view) {
             selectedDateField = null;
-            selectedId = listViewAdapter.getMediaId();
-            if (selectedId == null) {
-                Toast.makeText(this, "Please select a media to view", Toast.LENGTH_LONG).show();
-                return;
-            }
             final Intent activityIntent = new Intent(getApplicationContext(), ViewMedia.class);
-            activityIntent.putExtra("id", selectedId);
-            activityIntent.putExtra("currentUser", currentUser.getEmail());
-            activityIntent.putExtra("userStatus", currentUser.getStatus().toString());
+            activityIntent.putExtra("id", selectedMedia.getId());
             activityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(activityIntent);
         } else if (view == edit) {
             selectedDateField = null;
-            selectedId = listViewAdapter.getMediaId();
-            if (selectedId == null) {
-                Toast.makeText(this, "Please select a media to edit", Toast.LENGTH_LONG).show();
-                return;
-            }
             final Intent activityIntent = new Intent(getApplicationContext(), EditMedia.class);
-            activityIntent.putExtra("id", selectedId);
-            activityIntent.putExtra("currentUser", currentUser.getEmail());
-            activityIntent.putExtra("userStatus", currentUser.getStatus().toString());
+            activityIntent.putExtra("id", selectedMedia.getId());
             activityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(activityIntent);
         } else if (view == this.delete) {
             selectedDateField = null;
-            selectedId = listViewAdapter.getMediaId();
-            if (selectedId == null) {
-                Toast.makeText(this, "Please select a media to delete", Toast.LENGTH_LONG).show();
-                return;
-            }
-            deleteMedia();
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(List.this);
+            alertDialogBuilder.setTitle(getResources().getString(R.string.areYouSureYouWantToDeleteThisMedia));
+            alertDialogBuilder.setMessage(String.format(getResources().getString(R.string.areYouSureYouWantToDeleteMedia_),
+                    selectedMedia.getTitle()));
+            alertDialogBuilder.setCancelable(false);
+            alertDialogBuilder.setPositiveButton(getResources().getString(R.string.ok), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            deleteMedia();
+                        }
+                    });
+            alertDialogBuilder.setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            alertDialogBuilder.create().show();
         } else if (view == download) {
             selectedDateField = null;
-            selectedId = listViewAdapter.getMediaId();
-            if (selectedId == null) {
-                Toast.makeText(this, "Please select a media to download", Toast.LENGTH_LONG).show();
-                return;
-            }
+            downloadMedia();//TODO
 Toast.makeText(this, "Download under construction", Toast.LENGTH_LONG).show();
         }
 
@@ -205,20 +190,22 @@ Toast.makeText(this, "Download under construction", Toast.LENGTH_LONG).show();
         pageSize.setOnItemSelectedListener(this);
 
         view = (Button) findViewById(R.id.view);
+        view.setEnabled(false);
         view.setOnClickListener(this);
         edit = (Button) findViewById(R.id.edit);
+        edit.setEnabled(false);
         edit.setOnClickListener(this);
         delete = (Button) findViewById(R.id.delete);
+        delete.setEnabled(false);
         delete.setOnClickListener(this);
         download = (Button) findViewById(R.id.download);
+        download.setEnabled(false);
         download.setOnClickListener(this);
-
         listView = (ListView) findViewById(R.id.list);
-//        listView.setOnItemClickListener(this);
+        listView.setOnItemClickListener(this);
         mediaList = new ArrayList<Media>();
-        selectedMedia = false;
-
         selectedDateField = null;
+        selectedMedia = null;
     }
 
     @Override
@@ -255,14 +242,7 @@ Toast.makeText(this, "Download under construction", Toast.LENGTH_LONG).show();
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        return (item.getItemId() == R.id.settings) || super.onOptionsItemSelected(item);
     }
 
     //TextChangedListener
@@ -277,7 +257,6 @@ Toast.makeText(this, "Download under construction", Toast.LENGTH_LONG).show();
                 this.title.getText().toString().trim();
         final String user = (this.user.getText().toString().trim().length() == 0) ? null :
                 this.user.getText().toString().trim();
-        //TODO
         final DateFormat dateFormat = new SimpleDateFormat(getResources().getString(R.string.dateFormat));
         Date createdFrom = null;
         try {
@@ -345,14 +324,12 @@ Toast.makeText(this, "Download under construction", Toast.LENGTH_LONG).show();
         if (editedTo != null)
             url.append("&editedTo=").append(editedTo.getTime());
         if (publik != null)
-            url.append("&publik=").append(publik);
+            url.append("&public=").append(publik);
 
-        //TODO
+        //TODO paging
         url.append("&start=0");
         url.append("&length=").append(pageSize);
         url.append("&ascending=asc");
-
-Log.i("URL: ", url.toString());
         try {
             final HttpResponse response = new GetAsyncTask(this, new URL(url.toString())).execute().get();
             if (response == null) {
@@ -397,13 +374,11 @@ Log.i("URL: ", url.toString());
                         jsonTitle, latitude, longitude, jsonPublic);
                 mediaList.add(media);
             }
-//TODO
-            listViewAdapter = new ListViewAdapter(List.this, R.layout.list_view, mediaList);
+            final int total = list.getInt("total"); //TODO use for paging
+            listViewAdapter = new ListViewAdapter(this, mediaList);
             listView.setAdapter(listViewAdapter);
             //metraei to megethos tis listView gia na topothetithei oloklhrhs mesa sto ScrollView
             getListViewSize(listView);
-
-            final int total = list.getInt("total");
         } catch (final ExecutionException e) {
             error(R.string.errorRetrievingMedia, e.getMessage());
         } catch (final InterruptedException e) {
@@ -417,90 +392,69 @@ Log.i("URL: ", url.toString());
 
     /**
      * @see <a href="http://www.androidhub4you.com/2012/12/listview-into-scrollview-in-android.html">ListView into ScrollView in Android</a>
-     * @param myListView
+     * @param listView
      */
-    public void getListViewSize(ListView myListView) {
-        ListAdapter myListAdapter = myListView.getAdapter();
-        if (myListAdapter == null) {
-            //do nothing return null
+    public void getListViewSize(final ListView listView) {
+        if (listView.getAdapter() == null) //do nothing return null
             return;
-        }
         //set listAdapter in loop for getting final size
         int totalHeight = 0;
-        for (int size = 0; size < myListAdapter.getCount(); size++) {
-            View listItem = myListAdapter.getView(size, null, myListView);
+        for (int i = 0; i < listView.getAdapter().getCount(); i++) {
+            final View listItem = listView.getAdapter().getView(i, null, listView);
+            //mhdenizei to megethos pou tou leei o pateras tou me apotelesma na pairnei oso thelei
             listItem.measure(0, 0);
-            totalHeight += listItem.getMeasuredHeight();
+            totalHeight += listItem.getMeasuredHeight(); //metraei to neo upsos
         }
         //setting listview item in adapter
-        ViewGroup.LayoutParams params = myListView.getLayoutParams();
-        params.height = totalHeight + (myListView.getDividerHeight() * (myListAdapter.getCount() - 1));
-        myListView.setLayoutParams(params);
+        final ViewGroup.LayoutParams params = listView.getLayoutParams();
+        //dunamika h allagh tou upsous kai me prosthikh twn dividers
+        params.height = totalHeight + (listView.getDividerHeight() * (listView.getAdapter().getCount() - 1));
+        listView.setLayoutParams(params);
     }
 
     private void deleteMedia() {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-        alertDialogBuilder.setTitle("Are tou sure you want to delete this media?");
-
-        alertDialogBuilder.setMessage("Click yes to delete!").setCancelable(false).
-                setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // if this button is clicked, close
-                        // current activity
-                        //Delete Media
-//                        try {
-//                            final String url = String.format(getResources().getString(R.string.deleteMediaUrl),
-//                                    getResources().getString(R.string.secureBaseUrl),
-//                                    URLEncoder.encode(List.this.selectedId, UTF_8));
-//
-//                            new HttpsDeleteAsyncTask(getApplicationContext()) {
-//
-//                                @Override
-//                                protected void onPostExecute(HttpsResponse response) {
-//                                    if (!response.isSuccess()) {
-//                                        error(R.string.errorDeletingMedia, response.getResponse());
-//                                        return;
-//                                    }
-//                                    Toast.makeText(List.this, response.getResponse(), Toast.LENGTH_LONG).show();
-//                                    Log.d(List.class.getName(), response.getResponse());
-//                                    final Intent activityIntent = new Intent(getApplicationContext(), Map.class);
-//                                    activityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                                    List.this.finish();
-//                                    startActivity(activityIntent);
-//                                }
-//                            }.execute(new URL(url));
-//
-//                        } catch (final IOException e) {
-//                            error(R.string.errorDeletingMedia, e.getMessage());
-//                        }
-                    }
-                }).
-                setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // if this button is clicked, just close
-                        // the dialog box and do nothing
-                        dialog.cancel();
-                    }
-                });
-        // create alert dialog
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        // show it
-        alertDialog.show();
+        try {
+            final String url = String.format(getResources().getString(R.string.deleteMediaUrl),
+                    getResources().getString(R.string.baseUrl),
+                    URLEncoder.encode(selectedMedia.getId(), UTF_8));
+            final HttpResponse response = new DeleteAsyncTask(this, new URL(url)).execute().get();
+            if (response == null) //An null, den exei diktuo
+                error(R.string.errorDeletingMedia, getResources().getString(R.string.connectionError));
+            else if ((response.getStatusLine().getStatusCode() == HttpClient.HTTP_UNAUTHORIZED) && login()) //paei gia login
+                deleteMedia(); //kalei anadromika ton eauto ths gia na kanei to arxiko Delete
+            else if (response.getStatusLine().getStatusCode() != HttpClient.HTTP_OK) //Den einai oute GET oute Unauthorized
+                error(R.string.errorDeletingMedia, response.getStatusLine().getReasonPhrase());
+            else
+                updateList();
+        } catch (final IOException e) {
+            error(R.string.errorDeletingMedia, e.getMessage());
+        } catch (final InterruptedException e) {
+            error(R.string.errorDeletingMedia, e.getMessage());
+        } catch (final ExecutionException e) {
+            error(R.string.errorDeletingMedia, e.getMessage());
+        }
     }
 
-//    //Adapter.OnItemClickListener
-//    @Override
-//    public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-////        ListMedia mediaList = (ListMedia) listViewAdapter.getItem(position);
-//        if ((position == listViewAdapter.getSelectedPosition()) && (selectedMedia == false)) { //TODO
-//            view.setBackgroundColor(Color.YELLOW);
-//            selectedMedia = true;
-//        }
-//
-//        if ((position == listViewAdapter.getSelectedPosition()) && (selectedMedia == true)) {
-//            view.setBackgroundColor(Color.TRANSPARENT);
-//            selectedMedia = false;
-//        }
-//
-//    }
+    private void downloadMedia() { //TODO
+
+    }
+
+    private View selectedView = null;
+
+    //Adapter.OnItemClickListener
+    //Listener stin listView, opote to kathe stoixeio tis listas erxetai ws eisodo me to view kai stin thesh position
+    @Override
+    public void onItemClick(final AdapterView<?> adapterView, final View view, final int position, final long id) {
+        if (selectedView != null) {
+            selectedView.setBackgroundColor(Color.TRANSPARENT);
+        }
+        selectedView = view;
+        selectedView.setBackgroundColor(getResources().getColor(R.color.selectedListItem));
+        selectedMedia = listViewAdapter.getItem(position);
+        this.view.setEnabled(true);
+        download.setEnabled(true);
+        final boolean enabled = selectedMedia.getUser().equals(currentUser) || (currentUser.getStatus() == UserStatus.ADMIN);
+        edit.setEnabled(enabled);
+        delete.setEnabled(enabled);
+    }
 }

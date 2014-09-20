@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string-array name="user_status">
+        <item>Pending</item>
+        <item>Normal</item>
+        <item>Admin</item>
+        <item>Forgot Password</item>
+        <item>Locked</item>
+    </string-array>
+</resources>

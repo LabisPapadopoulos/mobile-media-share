@@ -3,7 +3,6 @@ package gr.uoa.di.std08169.mobile.media.share.android;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.DownloadManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -71,12 +70,6 @@ import gr.uoa.di.std08169.mobile.media.share.android.user.UserStatus;
 public class Map extends MobileMediaShareActivity implements AdapterView.OnItemSelectedListener,
         DatePickerDialog.OnDateSetListener, GoogleMap.OnCameraChangeListener, GoogleMap.OnMarkerClickListener,
         TextWatcher, View.OnClickListener {
-    public static final float GOOGLE_MAPS_ZOOM = 8.0f;
-    public static final double GOOGLE_MAPS_LATITUDE = 37.968546;	//DIT lat
-    public static final double GOOGLE_MAPS_LONGITUDE = 23.766968;	//DIT lng
-    public static final float MARKER_ANCHOR_X = 0.5f;
-    public static final float MARKER_ANCHOR_Y = 1.0f;
-    public static final double MIN_DISTANCE = 0.000001;
     private static final String DOWNLOAD_ENTITY = "email=%s&id=%s";
 
     //antistoixia mediatype se eikonidia gia markers
@@ -98,8 +91,6 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
     private EditText selectedDateField;
     private Set<Media> media;
     private Media selectedMedia;
-
-    final Context context = this;
 
     //EditText
     @Override
@@ -134,23 +125,21 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
             activityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(activityIntent);
         } else if (view == delete) {
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-            alertDialogBuilder.setTitle("Are you sure you want to delete this media?"); // TODO
-            alertDialogBuilder.setMessage("Are you sure you want to delete media " + selectedMedia.getTitle() + "?").setCancelable(false). // TODO
-                    setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            alertDialogBuilder.setTitle(getResources().getString(R.string.areYouSureYouWantToDeleteThisMedia));
+            alertDialogBuilder.setMessage(String.format(getResources().getString(R.string.areYouSureYouWantToDeleteMedia_), selectedMedia.getTitle()));
+            alertDialogBuilder.setCancelable(false);
+            alertDialogBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         public void onClick(final DialogInterface dialog, final int id) {
                             selectedDateField = null;
                             deleteMedia();
                         }
-                    }).
-                    setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    });
+            alertDialogBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                         public void onClick(final DialogInterface dialog, final int id) {
-                            // if this button is clicked, just close
-                            // the dialog box and do nothing
                             dialog.cancel();
                         }
                     });
-            // create alert dialog and show
             alertDialogBuilder.create().show();
         } else if (view == download) {
             selectedDateField = null;
@@ -208,7 +197,6 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
         //efarmogh tou adapter ston spinner
         type.setAdapter(adapter);
         type.setOnItemSelectedListener(this);
-
         //DropDown list gia to type
         publik = (Spinner) findViewById(R.id.publik);
         //dinei dedomena ston spinner
@@ -242,9 +230,10 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
 
         try {
             MapsInitializer.initialize(getApplicationContext());
+            final LatLng latLng = getLatLng();
             final GoogleMap map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
             map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(GOOGLE_MAPS_LATITUDE, GOOGLE_MAPS_LONGITUDE), GOOGLE_MAPS_ZOOM));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, GOOGLE_MAPS_ZOOM));
             map.setOnMarkerClickListener(this);
             map.setOnCameraChangeListener(this);
         } catch (final GooglePlayServicesNotAvailableException e) {
@@ -336,10 +325,7 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return ((item.getItemId() == R.id.settings) || super.onOptionsItemSelected(item));
+        return (item.getItemId() == R.id.settings) || super.onOptionsItemSelected(item);
     }
 
     //EditText
@@ -417,7 +403,7 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
         if (editedTo != null)
             url.append("&editedTo=").append(editedTo.getTime());
         if (publik != null)
-            url.append("&publik=").append(publik);
+            url.append("&public=").append(publik);
         url.append("&minLatitude=").append(minLatitude);
         url.append("&minLongitude=").append(minLongitude);
         url.append("&maxLatitude=").append(maxLatitude);
@@ -500,10 +486,9 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
             final HttpResponse response = new DeleteAsyncTask(this, new URL(url)).execute().get();
             if (response == null) //An null, den exei diktuo
                 error(R.string.errorDeletingMedia, getResources().getString(R.string.connectionError));
-            else if ((response.getStatusLine().getStatusCode() == HttpClient.HTTP_UNAUTHORIZED) && login()) { //paei gia login
+            else if ((response.getStatusLine().getStatusCode() == HttpClient.HTTP_UNAUTHORIZED) && login()) //paei gia login
                 deleteMedia(); //kalei anadromika ton eauto ths gia na kanei to arxiko Delete
-                return;
-            } else if (response.getStatusLine().getStatusCode() != HttpClient.HTTP_OK) //Den einai oute GET oute Unauthorized
+            else if (response.getStatusLine().getStatusCode() != HttpClient.HTTP_OK) //Den einai oute GET oute Unauthorized
                 error(R.string.errorDeletingMedia, response.getStatusLine().getReasonPhrase());
             else
                 updateMap();

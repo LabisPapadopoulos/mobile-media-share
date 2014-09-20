@@ -356,7 +356,7 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 		final BigDecimal[] temp2 = temp1[0].divideAndRemainder(DEGREES_BASE);
 		final int minutes = temp2[1].intValue();
 		final int degrees = temp2[0].intValue();
-		//an einai arnhtiko-> einai notia, alliws voreia
+		//an einai arnhtiko-> einai dutika, alliws anatolika
 		return (longitude.compareTo(BigDecimal.ZERO) < 0) ?
 				MOBILE_MEDIA_SHARE_MESSAGES.longitudeFormatWest(-degrees, -minutes, -seconds) :
 				MOBILE_MEDIA_SHARE_MESSAGES.longitudeFormatEast(degrees, minutes, seconds);

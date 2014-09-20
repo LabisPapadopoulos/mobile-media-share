@@ -144,8 +144,7 @@ public class EditMedia extends MobileMediaShareActivity implements TextWatcher, 
     //OnMapClickListener
     @Override
     public void onMapClick(final LatLng latLng) {
-        latlng.setText("(" + Upload.formatLatitude(new BigDecimal(latLng.latitude)) + ", " +
-                Upload.formatLongitude(new BigDecimal(latLng.longitude)) +")"); // TODO
+        latlng.setText(formatLocation(new BigDecimal(latLng.latitude), new BigDecimal(latLng.longitude)));
         marker.setPosition(latLng);
         enableOkReset();
     }
@@ -190,8 +189,7 @@ public class EditMedia extends MobileMediaShareActivity implements TextWatcher, 
                 media = new Media(id, type, size, duration, user, created, edited, title, latitude, longitude, publik);
                 this.title.setText(media.getTitle());
                 this.isPublic.setChecked(media.isPublic());
-                latlng.setText("(" + Upload.formatLatitude(media.getLatitude()) + ", " +
-                        Upload.formatLongitude(media.getLongitude()) + ")"); // TODO
+                latlng.setText(formatLocation(media.getLatitude(), media.getLongitude()));
                 final GoogleMap map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(media.getLatitude().doubleValue(),
                         media.getLongitude().doubleValue()), Map.GOOGLE_MAPS_ZOOM));

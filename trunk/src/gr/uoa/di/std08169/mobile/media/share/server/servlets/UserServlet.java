@@ -61,6 +61,7 @@ public class UserServlet extends HttpServlet {
 	private static final String LOGIN_ACTION = "login";
 	private static final String FORGOT_ACTION = "forgot";
 	private static final String RESET_ACTION = "reset";
+	private static final String EDIT_ACTION = "edit";
 	private static final String LOGIN_URL = "./login.html?locale=%s&url=%s";
 	private static final String MAP_URL = "./map.jsp?locale=%s";
 	private static final String RESET_PASSWORD_URL = "./resetPassword.html?locale=%s&token=%s";
@@ -415,17 +416,19 @@ public class UserServlet extends HttpServlet {
 				LOGGER.log(Level.WARNING, "Error resetting password for user with token " + token, e);
 				throw new ServletException("Error resetting password", e); //Epistrefei 500 ston client
 			}
-		} else if ("editUser".equals(action)) { //TODO edit user stin othonh my account apo to android
-			if (email == null) {
-				LOGGER.warning("No email specified");
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No email specified"); //400 Bad Request
-				return;
-			}
+		} else if (EDIT_ACTION.equals(action)) { // edit user stin othonh my account apo to android
+			//to eimail apo to session giati tha prepei na einai hdh sundedemenos o xrhsths gia na kanei allagh
+			final String sessionEmail = (String) request.getSession().getAttribute("email");
 			try {
-				final User user = userService.getUser(email);
+				if (sessionEmail == null) {
+					LOGGER.warning("No user is logged in");
+					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Login required"); //401
+					return;
+				}
+				final User user = userService.getUser(sessionEmail);
 				if (user == null) {
-					LOGGER.warning("User not found");
-					response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not found"); //404 Not Found
+					LOGGER.warning("User " + sessionEmail + " does not exist");
+					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Login required"); //401
 					return;
 				}
 				if ((user.getStatus() != UserStatus.NORMAL) && (user.getStatus() != UserStatus.ADMIN)) {
@@ -434,33 +437,18 @@ public class UserServlet extends HttpServlet {
 					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid status");
 					return;
 				}
-				
 				final String name = request.getParameter("name");
 				final String photo = request.getParameter("photo");
-				
 				if (name != null)
 					user.setName(name);
 				if (photo != null)
 					user.setPhoto(photo);
-
 				userService.editUser(user, (password != null) ? password : null);
+				response.getWriter().close(); // 200 OK
 				LOGGER.info("User " + user.getEmail() + " updated succesfully");
-				
-				//return se json ton user
-				response.setCharacterEncoding(UTF_8);
-				//tupos apantishs
-				response.setContentType(APPLICATION_JSON);
-				//Egrafh stin apantish tin lista me ta Media ws JSON (me xrhsh tou Google Gson)
-				final Writer writer = response.getWriter();
-				try {
-					writer.write(new Gson().toJson("User " + user.getEmail() + " updated succesfully"));
-				} finally {
-					writer.close();
-				}
-				
 			} catch (final UserServiceException e) {
-				LOGGER.log(Level.WARNING, "Error resetting password for user " + email, e);
-				throw new ServletException("Error resetting password", e); //Epistrefei 500 ston client				
+				LOGGER.log(Level.WARNING, "Error editing user " + sessionEmail, e);
+				throw new ServletException("Error editing user", e); //Epistrefei 500 ston client				
 			}
 		} else { // sumperilamvanomenou tou null
 			LOGGER.warning("Unknown action " + action);

@@ -11,6 +11,7 @@ import org.apache.http.client.methods.HttpPost;
 import java.io.IOException;
 import java.net.URL;
 
+
 /**
  * @see <href="http://stackoverflow.com/questions/18964288/upload-a-file-through-an-http-form-via-multipartentitybuilder-with-a-progress">upload a file through an http form via multipart-entitybuilder with a progres</href="http://stackoverflow.com/questions/18964288/upload-a-file-through-an-http-form-via-multipartentitybuilder-with-a-progress">
  */
@@ -21,8 +22,8 @@ public class PostAsyncTask extends AsyncTask<Void, Void, HttpResponse> {
     private final HttpEntity httpEntity; /*swma tou post*/
     private final String contentType;
 
-
-    public PostAsyncTask(final Context context, final URL url, final HttpEntity httpEntity, final String contentType) {
+    public PostAsyncTask(final Context context, final URL url, final HttpEntity httpEntity,
+                         final String contentType) {
         this.context = context;
         this.url = url;
         this.httpEntity = httpEntity;
@@ -43,5 +44,5 @@ public class PostAsyncTask extends AsyncTask<Void, Void, HttpResponse> {
     }
 
     @Override
-    protected void onPostExecute(final HttpResponse _) {}
+    protected void onPostExecute(final HttpResponse response) {}
 }

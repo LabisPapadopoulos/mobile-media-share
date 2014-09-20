@@ -37,14 +37,10 @@ import gr.uoa.di.std08169.mobile.media.share.android.CapturePhoto.ShowCamera;
 /**
  * @see <a href="http://www.tutorialspoint.com/android/android_camera.htm">Android Capture Photo</a>
  */
-public class NewPhoto extends MobileMediaShareActivity implements GoogleMap.OnMapClickListener, TextWatcher, View.OnClickListener {
+public class NewPhoto extends MobileMediaShareActivity implements GoogleMap.OnMapClickListener,
+        TextWatcher, View.OnClickListener, PictureCallback {
 
     public static final String FILE_EXTENSION = ".jpg";
-    public static final float GOOGLE_MAPS_ZOOM = 8.0f;
-    public static final double GOOGLE_MAPS_LATITUDE = 37.968546;	//DIT lat
-    public static final double GOOGLE_MAPS_LONGITUDE = 23.766968;	//DIT lng
-    private static final float MARKER_ANCHOR_X = 0.5f;
-    private static final float MARKER_ANCHOR_Y = 1.0f;
 
     private Button capturePhoto;
     private EditText title;
@@ -53,9 +49,9 @@ public class NewPhoto extends MobileMediaShareActivity implements GoogleMap.OnMa
     private Button ok;
     private Button reset;
 
-    private Camera cameraObject;
-    private ShowCamera showCamera;
-    private FrameLayout cameraPreview;
+    private Camera camera;
+    private ShowCamera cameraPreview;
+    private FrameLayout cameraFrame;
     private Bitmap bitmap;
     private String mediaStoragePath;
 
@@ -65,32 +61,23 @@ public class NewPhoto extends MobileMediaShareActivity implements GoogleMap.OnMa
     private String latitude;
     private String longitude;
 
-    public static Camera isCameraAvailable(){
+    public static Camera getCameraInstance(){
         Camera camera = null;
         try {
             camera = Camera.open();
-            camera.setDisplayOrientation(90);
+            camera.setDisplayOrientation(90); //peristrofh 90 moires
         }
         catch (Exception e){
         }
         return camera;
     }
 
-    private PictureCallback capturedIt = new PictureCallback() {
-
-        @Override
-        public void onPictureTaken(byte[] data, Camera camera) {
-
-            bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-            Toast.makeText(getApplicationContext(), "taken", Toast.LENGTH_SHORT).show();
-            cameraObject.release();
-        }
-    };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.new_photo);
+
+        camera = getCameraInstance();
 
         capturePhoto = (Button) findViewById(R.id.capturePhoto);
         capturePhoto.setOnClickListener(this);
@@ -109,26 +96,26 @@ public class NewPhoto extends MobileMediaShareActivity implements GoogleMap.OnMa
         reset = (Button) findViewById(R.id.reset);
         reset.setOnClickListener(this);
 
-        cameraObject = isCameraAvailable();
-        showCamera = new ShowCamera(this, cameraObject);
-        cameraPreview = (FrameLayout) findViewById(R.id.camera_preview);
-        cameraPreview.addView(showCamera);
+
+        cameraPreview = new ShowCamera(this, camera);
+        cameraFrame = (FrameLayout) findViewById(R.id.camera_preview);
+        cameraFrame.addView(cameraPreview);
 
         mediaStoragePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath(); ///storage/sdcard0/Pictures
 
         try {
             MapsInitializer.initialize(getApplicationContext());
+            final LatLng latLng = getLatLng();
             final GoogleMap map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
             map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(GOOGLE_MAPS_LATITUDE, GOOGLE_MAPS_LONGITUDE), GOOGLE_MAPS_ZOOM));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, GOOGLE_MAPS_ZOOM));
             //prosthikh marker ston xarth me tis default suntetagmenes
             marker = map.addMarker(new MarkerOptions().
                     icon(BitmapDescriptorFactory.fromResource(R.drawable.upload_marker)).
                     anchor(MARKER_ANCHOR_X, MARKER_ANCHOR_Y).
-                    position(new LatLng(GOOGLE_MAPS_LATITUDE, GOOGLE_MAPS_LONGITUDE)));
+                    position(latLng));
             map.setOnMapClickListener(this);
-            latlng.setText("(" + Upload.formatLatitude(new BigDecimal(GOOGLE_MAPS_LATITUDE)) + ", " +
-                    Upload.formatLongitude(new BigDecimal(GOOGLE_MAPS_LONGITUDE)) +")");
+            latlng.setText(formatLocation(new BigDecimal(latLng.latitude), new BigDecimal(latLng.longitude)));
         } catch (GooglePlayServicesNotAvailableException e) {
             error(R.string.errorRetrievingMedia, "error loading Google Maps");
         }
@@ -138,10 +125,6 @@ public class NewPhoto extends MobileMediaShareActivity implements GoogleMap.OnMa
         progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progress.setIndeterminate(true);
         progress.setMessage("Waiting...");
-    }
-
-    public void snapIt(View view){
-        cameraObject.takePicture(null, null, capturedIt);
     }
 
 
@@ -154,14 +137,7 @@ public class NewPhoto extends MobileMediaShareActivity implements GoogleMap.OnMa
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        return  (item.getItemId() == R.id.settings) || super.onOptionsItemSelected(item);
     }
 
     //TextChangedListener
@@ -185,8 +161,7 @@ public class NewPhoto extends MobileMediaShareActivity implements GoogleMap.OnMa
     //OnMapClickListener
     @Override
     public void onMapClick(LatLng latLng) {
-        latlng.setText("(" + Upload.formatLatitude(new BigDecimal(latLng.latitude)) + ", " +
-                Upload.formatLongitude(new BigDecimal(latLng.longitude)) +")");
+        latlng.setText(formatLocation(new BigDecimal(latLng.latitude), new BigDecimal(latLng.longitude)));
         marker.setPosition(latLng);
         this.latitude = String.valueOf(marker.getPosition().latitude);
         this.longitude = String.valueOf(marker.getPosition().longitude);
@@ -196,7 +171,8 @@ public class NewPhoto extends MobileMediaShareActivity implements GoogleMap.OnMa
     @Override
     public void onClick(View view) {
         if (view == capturePhoto) {
-            snapIt(view);
+            //to antikeimeno this (NewPhoto) ulopoiei to interface PictureCallback
+            camera.takePicture(null, null, this);
         } else if (view == reset) {
         } else if (view == ok) {
             uploadPhoto();
@@ -273,5 +249,13 @@ public class NewPhoto extends MobileMediaShareActivity implements GoogleMap.OnMa
         } else {
             Toast.makeText(getApplicationContext(), "not taken", Toast.LENGTH_LONG).show();
         }
+    }
+
+    //PictureCallback
+    @Override
+    public void onPictureTaken(byte[] data, Camera camera) {
+        bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+        Toast.makeText(getApplicationContext(), "taken", Toast.LENGTH_SHORT).show();
+        NewPhoto.this.camera.release();
     }
 }

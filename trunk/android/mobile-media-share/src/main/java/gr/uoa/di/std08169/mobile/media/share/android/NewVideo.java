@@ -44,11 +44,6 @@ public class NewVideo extends MobileMediaShareActivity implements GoogleMap.OnMa
         View.OnClickListener, SurfaceHolder.Callback {
 
     private static final String FILE_EXTENSION = ".mp4";
-    public static final float GOOGLE_MAPS_ZOOM = 8.0f;
-    public static final double GOOGLE_MAPS_LATITUDE = 37.968546;	//DIT lat
-    public static final double GOOGLE_MAPS_LONGITUDE = 23.766968;	//DIT lng
-    private static final float MARKER_ANCHOR_X = 0.5f;
-    private static final float MARKER_ANCHOR_Y = 1.0f;
 
     private Button startRecording;
     private Button stopRecording;
@@ -112,17 +107,17 @@ public class NewVideo extends MobileMediaShareActivity implements GoogleMap.OnMa
 
         try {
             MapsInitializer.initialize(getApplicationContext());
+            final LatLng latLng = getLatLng();
             final GoogleMap map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
             map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(GOOGLE_MAPS_LATITUDE, GOOGLE_MAPS_LONGITUDE), GOOGLE_MAPS_ZOOM));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, GOOGLE_MAPS_ZOOM));
             //prosthikh marker ston xarth me tis default suntetagmenes
             marker = map.addMarker(new MarkerOptions().
                     icon(BitmapDescriptorFactory.fromResource(R.drawable.upload_marker)).
                     anchor(MARKER_ANCHOR_X, MARKER_ANCHOR_Y).
-                    position(new LatLng(GOOGLE_MAPS_LATITUDE, GOOGLE_MAPS_LONGITUDE)));
+                    position(latLng));
             map.setOnMapClickListener(this);
-            latlng.setText("(" + Upload.formatLatitude(new BigDecimal(GOOGLE_MAPS_LATITUDE)) + ", " +
-                    Upload.formatLongitude(new BigDecimal(GOOGLE_MAPS_LONGITUDE)) +")");
+            latlng.setText(formatLocation(new BigDecimal(latLng.latitude), new BigDecimal(latLng.longitude)));
         } catch (GooglePlayServicesNotAvailableException e) {
             error(R.string.errorRetrievingMedia, "error loading Google Maps");
         }
@@ -136,8 +131,7 @@ public class NewVideo extends MobileMediaShareActivity implements GoogleMap.OnMa
     //OnMapClickListener
     @Override
     public void onMapClick(LatLng latLng) {
-        latlng.setText("(" + Upload.formatLatitude(new BigDecimal(latLng.latitude)) + ", " +
-                Upload.formatLongitude(new BigDecimal(latLng.longitude)) +")");
+        latlng.setText(formatLocation(new BigDecimal(latLng.latitude), new BigDecimal(latLng.longitude)));
         marker.setPosition(latLng);
         this.latitude = String.valueOf(marker.getPosition().latitude);
         this.longitude = String.valueOf(marker.getPosition().longitude);
