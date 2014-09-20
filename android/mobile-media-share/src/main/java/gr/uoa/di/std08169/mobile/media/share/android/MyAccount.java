@@ -1,10 +1,8 @@
 package gr.uoa.di.std08169.mobile.media.share.android;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,12 +11,23 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-//import gr.uoa.di.std08169.mobile.media.share.android.http.HttpsPostEditAsyncTask;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.entity.StringEntity;
+
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.concurrent.ExecutionException;
+
+import gr.uoa.di.std08169.mobile.media.share.android.http.HttpClient;
+import gr.uoa.di.std08169.mobile.media.share.android.http.PostAsyncTask;
 import gr.uoa.di.std08169.mobile.media.share.android.user.User;
 
 
 public class MyAccount extends MobileMediaShareActivity implements View.OnClickListener, TextWatcher {
-
+    private static final String ENTITY = "action=edit&name=%s%s";
+    private static final String PASSWORD = "&password=%s";
     private EditText name;
     private TextView status;
     private TextView email;
@@ -34,29 +43,28 @@ public class MyAccount extends MobileMediaShareActivity implements View.OnClickL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.my_account);
 
-//        requestUser();
-
         name = (EditText) findViewById(R.id.name);
+        name.setText(currentUser.getName());
         name.addTextChangedListener(this);
         status = (TextView) findViewById(R.id.status);
+        status.setText(getResources().getStringArray(
+                R.array.user_status)[currentUser.getStatus().ordinal()]);
         email = (TextView) findViewById(R.id.email);
+        email.setText(currentUser.getEmail());
         password = (EditText) findViewById(R.id.password);
         password.addTextChangedListener(this);
         password2 = (EditText) findViewById(R.id.confirmPassword);
         password2.addTextChangedListener(this);
         ok = (Button) findViewById(R.id.ok);
-        ok.setOnClickListener(this);
         ok.setEnabled(false);
+        ok.setOnClickListener(this);
         reset = (Button) findViewById(R.id.reset);
+        reset.setEnabled(false);
         reset.setOnClickListener(this);
-
-        myAccount();
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.my_account, menu);
         return true;
@@ -64,14 +72,7 @@ public class MyAccount extends MobileMediaShareActivity implements View.OnClickL
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        return (item.getItemId() == R.id.settings) || super.onOptionsItemSelected(item);
     }
 
     //OnClickListener
@@ -80,7 +81,11 @@ public class MyAccount extends MobileMediaShareActivity implements View.OnClickL
         if (ok.equals(view)) {
             editUser();
         } else if (reset.equals(view)) {
-
+            name.setText(currentUser.getName());
+            password.setText("");
+            password2.setText("");
+            ok.setEnabled(false);
+            reset.setEnabled(false);
         }
     }
 
@@ -91,96 +96,52 @@ public class MyAccount extends MobileMediaShareActivity implements View.OnClickL
 
     //TextChangedListener
     @Override
-    public void onTextChanged(final CharSequence charSequence, final int start, final int count, final int after) {
-        if ((!((password.getText().toString().trim().length() == 0) && (password2.getText().toString().trim().length() == 0))) &&
-                (!password.getText().toString().equals(password2.getText().toString()))) {
-            ok.setEnabled(false);
-        } else
-            ok.setEnabled(true);
-    }
+    public void onTextChanged(final CharSequence charSequence, final int start, final int count, final int after) {}
 
     //TextChangedListener
     @Override
     public void afterTextChanged(final Editable editable) {
-        if (editable.toString().equals(user.getName()) || (editable.toString().length() == 0))
-            ok.setEnabled(false);
-    }
-
-    private void myAccount() {
-//        try {
-//            new GetAsyncTask(getApplicationContext()) {
-//                @Override
-//                protected void onPostExecute(HttpsResponse response) {
-//                    if (!response.isSuccess()) {
-//                        error(R.string.authenticationError, response.getResponse());
-//                        return;
-//                    }
-//                    try {
-//                        //[ ... ] -> json Array
-//                        final JSONObject user = new JSONObject(response.getResponse());
-//                        //{"email":"haralambos9094@gmail.com","name":"labis","status":"NORMAL"}
-//                        final String email = user.getString("email");
-//                        final UserStatus status = (user.getString("status") == null) ? null : UserStatus.valueOf(user.getString("status"));
-//                        final String name = (user.toString().contains("\"name\"")) ? user.getString("name") : null;
-//                        final String photo = (user.toString().contains("\"photo\"")) ? user.getString("photo") : null;
-//                        Log.d(MobileMediaShareActivity.class.getName(), "Retrieved user");
-//                        MyAccount.this.user = ((email == null) || (status == null)) ? null : new User(email, status, name, photo);
-//                        Log.d(MobileMediaShareActivity.class.getName(), "Updated list");
-//                        MyAccount.this.name.setText(name);
-//                        MyAccount.this.email.setText(MyAccount.this.user.getEmail());
-//                        MyAccount.this.status.setText("" + MyAccount.this.user.getStatus()); //TODO
-//
-//                        if ((MyAccount.this.name.getText().toString().trim().length() != 0) &&
-//                                MyAccount.this.name.getText().toString().trim().equals(MyAccount.this.user.getName()) ||
-//                                (MyAccount.this.name.getText().toString().trim().length() == 0))
-//                            ok.setEnabled(false);
-//                        else
-//                            ok.setEnabled(true);
-//
-//                    } catch (final JSONException e) {
-//                        error(R.string.authenticationError, e.getMessage());
-//                    }
-//                }
-//            }.execute(new URL(String.format(getResources().getString(R.string.userServletUrl),
-//                    getResources().getString(R.string.secureBaseUrl))));
-//        } catch (IOException e) {
-//            error(R.string.authenticationError, e.getMessage());
-//        }
+        final boolean enabled = !(name.getText().toString().equals(currentUser.getName()) &&
+                password.getText().toString().isEmpty() && password2.getText().toString().isEmpty());
+        ok.setEnabled(enabled);
+        reset.setEnabled(enabled);
     }
 
     private void editUser() {
-//        final String userServlet = "userServlet";
-//        final String name = this.name.getText().toString().trim();
-//        final String password = (this.password.getText().toString().trim().length() == 0) ? null : this.password.getText().toString().trim(); //TODO password2 check
-//        //action=editUser&email=haralambos9094%40gmail.com&password=321&name=...&photo=...
-//        final StringBuilder parameters = new StringBuilder();//(String.format(getResources().getString(R.string.editUserUrl),
-//                //getResources().getString(R.string.secureBaseUrl)));
-//
-//        parameters.append("action=").append("editUser");
-//        parameters.append("&email=").append("haralambos9094%40gmail.com"); //TODO encode
-//
-//        if (name != null)
-//            parameters.append("&name=").append(name);
-//        if (password != null)
-//            parameters.append("&password=").append(password);
-//        //TODO photo
-//Log.d(MyAccount.class.getName(), parameters.toString());
-//        new HttpsPostEditAsyncTask(getApplicationContext()) {
-//
-//            @Override
-//            protected void onPostExecute(HttpsResponse response) {
-//                if (!response.isSuccess()) {
-//                    error(R.string.errorEditingUser, response.getResponse());
-//                    return;
-//                }
-//Toast.makeText(MyAccount.this, response.getResponse(), Toast.LENGTH_LONG).show();
-//Log.d(MyAccount.class.getName(), response.getResponse());
-//                final Intent activityIntent = new Intent(getApplicationContext(), Map.class);
-//                activityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                MyAccount.this.finish();
-//                startActivity(activityIntent);
-//
-//            }
-//        }.execute(userServlet, parameters.toString());
+        if (!password.getText().toString().equals(password2.getText().toString())) {
+            Toast.makeText(this, getResources().getString(R.string.passwordsDoNotMatch), Toast.LENGTH_LONG).show();
+            return;
+        }
+        try {
+            final String url = String.format(getResources().getString(R.string.userServletUrl),
+                    getResources().getString(R.string.baseUrl));
+            //Swma tou http post
+            final HttpEntity entity = new StringEntity(String.format(ENTITY, name.getText().toString(),
+                    //an to password keno den to vazei katholou sto entity
+                    password.getText().toString().isEmpty() ? "" :
+                            String.format(PASSWORD, password.getText().toString())));
+            final HttpResponse response = new PostAsyncTask(this,new URL(url), entity,
+                    APPLICATION_FORM_URL_ENCODED).execute().get();
+            if (response == null) {
+                error(R.string.errorEditingUser, getResources().getString(R.string.connectionError));
+                return;
+            }
+            if ((response.getStatusLine().getStatusCode() == HttpClient.HTTP_UNAUTHORIZED) && login()) {
+                editUser();
+            }
+            if (response.getStatusLine().getStatusCode() != HttpClient.HTTP_OK) {
+                error(R.string.errorEditingUser, response.getStatusLine().getReasonPhrase());
+                return;
+            }
+            finish();
+        } catch (final UnsupportedEncodingException e) {
+            error(R.string.errorEditingUser, e.getMessage());
+        } catch (final MalformedURLException e) {
+            error(R.string.errorEditingUser, e.getMessage());
+        } catch (final InterruptedException e) {
+            error(R.string.errorEditingUser, e.getMessage());
+        } catch (final ExecutionException e) {
+            error(R.string.errorEditingUser, e.getMessage());
+        }
     }
 }

@@ -440,7 +440,7 @@ div.content.listPage > table:nth-child(5) {
 
 /*Edit Media page*/
 div.content.editMediaPage {
-	height: 1000px;
+	height: 1020px; /*height: 1000px;*/
 }
 /*first p element - tilte*/
 .content.editMediaPage p:nth-child(4) {
@@ -501,7 +501,7 @@ div.content.editMediaPage img.editMediaFile {
 
 /*upload page*/
 div.content.uploadPage {
-	height: 1110px;
+	height: 1120px; /*height: 1110px;*/
 }
 
 .content.uploadPage .uploadImage {
@@ -692,7 +692,7 @@ div.photoSelector {
 }
 
 .content.myAccount p.myAccountButtons {
-	padding-left: 75px;
+	padding-left: 475px; /*padding-left: 75px;*/
 	width: auto!important;
 }
 

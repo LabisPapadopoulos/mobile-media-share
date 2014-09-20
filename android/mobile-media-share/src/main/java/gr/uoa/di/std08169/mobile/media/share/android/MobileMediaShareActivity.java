@@ -4,11 +4,17 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
+import android.content.Context;
 import android.content.Intent;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -19,8 +25,11 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
 import gr.uoa.di.std08169.mobile.media.share.android.authentication.Authenticator;
@@ -33,13 +42,75 @@ import gr.uoa.di.std08169.mobile.media.share.android.user.UserStatus;
 public abstract class MobileMediaShareActivity extends ActionBarActivity {
     protected static final String APPLICATION_FORM_URL_ENCODED = "application/x-www-form-urlencoded";
     protected static final String UTF_8 = "UTF-8";
+    protected static final float GOOGLE_MAPS_ZOOM = 8.0f;
+    protected static final float MARKER_ANCHOR_X = 0.5f;
+    protected static final float MARKER_ANCHOR_Y = 1.0f;
+    protected static final double MIN_DISTANCE = 0.000001;
+    private static final double DEFAULT_LATITUDE = 37.968546;	//DIT lat
+    private static final double DEFAULT_LONGITUDE = 23.766968;	//DIT lng
+    private static final int DURATION_BASE = 60;
+    private static final BigDecimal DEGREES_BASE = new BigDecimal(60);
     private static final String LOGIN_ENTITY = "action=login&email=%s&password=%s&url=http:%%2F%%2Fwww.example.org%%2F&locale=en&redirect=false";
     protected User currentUser;
 
-    @Override
-    protected void onCreate(final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        currentUser = retrieveUser();
+    public String formatLatitude(final BigDecimal latitude) {
+        // 1 moira = 60 prwta lepta
+        // 1 prwto lepto = 60 deutera
+        // to divideAndRemainder kanei tin diairesh kai epistefei:
+        // temp1[0]: phliko
+        // temp1[1]: upoloipo
+        final BigDecimal[] temp1 = latitude.multiply(DEGREES_BASE).multiply(DEGREES_BASE).divideAndRemainder(DEGREES_BASE);
+        final int seconds = temp1[1].intValue();
+        final BigDecimal[] temp2 = temp1[0].divideAndRemainder(DEGREES_BASE);
+        final int minutes = temp2[1].intValue();
+        final int degrees = temp2[0].intValue();
+        //an einai arnhtiko-> einai notia, alliws voreia
+        if (latitude.compareTo(BigDecimal.ZERO) < 0) {
+            return String.format(getResources().getString(R.string.latitudeFormatSouth), -degrees, -minutes, -seconds);
+        } else {
+            return String.format(getResources().getString(R.string.latitudeFormatNorth), degrees, minutes, seconds);
+        }
+    }
+
+    public String formatLongitude(final BigDecimal longitude) {
+        final BigDecimal[] temp1 = longitude.multiply(DEGREES_BASE).multiply(DEGREES_BASE).divideAndRemainder(DEGREES_BASE);
+        final int seconds = temp1[1].intValue();
+        final BigDecimal[] temp2 = temp1[0].divideAndRemainder(DEGREES_BASE);
+        final int minutes = temp2[1].intValue();
+        final int degrees = temp2[0].intValue();
+        //an einai arnhtiko-> einai dutika, alliws anatolika
+        if (longitude.compareTo(BigDecimal.ZERO) < 0) {
+            return String.format(getResources().getString(R.string.longitudeFormatWest), -degrees, -minutes, -seconds);
+        } else {
+            return String.format(getResources().getString(R.string.longitudeFormatEast), degrees, minutes, seconds);
+        }
+    }
+
+    public String formatDuration(final int duration) {
+        final int seconds = duration % DURATION_BASE;
+        final int minutes = (duration / DURATION_BASE) % DURATION_BASE; //p.x se 63 lepta -> krataei 3 lepta
+        final int hours = duration / DURATION_BASE / DURATION_BASE;
+        //{0}h {1}m {2}s
+        if (hours > 0)
+            return String.format(getResources().getString(R.string.durationFormatHours), hours, minutes, seconds);
+        else if (minutes > 0)
+            return String.format(getResources().getString(R.string.durationFormatMinutes), minutes, seconds);
+        else
+            return String.format(getResources().getString(R.string.durationFormatSeconds), seconds);
+    }
+
+    public String formatEmail(final String email) {
+        return String.format(getResources().getString(R.string.emailFormat), email.substring(0, email.indexOf('@')));
+    }
+
+    public String formatSize(final long size) {
+        //megethos arxeiou (B, KB, MB)
+        if (size < 1024l)
+            return String.format(getResources().getString(R.string.sizeFormatB), (int) size);
+        else if (size < 1024l * 1024l)
+            return String.format(getResources().getString(R.string.sizeFormatKB), size / 1024.0f);
+        else
+            return String.format(getResources().getString(R.string.sizeFormatMB), size / 1024.0f / 1024.0f);
     }
 
     protected boolean login() {
@@ -85,10 +156,61 @@ public abstract class MobileMediaShareActivity extends ActionBarActivity {
         }
     }
 
+    protected LatLng getLatLng() {
+        final LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        //Dhmiourgeia krithriwn gia na parei ton kalutero location manager
+        final Criteria criteria = new Criteria();
+        criteria.setAltitudeRequired(false); //oxi krithrio upsometrou
+        criteria.setBearingRequired(false); //oxi gia fora (pros ta pou koitaei)
+        criteria.setSpeedRequired(false);
+        criteria.setCostAllowed(false); //oxi xrewsh gia ton provider
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        criteria.setPowerRequirement(Criteria.POWER_LOW);
+        criteria.setHorizontalAccuracy(Criteria.ACCURACY_HIGH); //auto mas endiaferei gia to latitude kai longitude
+        final Location location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
+        return new LatLng((location == null) ? DEFAULT_LATITUDE : location.getLatitude(),
+                (location == null) ? DEFAULT_LONGITUDE : location.getLongitude());
+    }
+
+    protected String formatLocation(final BigDecimal latitude, final BigDecimal longitude) {
+        return String.format(getResources().getString(R.string.locationFormat), formatLatitude(latitude), formatLongitude(longitude));
+    }
+
     protected void error(final int message, final Object... arguments) {
         Log.e(MobileMediaShareActivity.class.getName(), String.format(getResources().getString(message), arguments));
         Toast.makeText(this, String.format(getResources().getString(message), arguments), Toast.LENGTH_LONG).show();
         finish();
+    }
+
+    @Override
+    protected void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        currentUser = retrieveUser();
+    }
+
+    @Override
+    protected void onPause() {
+        try {
+            // logout
+            final String url = String.format(getResources().getString(R.string.logoutUrl),
+                    getResources().getString(R.string.baseUrl));
+            new GetAsyncTask(this, new URL(url)).execute().get();
+            Log.d(MobileMediaShareActivity.class.getName(), "User " + currentUser + " logged out");
+        } catch (final MalformedURLException e) {
+            e.printStackTrace();
+        } catch (final InterruptedException e) {
+            e.printStackTrace();
+        } catch (final ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        currentUser = retrieveUser();
+        super.onResume();
     }
 
     private User retrieveUser() {
