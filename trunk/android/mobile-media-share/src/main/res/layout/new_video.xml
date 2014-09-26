@@ -1,142 +1,121 @@
-<LinearLayout
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-
+    android:descendantFocusability="beforeDescendants"
+    android:focusableInTouchMode="true">
     <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/scrollView">
-
+        android:layout_height="fill_parent">
         <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="320dp"
-            android:layout_height="fill_parent">
-
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical">
             <SurfaceView
                 android:id="@+id/surface_camera"
-                android:layout_width="300dp"
-                android:layout_height="300dp"
+                android:layout_width="@dimen/cameraWidthHeight"
+                android:layout_height="@dimen/cameraWidthHeight"
                 android:layout_marginTop="10dp"
                 android:layout_gravity="center"
                 android:layout_weight="1" />
-
             <LinearLayout
-                android:orientation="horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="20dp"
-                android:layout_marginBottom="10dp">
-
+                android:layout_marginBottom="10dp"
+                android:orientation="horizontal">
                 <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Start recording"
                     android:id="@+id/startRecording"
-                    android:layout_gravity="center_horizontal"/>
-
-                <Button
+                    android:text="@string/startRecording"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Stop recording"
+                    android:layout_gravity="center_horizontal"/>
+                <Button
                     android:id="@+id/stopRecording"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/stopRecording"
                     android:layout_gravity="center_horizontal" />
             </LinearLayout>
-
             <LinearLayout
-                android:orientation="horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
-                android:layout_marginLeft="5dp">
-
+                android:layout_marginLeft="5dp"
+                android:orientation="horizontal">
                 <TextView
-                    android:layout_width="100dp"
+                    android:text="@string/title"
+                    android:layout_width="@dimen/titleNewPhotoVideoWidth"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Title"
                     android:layout_gravity="center" />
-
                 <EditText
-                    android:layout_width="200dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/title" />
-
+                    android:id="@+id/title"
+                    android:layout_width="@dimen/titleNewPhotoVideoEditTextWidth"
+                    android:layout_height="wrap_content"/>
             </LinearLayout>
             <LinearLayout
-                android:orientation="horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
-                android:layout_marginLeft="5dp">
-
+                android:layout_marginLeft="5dp"
+                android:orientation="horizontal">
                 <TextView
-                    android:layout_width="95dp"
+                    android:text="@string/publik"
+                    android:layout_width="@dimen/isPublicTextView"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Public"
                     android:layout_gravity="center" />
-
                 <CheckBox
+                    android:id="@+id/isPublic"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/isPublic" />
-
+                    android:layout_height="wrap_content"/>
             </LinearLayout>
             <LinearLayout
-                android:orientation="horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="45dp"
-                android:layout_marginLeft="5dp">
-
+                android:layout_marginLeft="5dp"
+                android:orientation="horizontal">
                 <TextView
-                    android:layout_width="160dp"
+                    android:text="@string/latitudeAndLongitude"
+                    android:layout_width="@dimen/latitudeAndLongitudeWidth"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Latitude/Longitude"
                     android:layout_gravity="center" />
-
                 <TextView
+                    android:id="@+id/latlng"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:id="@+id/latlng"
                     android:layout_gravity="center" />
-
             </LinearLayout>
-
             <fragment
-                class="com.google.android.gms.maps.MapFragment"
+                android:id="@+id/map"
                 android:layout_width="wrap_content"
-                android:layout_height="400dp"
+                android:layout_height="@dimen/googleMapHeight"
                 android:layout_marginTop="10dp"
-                android:id="@+id/map" />
-
+                class="com.google.android.gms.maps.MapFragment"/>
             <LinearLayout
-                android:orientation="horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:layout_marginLeft="5dp">
-
+                android:layout_marginLeft="5dp"
+                android:orientation="horizontal">
                 <Button
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content"
-                    android:text="Ok"
                     android:id="@+id/ok"
-                    android:layout_gravity="center_horizontal" />
-
-                <Button
-                    android:layout_width="100dp"
+                    android:text="@string/ok"
+                    android:layout_width="@dimen/buttonWidth"
                     android:layout_height="wrap_content"
-                    android:text="Reset"
-                    android:id="@+id/reset"
                     android:layout_gravity="center_horizontal" />
-
+                <Button
+                    android:id="@+id/reset"
+                    android:text="Reset"
+                    android:layout_width="@dimen/buttonWidth"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal" />
             </LinearLayout>
-
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

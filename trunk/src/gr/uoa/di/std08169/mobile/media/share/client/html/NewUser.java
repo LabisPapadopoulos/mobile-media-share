@@ -3,7 +3,7 @@ package gr.uoa.di.std08169.mobile.media.share.client.html;
 import gr.uoa.di.std08169.mobile.media.share.client.i18n.MobileMediaShareMessages;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.shared.GWT;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -77,7 +77,8 @@ public class NewUser extends Composite implements ClickHandler, EntryPoint, KeyU
 			//Klhsh tou UserServlet me ajax, me tin methodo put (Ylopoihsh protokolou REST)
 			//Oi Browsers den upostirizoun PUT kai kat' epektash formes opote kanoun GET kai vazoun ta dedomena sto url.
 			//Gi' auto ginetai xrhsh tou RequestBuilder
-			final RequestBuilder request = new RequestBuilder(RequestBuilder.PUT, MOBILE_MEDIA_SHARE_URLS.userServletRegister(
+			final RequestBuilder request = new RequestBuilder(RequestBuilder.PUT, 
+					MOBILE_MEDIA_SHARE_URLS.userServletRegister(GWT.getHostPageBaseURL(), 
 					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
 					URL.encodeQueryString(email.getValue()), URL.encodeQueryString(password.getValue()),
 					URL.encodeQueryString(password2.getValue())));
@@ -87,9 +88,8 @@ public class NewUser extends Composite implements ClickHandler, EntryPoint, KeyU
 			} catch (final RequestException e) {
 				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCreatingUser(e.getMessage()));
 				//redirect sto map
-				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-						//me to antistoixo locale 
-						LocaleInfo.getCurrentLocale().getLocaleName())));
+				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+						URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 			}
 		} else if (clickEvent.getSource() == reset) {
 			email.setValue(null);
@@ -97,9 +97,8 @@ public class NewUser extends Composite implements ClickHandler, EntryPoint, KeyU
 			password2.setValue(null);
 			ok.setEnabled(false);
 		} else if (clickEvent.getSource() == cancel) {
-			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-					//me to antistoixo locale 
-					LocaleInfo.getCurrentLocale().getLocaleName())));
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 		}
 	}
 	
@@ -107,9 +106,8 @@ public class NewUser extends Composite implements ClickHandler, EntryPoint, KeyU
 	public void onError(final Request request, final Throwable throwable) {
 		Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCreatingUser(throwable.getMessage()));
 		//redirect sto map
-		Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-				//me to antistoixo locale 
-				LocaleInfo.getCurrentLocale().getLocaleName())));
+		Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+				URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 	}
 	
 	@Override
@@ -133,9 +131,8 @@ public class NewUser extends Composite implements ClickHandler, EntryPoint, KeyU
 		if (response.getStatusCode() != Response.SC_OK) {
 			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorCreatingUser(response.getStatusText()));
 			//redirect sto map
-			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-					//me to antistoixo locale 
-					LocaleInfo.getCurrentLocale().getLocaleName())));
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 			return;
 		}
 		form.getStyle().setDisplay(Style.Display.NONE);

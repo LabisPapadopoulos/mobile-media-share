@@ -8,7 +8,7 @@ import gr.uoa.di.std08169.mobile.media.share.client.services.user.UserServiceAsy
 import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.shared.GWT;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -109,18 +109,19 @@ public class MyAccount extends Composite implements ClickHandler, EntryPoint, Ke
 				public void onFailure(final Throwable throwable) {
 					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorEditingUser(throwable.getMessage()));
 					//redirect sto map
-					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-							LocaleInfo.getCurrentLocale().getLocaleName())));
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 				}
 
 				@Override
 				public void onSuccess(final String _) {
-					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-							LocaleInfo.getCurrentLocale().getLocaleName())));
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 				}
 			});
 		} else if (clickEvent.getSource() == reset) {
-			photo.setUrl((user.getPhoto() == null) ? MOBILE_MEDIA_SHARE_URLS.defaultUser() : MOBILE_MEDIA_SHARE_URLS.download(user.getPhoto()));
+			photo.setUrl((user.getPhoto() == null) ? MOBILE_MEDIA_SHARE_URLS.defaultUser(GWT.getHostPageBaseURL()) : 
+				MOBILE_MEDIA_SHARE_URLS.download(GWT.getHostPageBaseURL(), user.getPhoto()));
 			photoSelector.setValue(user.getPhoto());
 			name.setValue(user.getName());
 			status.setText(USER_STATUS_CONSTANTS.getString(user.getStatus().name()));
@@ -152,9 +153,8 @@ public class MyAccount extends Composite implements ClickHandler, EntryPoint, Ke
 			public void onFailure(final Throwable throwable) {
 				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingUser(throwable.getMessage()));
 				//redirect sto map
-				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-						//me to antistoixo locale 
-						LocaleInfo.getCurrentLocale().getLocaleName())));
+				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+						URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 			}
 
 			@Override
@@ -162,9 +162,8 @@ public class MyAccount extends Composite implements ClickHandler, EntryPoint, Ke
 				if (user == null) {
 					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingUser(MOBILE_MEDIA_SHARE_CONSTANTS.userNotFound()));
 					//redirect sto map
-					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-							//me to antistoixo locale 
-							LocaleInfo.getCurrentLocale().getLocaleName())));
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 					return;
 				}
 				MyAccount.this.user = user;
@@ -180,9 +179,9 @@ public class MyAccount extends Composite implements ClickHandler, EntryPoint, Ke
 					//an dialexe th default fwtografia o xrhsths
 		photo.setUrl((photoSelector.getValue() == null) ?
 				// tote th default
-				MOBILE_MEDIA_SHARE_URLS.defaultUser() :
+				MOBILE_MEDIA_SHARE_URLS.defaultUser(GWT.getHostPageBaseURL()) :
 					//alliws auth pou dialexe
-					MOBILE_MEDIA_SHARE_URLS.download(photoSelector.getValue()));
+					MOBILE_MEDIA_SHARE_URLS.download(GWT.getHostPageBaseURL(), photoSelector.getValue()));
 		ok.setEnabled(true);
 	}
 }

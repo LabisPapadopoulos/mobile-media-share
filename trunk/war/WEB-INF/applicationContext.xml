@@ -74,6 +74,16 @@
 		<constructor-arg ref="userService" />
 	</bean>
 	
+	<bean id="jdbcDownloadService" class="gr.uoa.di.std08169.mobile.media.share.server.jdbc.DownloadServiceImpl" scope="singleton" init-method="init" destroy-method="shutdown">
+		<!-- San orisma tha parei bean me id to ref (etoimo dataSource) -->
+		<constructor-arg ref="dataSource" /> <!-- deikths se object -->
+		<constructor-arg value="${download.service.timeout}" />
+	</bean>
+	
+	<bean id="downloadService" class="gr.uoa.di.std08169.mobile.media.share.server.proxies.DownloadServiceProxy" scope="singleton">
+	    <constructor-arg ref="${download.service}" /> <!-- diavazei apo property to user service -->
+	</bean>
+		
 	<!-- static final gr.uoa.di.std08169.mobile.media.share.server.proxies.MediaServiceProxy mediaService = new 
 	gr.uoa.di.std08169.mobile.media.share.server.proxies.MediaServiceProxy(${media.service}); --> 
 	<bean id="mediaService" class="gr.uoa.di.std08169.mobile.media.share.server.proxies.MediaServiceProxy" scope="singleton">

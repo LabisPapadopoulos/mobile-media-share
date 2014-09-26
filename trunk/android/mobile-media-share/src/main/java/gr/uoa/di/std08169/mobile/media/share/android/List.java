@@ -19,7 +19,6 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
 import org.json.JSONArray;
@@ -40,7 +39,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.concurrent.ExecutionException;
 
-import gr.uoa.di.std08169.mobile.media.share.android.ListView.ListViewAdapter;
 import gr.uoa.di.std08169.mobile.media.share.android.http.DeleteAsyncTask;
 import gr.uoa.di.std08169.mobile.media.share.android.http.GetAsyncTask;
 import gr.uoa.di.std08169.mobile.media.share.android.http.HttpClient;
@@ -125,8 +123,7 @@ public class List extends MobileMediaShareActivity implements AdapterView.OnItem
             alertDialogBuilder.create().show();
         } else if (view == download) {
             selectedDateField = null;
-            downloadMedia();//TODO
-Toast.makeText(this, "Download under construction", Toast.LENGTH_LONG).show();
+            downloadMedia(selectedMedia);
         }
 
     }
@@ -308,7 +305,7 @@ Toast.makeText(this, "Download under construction", Toast.LENGTH_LONG).show();
         }
 
         final StringBuilder url = new StringBuilder(String.format(getResources().getString(R.string.getResultUrl),
-                getResources().getString(R.string.baseUrl)));
+                getResources().getString(R.string.secureBaseUrl)));
         if (title != null)
             url.append("&title=").append(title);
         if (type != null)
@@ -415,7 +412,7 @@ Toast.makeText(this, "Download under construction", Toast.LENGTH_LONG).show();
     private void deleteMedia() {
         try {
             final String url = String.format(getResources().getString(R.string.deleteMediaUrl),
-                    getResources().getString(R.string.baseUrl),
+                    getResources().getString(R.string.secureBaseUrl),
                     URLEncoder.encode(selectedMedia.getId(), UTF_8));
             final HttpResponse response = new DeleteAsyncTask(this, new URL(url)).execute().get();
             if (response == null) //An null, den exei diktuo
@@ -433,10 +430,6 @@ Toast.makeText(this, "Download under construction", Toast.LENGTH_LONG).show();
         } catch (final ExecutionException e) {
             error(R.string.errorDeletingMedia, e.getMessage());
         }
-    }
-
-    private void downloadMedia() { //TODO
-
     }
 
     private View selectedView = null;

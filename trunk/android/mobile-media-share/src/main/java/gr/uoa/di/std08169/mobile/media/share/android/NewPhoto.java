@@ -3,6 +3,7 @@ package gr.uoa.di.std08169.mobile.media.share.android;
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Environment;
@@ -12,12 +13,12 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -29,80 +30,64 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URL;
+import java.nio.charset.Charset;
 
 import gr.uoa.di.std08169.mobile.media.share.android.CapturePhoto.ShowCamera;
+import gr.uoa.di.std08169.mobile.media.share.android.http.HttpClient;
+import gr.uoa.di.std08169.mobile.media.share.android.http.PostAsyncTask;
 
 /**
  * @see <a href="http://www.tutorialspoint.com/android/android_camera.htm">Android Capture Photo</a>
  */
 public class NewPhoto extends MobileMediaShareActivity implements GoogleMap.OnMapClickListener,
         TextWatcher, View.OnClickListener, PictureCallback {
+    private static final int ROTATION = 90;
+    private static final String PREFIX = "photo";
+    private static final String SUFFIX = ".jpg";
+    private static final int QUALITY = 85;
 
-    public static final String FILE_EXTENSION = ".jpg";
-
-    private Button capturePhoto;
+    private FrameLayout photo;
+    private Button capture;
     private EditText title;
     private CheckBox isPublic;
     private TextView latlng;
     private Button ok;
     private Button reset;
-
-    private Camera camera;
-    private ShowCamera cameraPreview;
-    private FrameLayout cameraFrame;
     private Bitmap bitmap;
-    private String mediaStoragePath;
-
+    private Camera camera;
     private ProgressDialog progress;
-
     private Marker marker;
-    private String latitude;
-    private String longitude;
-
-    public static Camera getCameraInstance(){
-        Camera camera = null;
-        try {
-            camera = Camera.open();
-            camera.setDisplayOrientation(90); //peristrofh 90 moires
-        }
-        catch (Exception e){
-        }
-        return camera;
-    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.new_photo);
-
-        camera = getCameraInstance();
-
-        capturePhoto = (Button) findViewById(R.id.capturePhoto);
-        capturePhoto.setOnClickListener(this);
-
+        photo = (FrameLayout) findViewById(R.id.photo);
+        capture = (Button) findViewById(R.id.capture);
+        capture.setOnClickListener(this);
         title = (EditText) findViewById(R.id.title);
         title.addTextChangedListener(this);
-
         isPublic = (CheckBox) findViewById(R.id.isPublic);
-        isPublic.setOnClickListener(this);
-
         latlng = (TextView) findViewById(R.id.latlng);
-
         ok = (Button) findViewById(R.id.ok);
+        ok.setEnabled(false);
         ok.setOnClickListener(this);
-
         reset = (Button) findViewById(R.id.reset);
+        reset.setEnabled(false);
         reset.setOnClickListener(this);
-
-
-        cameraPreview = new ShowCamera(this, camera);
-        cameraFrame = (FrameLayout) findViewById(R.id.camera_preview);
-        cameraFrame.addView(cameraPreview);
-
-        mediaStoragePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath(); ///storage/sdcard0/Pictures
-
+        // initialize camera
+        initializeCamera();
+        // initialize map
         try {
             MapsInitializer.initialize(getApplicationContext());
             final LatLng latLng = getLatLng();
@@ -116,146 +101,147 @@ public class NewPhoto extends MobileMediaShareActivity implements GoogleMap.OnMa
                     position(latLng));
             map.setOnMapClickListener(this);
             latlng.setText(formatLocation(new BigDecimal(latLng.latitude), new BigDecimal(latLng.longitude)));
-        } catch (GooglePlayServicesNotAvailableException e) {
-            error(R.string.errorRetrievingMedia, "error loading Google Maps");
+        } catch (final GooglePlayServicesNotAvailableException e) {
+            error(R.string.errorCapturingPhoto, e.getMessage());
         }
-
-
         progress = new ProgressDialog(this);
         progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progress.setIndeterminate(true);
-        progress.setMessage("Waiting...");
+        progress.setTitle(getResources().getString(R.string.uploadingFile));
+        progress.setMessage(getResources().getString(R.string.pleaseWait));
     }
 
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(final Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.new_photo, menu);
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(final MenuItem item) {
         return  (item.getItemId() == R.id.settings) || super.onOptionsItemSelected(item);
     }
 
     //TextChangedListener
     @Override
-    public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+    public void beforeTextChanged(final CharSequence charSequence, final int i, final int i2, final int i3) {
 
     }
 
     //TextChangedListener
     @Override
-    public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+    public void onTextChanged(final CharSequence charSequence, final int i, final int i2, final int i3) {
 
     }
 
     //TextChangedListener
     @Override
-    public void afterTextChanged(Editable editable) {
-
+    public void afterTextChanged(final Editable editable) {
+        enableOkReset();
     }
 
     //OnMapClickListener
     @Override
-    public void onMapClick(LatLng latLng) {
+    public void onMapClick(final LatLng latLng) {
         latlng.setText(formatLocation(new BigDecimal(latLng.latitude), new BigDecimal(latLng.longitude)));
         marker.setPosition(latLng);
-        this.latitude = String.valueOf(marker.getPosition().latitude);
-        this.longitude = String.valueOf(marker.getPosition().longitude);
     }
 
     //ClickListener
     @Override
-    public void onClick(View view) {
-        if (view == capturePhoto) {
+    public void onClick(final View view) {
+        if (view == capture) {
             //to antikeimeno this (NewPhoto) ulopoiei to interface PictureCallback
             camera.takePicture(null, null, this);
         } else if (view == reset) {
+            initializeCamera();
+            title.setText("");
+            onMapClick(getLatLng());
+            enableOkReset();
+            capture.setEnabled(true);
         } else if (view == ok) {
-            uploadPhoto();
+            upload();
         }
     }
 
-    private void uploadPhoto(){
-        final String title = this.title.getText().toString();
-        final boolean publik = (isPublic.isChecked()) ? true : false;
-        final String latitude = this.latitude;
-        final String longitude = this.longitude;
-        final String absoluteFilePath = mediaStoragePath + File.separator + title + FILE_EXTENSION;
-
-        if(bitmap != null){
-
-            /* Process Bar */
+    private void upload() {
+        try {
             progress.show();
-            final int totalProgressTime = 100;
-
-            final Thread progressThread = new Thread(){
-
+            //Dhmiourgeia enos temp file sto directory me tis eikones
+            final File file = File.createTempFile(PREFIX, SUFFIX, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES));
+            final FileOutputStream output = new FileOutputStream(file);
+            try {
+                bitmap.compress(Bitmap.CompressFormat.JPEG, QUALITY, output);
+            } finally {
+                output.close();
+            }
+            final String title = this.title.getText().toString();
+            final boolean publik = isPublic.isChecked();
+            final BigDecimal latitude = new BigDecimal(marker.getPosition().latitude);
+            final BigDecimal longitude = new BigDecimal(marker.getPosition().longitude);
+            final String url = String.format(getResources().getString(R.string.uploadMediaUrl), getResources().getString(R.string.secureBaseUrl));
+            final ContentType type = ContentType.create(
+                    MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                            MimeTypeMap.getFileExtensionFromUrl(file.toURI().toURL().toString()))
+            );
+            final HttpEntity httpEntity = MultipartEntityBuilder.create().setCharset(Charset.forName(UTF_8)).
+                    setStrictMode().
+                    addBinaryBody("file", file, type, file.getName()).
+                    addTextBody("title", title).
+                    addTextBody("public", Boolean.toString(publik)).
+                    addTextBody("latitude", latitude.toString()).
+                    addTextBody("longitude", longitude.toString()).build();
+            new PostAsyncTask(this, new URL(url), httpEntity, httpEntity.getContentType().getValue()) {
                 @Override
-                public void run(){
-
-                    int jumpTime = 0;
-                    while(jumpTime < totalProgressTime){
-                        try {
-                            sleep(200);
-                            jumpTime += 5;
-                            progress.setProgress(jumpTime);
-                        } catch (InterruptedException e) { }
+                protected void onPostExecute(final HttpResponse response) {
+                    if (response == null) {
+                        error(R.string.errorUploadingMedia, getResources().getString(R.string.connectionError));
+                        return;
                     }
-
+                    if ((response.getStatusLine().getStatusCode() == HttpClient.HTTP_UNAUTHORIZED) && login()) {
+                        upload();
+                    }
+                    if (response.getStatusLine().getStatusCode() != HttpClient.HTTP_OK) {
+                        error(R.string.errorUploadingMedia, response.getStatusLine().getReasonPhrase());
+                        return;
+                    }
+                    progress.dismiss();
+                    finish();
                 }
-            };
-            progressThread.start();
-
-
-            final File mediaFile = new File(absoluteFilePath);
-//            try {
-//                final FileOutputStream fileOutputStream = new FileOutputStream(mediaFile);
-//                bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fileOutputStream);
-//                fileOutputStream.flush();
-//                fileOutputStream.close();
-//
-//                new PostAsyncTask(getApplicationContext()) {
-//
-//                    @Override
-//                    protected void onPostExecute(HttpsResponse response) {
-//                        if (!response.isSuccess()) {
-//                            Toast.makeText(NewPhoto.this, "Error Sending Media", Toast.LENGTH_LONG).show();
-//                            Log.d(NewPhoto.class.getName(), response.getResponse());
-//                            return;
-//                        }
-//
-//                        progress.cancel();
-//                        progressThread.interrupt();
-//
-//                        Toast.makeText(NewPhoto.this, "Photo Uploaded Successfully", Toast.LENGTH_LONG).show();
-//Log.d(NewPhoto.class.getName(), response.getResponse());
-//
-//                        mediaFile.delete();
-//
-//                        final Intent activityIntent = new Intent(getApplicationContext(), Map.class);
-//                        activityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                        startActivity(activityIntent);
-//                        NewPhoto.this.finish();
-//                    }
-//                }.execute(absoluteFilePath, title, Boolean.toString(publik), latitude, longitude);
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-        } else {
-            Toast.makeText(getApplicationContext(), "not taken", Toast.LENGTH_LONG).show();
+            }.execute();
+        } catch (final IOException e) {
+            error(R.string.errorUploadingMedia, e.getMessage());
         }
     }
 
     //PictureCallback
     @Override
-    public void onPictureTaken(byte[] data, Camera camera) {
+    public void onPictureTaken(byte[] data, final Camera camera) {
         bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-        Toast.makeText(getApplicationContext(), "taken", Toast.LENGTH_SHORT).show();
-        NewPhoto.this.camera.release();
+        camera.release();
+        capture.setEnabled(false);
+        enableOkReset();
+    }
+
+    private void enableOkReset() {
+        final boolean enabled = (bitmap != null) && (!title.getText().toString().isEmpty());
+        ok.setEnabled(enabled);
+        reset.setEnabled(enabled);
+    }
+
+    private void initializeCamera() {
+        try {
+            camera = Camera.open();
+        } catch (final Exception e) {
+            error(R.string.errorCapturingPhoto, e.getMessage());
+        }
+        final Point size = new Point();
+        getWindowManager().getDefaultDisplay().getSize(size);
+        if (size.x < size.y)
+            camera.setDisplayOrientation(ROTATION); //peristrofh 90 moires gia Portrait (katakorufo) mode
+        photo.addView(new ShowCamera(this, camera));
+        bitmap = null;
     }
 }

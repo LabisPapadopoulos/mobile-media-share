@@ -51,17 +51,17 @@ public class Login extends Composite implements ClickHandler, EntryPoint, KeyUpH
 	public Login() {
 		//Arxikopoihsh tou grafikou me ton Ui Binder
 		initWidget(LOGIN_UI_BINDER.createAndBindUi(this));
-		url.setValue(MOBILE_MEDIA_SHARE_URLS.map(LocaleInfo.getCurrentLocale().getLocaleName()));
+		url.setValue(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), LocaleInfo.getCurrentLocale().getLocaleName()));
 		locale.setValue(LocaleInfo.getCurrentLocale().getLocaleName());
 		email.addKeyUpHandler(this);
 		password.addKeyUpHandler(this);
 		newUser.addClickHandler(this);
-		forgotPassword.setHref(MOBILE_MEDIA_SHARE_URLS.forgotPassword(LocaleInfo.getCurrentLocale().getLocaleName()));
+		forgotPassword.setHref(MOBILE_MEDIA_SHARE_URLS.forgotPassword(GWT.getHostPageBaseURL(), LocaleInfo.getCurrentLocale().getLocaleName()));
 	}
 	
 	@Override
 	public void onClick(final ClickEvent clickEvent) { // click sto new user
-		Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.newUser(
+		Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.newUser(GWT.getHostPageBaseURL(), 
 			//encodeQueryString: Kwdikopoiei to localeName san parametro gia queryString enos url
 			URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 	}

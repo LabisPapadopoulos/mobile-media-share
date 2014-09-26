@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string-array name="user_status">
+        <item>Χρήστης σε Εκκρεμότητα</item>
+        <item>Κανονικός Χρήστης</item>
+        <item>Διαχειριστής</item>
+        <item>Χρήστης με Ξεχασμένο Συνθηματικό</item>
+        <item>Κλειδωμένος Χρήστης</item>
+    </string-array>
+</resources>

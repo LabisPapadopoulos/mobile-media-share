@@ -19,6 +19,10 @@
 		<servlet-class>gr.uoa.di.std08169.mobile.media.share.server.servlets.MediaServlet</servlet-class>
 	</servlet>
 	<servlet>
+		<servlet-name>downloadServlet</servlet-name>
+		<servlet-class>gr.uoa.di.std08169.mobile.media.share.server.servlets.DownloadServlet</servlet-class>
+	</servlet>
+	<servlet> 
 		<servlet-name>mediaService</servlet-name> <!-- einai tou GWT -->
 		<servlet-class>gr.uoa.di.std08169.mobile.media.share.server.servlets.MediaServiceServlet</servlet-class>
 	</servlet>
@@ -37,7 +41,11 @@
 	    <servlet-name>mediaServlet</servlet-name>
 	    <url-pattern>/mediaServlet</url-pattern>
 	</servlet-mapping>
-	<!-- Akouei stin dieuthinsh /userService -->
+	<servlet-mapping>
+	    <servlet-name>downloadServlet</servlet-name>
+	    <url-pattern>/downloadServlet</url-pattern>
+	</servlet-mapping>
+		<!-- Akouei stin dieuthinsh /userService -->
 	<servlet-mapping>
 		<servlet-name>mediaService</servlet-name>
 		<url-pattern>/mediaService</url-pattern>
@@ -50,7 +58,15 @@
 		<!-- Me to pou xekinaei paei sto map.jsp -->
 		<welcome-file>map.jsp</welcome-file>
 	</welcome-file-list>
-	<!-- Tha zhtaei h efarmogh na mhlaei MONO me https -->
+	<!-- Gia GET sto /downloadServlet den exei kanena periorismo (user-data-constraint) -->
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Download Media</web-resource-name>
+			<http-method>GET</http-method>
+			<url-pattern>/downloadServlet*</url-pattern>
+		</web-resource-collection>
+	</security-constraint>
+	<!-- Tha zhtaei h efarmogh na mhlaei MONO me https gia ola ta alla -->
 	<security-constraint>
 		<!-- Ti theloume na prostatepsoume -->
 		<web-resource-collection>
