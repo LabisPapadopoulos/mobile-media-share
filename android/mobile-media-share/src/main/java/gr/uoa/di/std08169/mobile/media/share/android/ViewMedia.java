@@ -36,7 +36,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
-//import gr.uoa.di.std08169.mobile.media.share.android.http.HttpsDeleteAsyncTask;
 import gr.uoa.di.std08169.mobile.media.share.android.http.DeleteAsyncTask;
 import gr.uoa.di.std08169.mobile.media.share.android.http.GetAsyncTask;
 import gr.uoa.di.std08169.mobile.media.share.android.http.HttpClient;
@@ -122,7 +121,7 @@ public class ViewMedia extends MobileMediaShareActivity implements View.OnClickL
     @Override
     public void onClick(View view) {
         if (view == download) { //TODO
-
+            downloadMedia(media);
         } else if (view == edit) {
             final Intent activityIntent = new Intent(getApplicationContext(), EditMedia.class);
             activityIntent.putExtra("id", media.getId());
@@ -174,7 +173,7 @@ public class ViewMedia extends MobileMediaShareActivity implements View.OnClickL
     private void getMedia() {
         try {
             final String url = String.format(getResources().getString(R.string.getMediaUrl),
-                    getResources().getString(R.string.baseUrl), URLEncoder.encode(id, UTF_8));
+                    getResources().getString(R.string.secureBaseUrl), URLEncoder.encode(id, UTF_8));
             final HttpResponse response = new GetAsyncTask(this, new URL(url)).execute().get();
             if (response == null) //An null, den exei diktuo
                 error(R.string.errorRetrievingMedia, getResources().getString(R.string.connectionError));
@@ -213,7 +212,7 @@ public class ViewMedia extends MobileMediaShareActivity implements View.OnClickL
                 final boolean enabled = media.getUser().equals(currentUser) || (currentUser.getStatus() == UserStatus.ADMIN);
                 edit.setEnabled(enabled);
                 delete.setEnabled(enabled);
-                this.mediaImage.setImageBitmap(BitmapFactory.decodeResource(getResources(), MediaType.getMediaType(media.getType()).getDrawable()));
+                this.mediaImage.setImageBitmap(BitmapFactory.decodeResource(getResources(), MediaType.getMediaType(media.getType()).getLargeDrawable()));
                 this.title.setText(media.getTitle());
                 this.type.setText(getResources().getStringArray(R.array.media_type)[MediaType.getMediaType(media.getType()).ordinal() + 1]);
                 this.size.setText(formatSize(media.getSize()));
@@ -246,7 +245,7 @@ public class ViewMedia extends MobileMediaShareActivity implements View.OnClickL
     private void deleteMedia() {
         try {
             final String url = String.format(getResources().getString(R.string.deleteMediaUrl),
-                    getResources().getString(R.string.baseUrl),
+                    getResources().getString(R.string.secureBaseUrl),
                     URLEncoder.encode(media.getId(), UTF_8));
             final HttpResponse response = new DeleteAsyncTask(this, new URL(url)).execute().get();
             if (response == null) //An null, den exei diktuo

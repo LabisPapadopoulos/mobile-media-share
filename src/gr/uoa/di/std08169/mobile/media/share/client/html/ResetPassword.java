@@ -67,7 +67,8 @@ public class ResetPassword extends Composite implements ClickHandler, EntryPoint
 			//Klhsh tou UserServlet me ajax, me tin methodo put (Ylopoihsh protokolou REST)
 			//Oi Browsers den upostirizoun PUT kai kat' epektash formes opote kanoun GET kai vazoun ta dedomena sto url.
 			//Gi' auto ginetai xrhsh tou RequestBuilder
-			final RequestBuilder request = new RequestBuilder(RequestBuilder.POST, MOBILE_MEDIA_SHARE_URLS.userServletReset(
+			final RequestBuilder request = new RequestBuilder(RequestBuilder.POST, 
+					MOBILE_MEDIA_SHARE_URLS.userServletReset(GWT.getHostPageBaseURL(), 
 					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
 					//apostolh kai tou token sto url anti gia hidden pedio
 					URL.encodeQueryString(token), URL.encodeQueryString(password.getValue()),
@@ -80,9 +81,8 @@ public class ResetPassword extends Composite implements ClickHandler, EntryPoint
 			} catch (final RequestException e) { //den borese na steilei to request
 				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorResettingPassword(e.getMessage()));
 				//redirect sto map
-				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-						//me to antistoixo locale 
-						LocaleInfo.getCurrentLocale().getLocaleName())));
+				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+						URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 			}
 		} else if (clickEvent.getSource() == reset) {
 			password.setValue(null);
@@ -95,9 +95,8 @@ public class ResetPassword extends Composite implements ClickHandler, EntryPoint
 	public void onError(final Request request, final Throwable throwable) {
 		Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorResettingPassword(throwable.getMessage()));
 		//redirect sto map
-		Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-				//me to antistoixo locale 
-				LocaleInfo.getCurrentLocale().getLocaleName())));
+		Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+				URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 	}
 	
 	@Override
@@ -114,9 +113,8 @@ public class ResetPassword extends Composite implements ClickHandler, EntryPoint
 			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorResettingPassword(
 					MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
 			//redirect sto map
-			Window.Location.assign(GWT.getHostPageBaseURL() + MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-					//me to antistoixo locale 
-					LocaleInfo.getCurrentLocale().getLocaleName())));
+			Window.Location.assign(GWT.getHostPageBaseURL() + MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 			return;
 		}
 		RootPanel.get().add(this);
@@ -129,17 +127,15 @@ public class ResetPassword extends Composite implements ClickHandler, EntryPoint
 		if (response.getStatusCode() != Response.SC_OK) {
 			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorResettingPassword(response.getStatusText()));
 			//redirect sto map
-			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-					//me to antistoixo locale 
-					LocaleInfo.getCurrentLocale().getLocaleName())));
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 			return;
 		}
 		password.setValue(null);
 		password2.setValue(null);
 		ok.setEnabled(false);
 		reset.setEnabled(false);
-		Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-				//me to antistoixo locale 
-				LocaleInfo.getCurrentLocale().getLocaleName())));
+		Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+				URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 	}
 }

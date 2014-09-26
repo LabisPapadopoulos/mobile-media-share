@@ -9,7 +9,7 @@ import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaResult;
 import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
 import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
 
-import com.google.gwt.core.shared.GWT;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -108,7 +108,7 @@ public class PhotoSelector extends Composite implements ClickHandler {
 				for (int i = 0; (i < ROWS * COLUMNS) && (i < result.getMedia().size()); i++) {
 					final Media media = result.getMedia().get(i);
 					final Image image = new Image();
-					image.setUrl(MOBILE_MEDIA_SHARE_URLS.download(media.getId()));
+					image.setUrl(MOBILE_MEDIA_SHARE_URLS.download(GWT.getHostPageBaseURL(), media.getId()));
 					image.setTitle(media.getTitle());
 					image.setAltText(media.getTitle());
 					image.setWidth(IMAGE_WIDTH);
@@ -131,7 +131,7 @@ public class PhotoSelector extends Composite implements ClickHandler {
 				}
 				if (page == totalPages - 1) { //sthn teleutaia selida bazei kai th default photo
 					final Image image = new Image();
-					image.setUrl(MOBILE_MEDIA_SHARE_URLS.defaultUser());
+					image.setUrl(MOBILE_MEDIA_SHARE_URLS.defaultUser(GWT.getHostPageBaseURL()));
 					image.setTitle(MOBILE_MEDIA_SHARE_CONSTANTS.default_());
 					image.setAltText(MOBILE_MEDIA_SHARE_CONSTANTS.default_());
 					image.setWidth(IMAGE_WIDTH);

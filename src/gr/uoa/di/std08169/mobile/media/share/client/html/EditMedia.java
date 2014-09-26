@@ -109,17 +109,17 @@ public class EditMedia extends Composite implements ClickHandler, EntryPoint, Go
 				public void onFailure(final Throwable throwable) {
 					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorEditingMedia(throwable.getMessage()));
 					//redirect sto map
-					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-							//me to antistoixo locale 
-							LocaleInfo.getCurrentLocale().getLocaleName())));
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+													//me to antistoixo locale
+							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 				}
 
 				@Override
 				public void onSuccess(final Void _) {
 					//redirect sto map
-					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-							//me to antistoixo locale 
-							LocaleInfo.getCurrentLocale().getLocaleName())));
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(),
+													//me to antistoixo locale
+							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 				}
 			});
 		} else if (clickEvent.getSource() == reset) {
@@ -149,8 +149,8 @@ public class EditMedia extends Composite implements ClickHandler, EntryPoint, Go
 				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingUser(
 						MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
 				//redirect sto map
-				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString( 
-						LocaleInfo.getCurrentLocale().getLocaleName())));
+				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+						URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 			}
 
 			@Override
@@ -159,8 +159,8 @@ public class EditMedia extends Composite implements ClickHandler, EntryPoint, Go
 					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingUser(
 							MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
 					//redirect sto map
-					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString( 
-							LocaleInfo.getCurrentLocale().getLocaleName())));
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(),
+							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 					return;
 				}
 				EditMedia.this.user = user;
@@ -194,9 +194,9 @@ public class EditMedia extends Composite implements ClickHandler, EntryPoint, Go
 			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingMedium(
 					MOBILE_MEDIA_SHARE_CONSTANTS.noMediaIdSpecified()));
 			//redirect sto map
-			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-					//me to antistoixo locale 
-					LocaleInfo.getCurrentLocale().getLocaleName())));
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+										//me to antistoixo locale
+					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 		} else {
 			//Klhsh tou MEDIA_SERVICE gia na paroume to antikeimeno
 			MEDIA_SERVICE.getMedia(id, new AsyncCallback<Media>() {
@@ -204,9 +204,8 @@ public class EditMedia extends Composite implements ClickHandler, EntryPoint, Go
 				public void onFailure(final Throwable throwable) {
 					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingMedium(throwable.getMessage()));
 					//redirect sto map
-					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-							//me to antistoixo locale 
-							LocaleInfo.getCurrentLocale().getLocaleName())));
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 				}
 
 				@Override
@@ -215,9 +214,8 @@ public class EditMedia extends Composite implements ClickHandler, EntryPoint, Go
 						Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorEditingMedia(
 								MOBILE_MEDIA_SHARE_CONSTANTS.mediaNotFound()));
 						//redirect sto map
-						Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-								//me to antistoixo locale 
-								LocaleInfo.getCurrentLocale().getLocaleName())));
+						Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+								URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 					//Vrethike to media kai anhkei ston sundedemeno xrhsth 'h o xrhsths einai diaxeirisths
 					} else if (user.equals(media.getUser()) || (user.getStatus() == UserStatus.ADMIN)) {
 						//Topika apothikeush tou media pou tha ginei edit
@@ -228,9 +226,8 @@ public class EditMedia extends Composite implements ClickHandler, EntryPoint, Go
 						Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorEditingMedia(
 								MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
 						//redirect sto map
-						Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-								//me to antistoixo locale 
-								LocaleInfo.getCurrentLocale().getLocaleName())));
+						Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+								URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 					}
 				}
 			});

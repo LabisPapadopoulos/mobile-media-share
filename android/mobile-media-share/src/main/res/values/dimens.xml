@@ -2,4 +2,34 @@
 <resources>
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="buttonDownloadWidth">310dp</dimen>
+    <dimen name="buttonReset">100dp</dimen>
+    <dimen name="buttonViewMediaWidth">110dp</dimen>
+    <dimen name="buttonViewWidth">110dp</dimen>
+    <dimen name="buttonWidth">100dp</dimen>
+    <dimen name="cameraWidthHeight">300dp</dimen>
+    <dimen name="editTextWidth">200dp</dimen>
+    <dimen name="fileTextViewWidth">100dp</dimen>
+    <dimen name="googleMapHeight">400dp</dimen>
+    <dimen name="imageViewWidthHeight">200dp</dimen>
+    <dimen name="isPublicTextView">95dp</dimen>
+    <dimen name="latitudeAndLongitudeWidth">160dp</dimen>
+    <dimen name="listPageSizeSpinnerWidth">100dp</dimen>
+    <dimen name="listPageSizeSpinnerWidthLand">135dp</dimen>
+    <dimen name="listPublicSpinnerWidth">100dp</dimen>
+    <dimen name="listPublicSpinnerWidthLand">135dp</dimen>
+    <dimen name="listSpinnerWidth">110dp</dimen>
+    <dimen name="listSpinnerWidthLand">135dp</dimen>
+    <dimen name="myAccountImageWidthHeight">200dp</dimen>
+    <dimen name="myAccountTextViewWidth">150dp</dimen>
+    <dimen name="myAccountTextViewWidthLand">160dp</dimen>
+    <dimen name="myAccountEditTextViewWidth">155dp</dimen>
+    <dimen name="spinnerWidth">150dp</dimen>
+    <dimen name="spinnerWidthLand">200dp</dimen>
+    <dimen name="textViewWidth">110dp</dimen>
+    <dimen name="textViewMediaWidth">130dp</dimen>
+    <dimen name="textViewMediaWidthLand">150dp</dimen>
+    <dimen name="titleTextViewWidth">100dp</dimen>
+    <dimen name="titleNewPhotoVideoWidth">100dp</dimen>
+    <dimen name="titleNewPhotoVideoEditTextWidth">200dp</dimen>
 </resources>

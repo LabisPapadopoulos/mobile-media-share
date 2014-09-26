@@ -61,12 +61,12 @@ public class Login extends ActionBarActivity implements View.OnClickListener, Te
         } else if (view == newUser) {
             final Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(String.format(getResources().getString(R.string.newUserUrl),
-                    getResources().getString(R.string.baseUrl))));
+                    getResources().getString(R.string.secureBaseUrl))));
             startActivity(intent);
         } else if (view == forgotPassword) {
             final Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(String.format(getResources().getString(R.string.forgotPasswordUrl),
-                    getResources().getString(R.string.baseUrl))));
+                    getResources().getString(R.string.secureBaseUrl))));
             startActivity(intent);
         }
     }

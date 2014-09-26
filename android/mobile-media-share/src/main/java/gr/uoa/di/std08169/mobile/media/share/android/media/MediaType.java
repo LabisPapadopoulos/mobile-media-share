@@ -6,11 +6,11 @@ import gr.uoa.di.std08169.mobile.media.share.android.R;
  * Created by labis on 7/14/14.
  */
 public enum MediaType {
-    APPLICATION("application/", R.drawable.application),
-    AUDIO("audio/", R.drawable.audio),
-    IMAGE("image/", R.drawable.image),
-    TEXT("text/", R.drawable.text),
-    VIDEO("video/", R.drawable.video);
+    APPLICATION("application/", R.drawable.application, R.drawable.application_large),
+    AUDIO("audio/", R.drawable.audio, R.drawable.audio_large),
+    IMAGE("image/", R.drawable.image, R.drawable.image_large),
+    TEXT("text/", R.drawable.text, R.drawable.text_large),
+    VIDEO("video/", R.drawable.video, R.drawable.video_large);
 
     public static MediaType getMediaType(final String mimeType) {
         if (mimeType == null)
@@ -30,12 +30,19 @@ public enum MediaType {
         return drawable;
     }
 
+    public int getLargeDrawable() {
+        return largeDrawable;
+    }
+
     private final String mimeTypePrefix;
 
     private final int drawable;
 
-    private MediaType(final String mimeTypePrefix, final int drawable) {
+    private final int largeDrawable;
+
+    private MediaType(final String mimeTypePrefix, final int drawable, final int largeDrawable) {
         this.mimeTypePrefix = mimeTypePrefix;
         this.drawable = drawable;
+        this.largeDrawable = largeDrawable;
     }
 }

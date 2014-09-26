@@ -113,9 +113,9 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 	@Override
 	public void onClick(final ClickEvent clickEvent) {
 		if (clickEvent.getSource() == download) //klhsh tou servlet gia download
-			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.download(Window.Location.getParameter("id")));
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.download(GWT.getHostPageBaseURL(), Window.Location.getParameter("id")));
 		else if (clickEvent.getSource() == edit)
-			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.editMedia(LocaleInfo.getCurrentLocale().getLocaleName(),
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.editMedia(GWT.getHostPageBaseURL(), LocaleInfo.getCurrentLocale().getLocaleName(),
 					Window.Location.getParameter("id")));
 		else if ((clickEvent.getSource() == delete) && Window.confirm(MOBILE_MEDIA_SHARE_CONSTANTS.areYouSureYouWantToDeleteThisMedia())) {
 			//Diagrafh tou arxeiou apo tin vash
@@ -127,7 +127,7 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 				
 				@Override
 				public void onSuccess(final Void _) {
-					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(LocaleInfo.getCurrentLocale().getLocaleName()));
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), LocaleInfo.getCurrentLocale().getLocaleName()));
 				}
 			});
 		}
@@ -142,7 +142,7 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingUser(
 						MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
 				//redirect sto map
-				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString( 
+				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), URL.encodeQueryString( 
 						LocaleInfo.getCurrentLocale().getLocaleName())));
 			}
 
@@ -152,7 +152,7 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingUser(
 							MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
 					//redirect sto map
-					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString( 
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), URL.encodeQueryString( 
 							LocaleInfo.getCurrentLocale().getLocaleName())));
 					return;
 				}
@@ -185,7 +185,7 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingMedium(
 					MOBILE_MEDIA_SHARE_CONSTANTS.noMediaIdSpecified()));
 			//redirect sto map
-			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), URL.encodeQueryString(
 					//me to antistoixo locale 
 					LocaleInfo.getCurrentLocale().getLocaleName())));
 		} else {
@@ -195,7 +195,7 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 				public void onFailure(final Throwable throwable) {
 					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingMedium(throwable.getMessage()));
 					//redirect sto map
-					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), URL.encodeQueryString(
 							//me to antistoixo locale 
 							LocaleInfo.getCurrentLocale().getLocaleName())));
 				}
@@ -206,7 +206,7 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 						Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorViewingMedia(
 								MOBILE_MEDIA_SHARE_CONSTANTS.mediaNotFound()));
 						//redirect sto map
-						Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
+						Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), URL.encodeQueryString(
 								//me to antistoixo locale 
 								LocaleInfo.getCurrentLocale().getLocaleName())));
 					//o xrhsths vlepei to media giati einai diko tou 'h einai diaxeirisths 'h to media einai public
@@ -215,7 +215,7 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 						switch (MediaType.getMediaType(media.getType())) {
 						case APPLICATION:
 							final ImageElement application = Document.get().createImageElement();
-							application.setSrc(MOBILE_MEDIA_SHARE_URLS.selectedImage(MediaType.APPLICATION.name().toLowerCase()));
+							application.setSrc(MOBILE_MEDIA_SHARE_URLS.selectedImage(GWT.getHostPageBaseURL(), MediaType.APPLICATION.name().toLowerCase()));
 							application.setAlt(media.getTitle());
 							application.getStyle().setWidth(CONTENT_WIDTH, Style.Unit.PX);
 							application.getStyle().setHeight(CONTENT_HEIGHT, Style.Unit.PX);
@@ -228,14 +228,14 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 							//url sto opoio vriskontai ta dedomena tou antikeimenou. Ta travaei o browser
 							//me xrhsh tou media servlet
 							final SourceElement audioSource = Document.get().createSourceElement();
-							audioSource.setSrc(MOBILE_MEDIA_SHARE_URLS.download(media.getId()));
+							audioSource.setSrc(MOBILE_MEDIA_SHARE_URLS.download(GWT.getHostPageBaseURL(), media.getId()));
 							audioSource.setType(media.getType());
 							audio.appendChild(audioSource);
 							content.appendChild(audio);
 							break;
 						case IMAGE:
 							final ImageElement image = Document.get().createImageElement();
-							image.setSrc(MOBILE_MEDIA_SHARE_URLS.download(media.getId()));
+							image.setSrc(MOBILE_MEDIA_SHARE_URLS.download(GWT.getHostPageBaseURL(), media.getId()));
 							image.setAlt(media.getTitle());
 							image.getStyle().setWidth(CONTENT_WIDTH, Style.Unit.PX);
 							image.getStyle().setHeight(CONTENT_HEIGHT, Style.Unit.PX);
@@ -253,14 +253,14 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 							content.appendChild(text);
 							//Zhtaei asugxrona to periexomeno enos url
 							final RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET,
-									MOBILE_MEDIA_SHARE_URLS.download(media.getId()));
+									MOBILE_MEDIA_SHARE_URLS.download(GWT.getHostPageBaseURL(), media.getId()));
 							try {
 								requestBuilder.sendRequest(null, new RequestCallback() {
 									@Override
 									public void onError(final Request request, final Throwable throwable) {
 										Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorViewingMedia(throwable.getMessage()));
 										//redirect sto map
-										Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
+										Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), URL.encodeQueryString(
 												//me to antistoixo locale 
 												LocaleInfo.getCurrentLocale().getLocaleName())));
 									}
@@ -274,7 +274,7 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 											//selida pou efere to response se periptwsh sfalmatos (getText())
 											Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorViewingMedia(response.getText()));
 											//redirect sto map
-											Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
+											Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), URL.encodeQueryString(
 													//me to antistoixo locale 
 													LocaleInfo.getCurrentLocale().getLocaleName())));
 										}
@@ -283,20 +283,20 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 							} catch (final RequestException e) {
 								Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorViewingMedia(e.getMessage()));
 								//redirect sto map
-								Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
+								Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), URL.encodeQueryString(
 										//me to antistoixo locale 
 										LocaleInfo.getCurrentLocale().getLocaleName())));
 							}
 							break;
 						case VIDEO:
 							final VideoElement video = Document.get().createVideoElement();
-							video.setPoster(MOBILE_MEDIA_SHARE_URLS.selectedImage(MediaType.VIDEO.name().toLowerCase()));
+							video.setPoster(MOBILE_MEDIA_SHARE_URLS.selectedImage(GWT.getHostPageBaseURL(), MediaType.VIDEO.name().toLowerCase()));
 							video.setControls(true);
 							video.setPreload(VideoElement.PRELOAD_AUTO);
 							video.setWidth(Double.valueOf(CONTENT_WIDTH).intValue());
 							video.setHeight(Double.valueOf(CONTENT_HEIGHT).intValue());
 							final SourceElement videoSource = Document.get().createSourceElement();
-							videoSource.setSrc(MOBILE_MEDIA_SHARE_URLS.download(media.getId()));
+							videoSource.setSrc(MOBILE_MEDIA_SHARE_URLS.download(GWT.getHostPageBaseURL(), media.getId()));
 							videoSource.setType(media.getType());
 							video.appendChild(videoSource);
 							content.appendChild(video);
@@ -311,7 +311,7 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 						//prosthikh html (keimeno kai eikona) stin selida
 						type.setHTML(List.TYPE.getValue(media));
 						//analoga ton tupo dialegetai to katallhlo eikonidio
-						marker.setIcon(MarkerImage.create(MOBILE_MEDIA_SHARE_URLS.selectedImage(
+						marker.setIcon(MarkerImage.create(MOBILE_MEDIA_SHARE_URLS.selectedImage(GWT.getHostPageBaseURL(), 
 								MediaType.getMediaType(media.getType()).name().toLowerCase())));
 						size.setText(List.SIZE.getValue(media));
 						duration.setText(List.DURATION.getValue(media));
@@ -327,9 +327,8 @@ public class ViewMedia extends Composite implements ClickHandler, EntryPoint, Ru
 						Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorViewingMedia(
 								MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
 						//redirect sto map
-						Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-								//me to antistoixo locale 
-								LocaleInfo.getCurrentLocale().getLocaleName())));
+						Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+								URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 					}
 				}
 			});

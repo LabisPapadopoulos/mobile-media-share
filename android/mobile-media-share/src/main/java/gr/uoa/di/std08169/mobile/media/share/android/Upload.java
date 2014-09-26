@@ -1,15 +1,10 @@
 package gr.uoa.di.std08169.mobile.media.share.android;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -39,7 +34,6 @@ import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.Date;
 
 import gr.uoa.di.std08169.mobile.media.share.android.FileExplorer.FileChooser;
 import gr.uoa.di.std08169.mobile.media.share.android.http.HttpClient;
@@ -97,8 +91,6 @@ public class Upload extends MobileMediaShareActivity implements GoogleMap.OnMapC
         } else if (view == isPublic) {
             enableOkReset();
         } else if (view == ok) {
-            //progress.show();
-            //Toast.makeText(Upload.this, "Uploading file, please wait...", Toast.LENGTH_LONG).show();
             upload();
         } else if (view == reset) {
             fileName.setText("");
@@ -190,7 +182,7 @@ public class Upload extends MobileMediaShareActivity implements GoogleMap.OnMapC
             final boolean publik = isPublic.isChecked();
             final BigDecimal latitude = new BigDecimal(marker.getPosition().latitude);
             final BigDecimal longitude = new BigDecimal(marker.getPosition().longitude);
-            final String url = String.format(getResources().getString(R.string.uploadMediaUrl), getResources().getString(R.string.baseUrl));
+            final String url = String.format(getResources().getString(R.string.uploadMediaUrl), getResources().getString(R.string.secureBaseUrl));
             final ContentType type = ContentType.create(
                     MimeTypeMap.getSingleton().getMimeTypeFromExtension(
                             MimeTypeMap.getFileExtensionFromUrl(file.toURI().toURL().toString())));

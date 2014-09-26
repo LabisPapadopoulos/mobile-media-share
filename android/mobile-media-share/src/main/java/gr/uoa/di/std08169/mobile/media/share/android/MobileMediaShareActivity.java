@@ -4,12 +4,15 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.widget.Toast;
@@ -29,13 +32,14 @@ import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
 import gr.uoa.di.std08169.mobile.media.share.android.authentication.Authenticator;
 import gr.uoa.di.std08169.mobile.media.share.android.http.GetAsyncTask;
 import gr.uoa.di.std08169.mobile.media.share.android.http.HttpClient;
 import gr.uoa.di.std08169.mobile.media.share.android.http.PostAsyncTask;
+import gr.uoa.di.std08169.mobile.media.share.android.media.Media;
+import gr.uoa.di.std08169.mobile.media.share.android.media.MediaType;
 import gr.uoa.di.std08169.mobile.media.share.android.user.User;
 import gr.uoa.di.std08169.mobile.media.share.android.user.UserStatus;
 
@@ -51,6 +55,7 @@ public abstract class MobileMediaShareActivity extends ActionBarActivity {
     private static final int DURATION_BASE = 60;
     private static final BigDecimal DEGREES_BASE = new BigDecimal(60);
     private static final String LOGIN_ENTITY = "action=login&email=%s&password=%s&url=http:%%2F%%2Fwww.example.org%%2F&locale=en&redirect=false";
+    private static final String DOWNLOAD_ENTITY = "media=%s"; //postarei sto downloadServlet to id tou media
     protected User currentUser;
 
     public String formatLatitude(final BigDecimal latitude) {
@@ -124,7 +129,7 @@ public abstract class MobileMediaShareActivity extends ActionBarActivity {
         try {
 
             final URL url = new URL(String.format(getResources().getString(R.string.userServletUrl),
-                    getResources().getString(R.string.baseUrl)));
+                    getResources().getString(R.string.secureBaseUrl)));
             final String email = URLEncoder.encode(accounts[0].name, UTF_8);
             final String password = URLEncoder.encode(accountManager.getPassword(accounts[0]), UTF_8);
             final HttpEntity entity = new StringEntity(String.format(LOGIN_ENTITY, email, password));
@@ -182,6 +187,71 @@ public abstract class MobileMediaShareActivity extends ActionBarActivity {
         finish();
     }
 
+    protected void downloadMedia(final Media media) {
+        try {
+            final String requestDownloadUrl = String.format(getString(R.string.requestDownloadUrl), getString(R.string.unsecureBaseUrl));
+            final HttpEntity entity = new StringEntity(String.format(DOWNLOAD_ENTITY, media.getId()));
+            //* Arxika kanei post gia na parei to dikaiwma gia na katevazei (pairnontas ena token)
+                                                            /*H get epistrefei to apotelesma tou AsyncTask*/
+            final HttpResponse response = new PostAsyncTask(getApplicationContext(), new URL(requestDownloadUrl),
+                    entity, APPLICATION_FORM_URL_ENCODED).execute().get();
+
+            if (response == null) //An null, den exei diktuo
+                error(R.string.errorDownloadingMedia, getResources().getString(R.string.connectionError));
+            else if ((response.getStatusLine().getStatusCode() == HttpClient.HTTP_UNAUTHORIZED) && login()) { //paei gia login
+                downloadMedia(media); //kalei anadromika ton eauto ths gia na kanei to arxiko Download
+                return;
+            } else if (response.getStatusLine().getStatusCode() != HttpClient.HTTP_OK) //Den einai oute POST oute Unauthorized
+                error(R.string.errorDownloadingMedia, response.getStatusLine().getReasonPhrase());
+            else {
+                //Apantaei m' ena token
+                final StringBuilder downloadToken = new StringBuilder();
+                final BufferedReader input = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+                try {
+                    String line;
+                    while ((line = input.readLine()) != null)
+                        downloadToken.append(line);
+                } finally {
+                    input.close();
+                }
+                //** Afou phre to downloadToken zhtaei apo ton downloadManager na kanei to GET
+                final String downloadUrl = String.format(getResources().getString(R.string.downloadUrl),
+                        getResources().getString(R.string.secureBaseUrl),
+                        URLEncoder.encode(downloadToken.toString(), UTF_8));
+Log.d(MobileMediaShareActivity.class.getName(), "URL: " + downloadUrl);
+                final DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
+                //apothhkeuetai sta downloads me onoma title
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, media.getId());
+                //ti typou arxeio einai
+                request.setMimeType(media.getType());
+                //to download tha einai orato stin lista twn downloads kai tha eidopoihthei o xrhsths molis katevei
+                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                request.setTitle(media.getTitle());
+                //gia na fainetai sta downloads
+                request.setVisibleInDownloadsUi(true);
+                request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_MOBILE | DownloadManager.Request.NETWORK_WIFI);
+                request.setAllowedOverMetered(true);
+                request.setAllowedOverRoaming(true);
+                final MediaType mediaType = MediaType.getMediaType(media.getType());
+
+                if ((mediaType == MediaType.AUDIO) || (mediaType == MediaType.IMAGE) || (mediaType == MediaType.VIDEO))
+                    //gia na mathei o media scanner oti uparxei to arxeio kai na to provalei argotera
+                    request.allowScanningByMediaScanner();
+
+                final DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+
+                //Xekinaei to download vazontas to sthn oura twn downloads (enqueue)
+                final long id = downloadManager.enqueue(request); //Kanei GET
+            }
+        } catch (final IOException e){
+            error(R.string.errorDownloadingMedia, e.getMessage());
+        } catch (final InterruptedException e){
+            error(R.string.errorDownloadingMedia, e.getMessage());
+        } catch (final ExecutionException e){
+            error(R.string.errorDownloadingMedia, e.getMessage());
+        }
+    }
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -193,7 +263,7 @@ public abstract class MobileMediaShareActivity extends ActionBarActivity {
         try {
             // logout
             final String url = String.format(getResources().getString(R.string.logoutUrl),
-                    getResources().getString(R.string.baseUrl));
+                    getResources().getString(R.string.secureBaseUrl));
             new GetAsyncTask(this, new URL(url)).execute().get();
             Log.d(MobileMediaShareActivity.class.getName(), "User " + currentUser + " logged out");
         } catch (final MalformedURLException e) {
@@ -219,7 +289,7 @@ public abstract class MobileMediaShareActivity extends ActionBarActivity {
             final URL url = new URL(String.format(getResources().getString(R.string.userServletUrl),
                     //Prosthikh get gia na perimenei na teleiwsei h asugxronh ektelesh kai na paroume to apotelesma
                     //san wait() kai get() tautoxrona
-                    getResources().getString(R.string.baseUrl)));
+                    getResources().getString(R.string.secureBaseUrl)));
             final HttpResponse response = new GetAsyncTask(this, url).execute().get();
             if (response == null) { //An null, den exei diktuo
                 error(R.string.authenticationError, getResources().getString(R.string.connectionError));

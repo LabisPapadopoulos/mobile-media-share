@@ -1,30 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LinearLayout
-    android:orientation="vertical"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:background="@android:color/white">
     <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/scrollView">
+        android:layout_height="fill_parent">
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
+            android:orientation="vertical"
             android:background="@drawable/android_cloud">
             <LinearLayout
-                android:orientation="horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="30dp">
+                android:layout_marginTop="30dp"
+                android:orientation="horizontal">
                 <LinearLayout
-                    android:orientation="vertical"
+                    android:id="@+id/map"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:id="@+id/map"
+                    android:orientation="vertical"
                     android:clickable="true">
                     <ImageView
                         android:layout_width="wrap_content"
@@ -32,18 +31,18 @@
                         android:src="@drawable/map"
                         android:layout_gravity="center_horizontal" />
                     <TextView
+                        android:text="@string/map"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text="@string/map"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="10dp" />
                 </LinearLayout>
                 <LinearLayout
-                    android:orientation="vertical"
+                    android:id="@+id/list"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:id="@+id/list"
+                    android:orientation="vertical"
                     android:clickable="true">
                     <ImageView
                         android:layout_width="wrap_content"
@@ -51,18 +50,18 @@
                         android:src="@drawable/list"
                         android:layout_gravity="center_horizontal" />
                     <TextView
+                        android:text="@string/list"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text="@string/list"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="10dp" />
                 </LinearLayout>
                 <LinearLayout
-                    android:orientation="vertical"
+                    android:id="@+id/newPhoto"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:id="@+id/newPhoto"
+                    android:orientation="vertical"
                     android:clickable="true">
                     <ImageView
                         android:layout_width="wrap_content"
@@ -70,10 +69,10 @@
                         android:src="@drawable/new_photo"
                         android:layout_gravity="center_horizontal" />
                     <TextView
+                        android:text="@string/newPhoto"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text="@string/newPhoto"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="10dp" />
                 </LinearLayout>
@@ -85,10 +84,10 @@
                 android:layout_marginTop="20dp"
                 android:layout_gravity="center">
                 <LinearLayout
-                    android:orientation="vertical"
+                    android:id="@+id/newVideo"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:id="@+id/newVideo"
+                    android:orientation="vertical"
                     android:clickable="true">
                     <ImageView
                         android:layout_width="wrap_content"
@@ -96,18 +95,18 @@
                         android:src="@drawable/new_video"
                         android:layout_gravity="center_horizontal" />
                     <TextView
+                        android:text="@string/newVideo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text="@string/newVideo"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="10dp" />
                 </LinearLayout>
                 <LinearLayout
-                    android:orientation="vertical"
+                    android:id="@+id/upload"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:id="@+id/upload"
+                    android:orientation="vertical"
                     android:clickable="true">
                     <ImageView
                         android:layout_width="wrap_content"
@@ -115,18 +114,18 @@
                         android:src="@drawable/upload"
                         android:layout_gravity="center_horizontal" />
                     <TextView
+                        android:text="@string/upload"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text="@string/upload"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="10dp" />
                 </LinearLayout>
                 <LinearLayout
-                    android:orientation="vertical"
+                    android:id="@+id/myAccount"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:id="@+id/myAccount"
+                    android:orientation="vertical"
                     android:clickable="true">
                     <ImageView
                         android:layout_width="wrap_content"
@@ -134,10 +133,10 @@
                         android:src="@drawable/my_account"
                         android:layout_gravity="center_horizontal" />
                     <TextView
+                        android:text="@string/myAccount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text="@string/myAccount"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="10dp" />
                 </LinearLayout>
@@ -149,10 +148,10 @@
                 android:layout_marginTop="20dp"
                 android:layout_gravity="center">
                 <LinearLayout
+                    android:id="@+id/logout"
                     android:orientation="vertical"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:id="@+id/logout"
                     android:clickable="true">
                     <ImageView
                         android:layout_width="wrap_content"
@@ -160,10 +159,10 @@
                         android:src="@drawable/logout"
                         android:layout_gravity="center_horizontal" />
                     <TextView
+                        android:text="@string/logout"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text="@string/logout"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="10dp" />
                 </LinearLayout>

@@ -84,7 +84,7 @@ public class Map extends Composite implements ChangeHandler, ClickHandler, Entry
 //					marker.getKey().setIcon(selectedMarkerImages.get(MediaType.getMediaType(marker.getValue().getType())));
 //					selectedMarker = marker.getKey();
 //					download.setEnabled(true);
-					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.viewMedia(LocaleInfo.getCurrentLocale().getLocaleName(),
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.viewMedia(GWT.getHostPageBaseURL(), LocaleInfo.getCurrentLocale().getLocaleName(),
 							marker.getValue().getId()));
 					return;
 				}
@@ -236,9 +236,9 @@ public class Map extends Composite implements ChangeHandler, ClickHandler, Entry
 	public void onClick(final ClickEvent clickEvent) { // clicking on download, edit or delete
 		if (clickEvent.getSource() == download)
 			//Anoigei neo tab pou tha trexei tin doGet gia na katevei to arxeio
-			Window.open(MOBILE_MEDIA_SHARE_URLS.download(URL.encodeQueryString(markers.get(selectedMarker).getId())), "_blank", "");
+			Window.open(MOBILE_MEDIA_SHARE_URLS.download(GWT.getHostPageBaseURL(), URL.encodeQueryString(markers.get(selectedMarker).getId())), "_blank", "");
 		else if (clickEvent.getSource() == edit)
-			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.editMedia(URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()), 
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.editMedia(GWT.getHostPageBaseURL(), URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()), 
 					//stelnei ws parametro to id tou media pou dialexe o xrhsths
 					URL.encodeQueryString(markers.get(selectedMarker).getId())));
 		else if ((clickEvent.getSource() == delete) &&
@@ -285,8 +285,8 @@ public class Map extends Composite implements ChangeHandler, ClickHandler, Entry
 				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingUser(
 						MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
 				//redirect sto map
-				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString( 
-						LocaleInfo.getCurrentLocale().getLocaleName())));
+				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+						URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 			}
 
 			@Override
@@ -295,8 +295,8 @@ public class Map extends Composite implements ChangeHandler, ClickHandler, Entry
 					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingUser(
 							MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
 					//redirect sto map
-					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString( 
-							LocaleInfo.getCurrentLocale().getLocaleName())));
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 					return;
 				}
 				currentUser = user;
@@ -356,8 +356,8 @@ public class Map extends Composite implements ChangeHandler, ClickHandler, Entry
 		});
 		for (MediaType type : MediaType.values()) {
 			//Ftaxnei to markerImage apo to arxiko size (originalSize) se size
-			markerImages.put(type, MarkerImage.create(MOBILE_MEDIA_SHARE_URLS.markerImage(type.name().toLowerCase())));
-			selectedMarkerImages.put(type, MarkerImage.create(MOBILE_MEDIA_SHARE_URLS.selectedImage(type.name().toLowerCase())));
+			markerImages.put(type, MarkerImage.create(MOBILE_MEDIA_SHARE_URLS.markerImage(GWT.getHostPageBaseURL(), type.name().toLowerCase())));
+			selectedMarkerImages.put(type, MarkerImage.create(MOBILE_MEDIA_SHARE_URLS.selectedImage(GWT.getHostPageBaseURL(), type.name().toLowerCase())));
 		}
 	}
 	

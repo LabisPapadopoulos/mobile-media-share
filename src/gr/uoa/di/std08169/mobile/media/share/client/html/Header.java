@@ -1,6 +1,6 @@
 package gr.uoa.di.std08169.mobile.media.share.client.html;
 
-import com.google.gwt.core.shared.GWT;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
@@ -44,7 +44,7 @@ public class Header extends Composite {
 		//Gia pragmata pou theloun periexomeno
 		//redirect sto map kai krataei kai tin glwssa
 		di.setHref(MOBILE_MEDIA_SHARE_URLS.di(LocaleInfo.getCurrentLocale().getLocaleName()));
-		startPage.setHref(MOBILE_MEDIA_SHARE_URLS.map(LocaleInfo.getCurrentLocale().getLocaleName()));
+		startPage.setHref(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), LocaleInfo.getCurrentLocale().getLocaleName()));
 		//Gia kathe diathesimo locale (apo to MobileMediaShare.gwt.xml)
 		for (String locale : LocaleInfo.getAvailableLocaleNames()) {
 			if (!locale.equals("default")) {
@@ -53,7 +53,7 @@ public class Header extends Composite {
 				localeAnchor.setTitle(LocaleInfo.getLocaleNativeDisplayName(locale));
 				localeAnchor.setClassName("locale_" + locale);
 				final ImageElement localeImage = Document.get().createImageElement();
-				localeImage.setSrc(MOBILE_MEDIA_SHARE_URLS.localeImage(locale));
+				localeImage.setSrc(MOBILE_MEDIA_SHARE_URLS.localeImage(GWT.getHostPageBaseURL(), locale));
 									//Emfanizei to locale sti glwssa tou
 				localeImage.setAlt(LocaleInfo.getLocaleNativeDisplayName(locale));
 				localeAnchor.appendChild(localeImage);

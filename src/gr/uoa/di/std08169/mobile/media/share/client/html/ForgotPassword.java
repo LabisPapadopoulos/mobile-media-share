@@ -1,7 +1,7 @@
 package gr.uoa.di.std08169.mobile.media.share.client.html;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.shared.GWT;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -70,7 +70,8 @@ public class ForgotPassword extends Composite implements ClickHandler, EntryPoin
 			//Klhsh tou UserServlet me ajax, me tin methodo POST gia na ginei edit to password (Ylopoihsh protokolou REST)
 			//Oi Browsers den upostirizoun PUT kai kat' epektash formes opote kanoun GET kai vazoun ta dedomena sto url.
 			//Gi' auto ginetai xrhsh tou RequestBuilder
-			final RequestBuilder request = new RequestBuilder(RequestBuilder.POST, MOBILE_MEDIA_SHARE_URLS.userServletForgot(
+			final RequestBuilder request = new RequestBuilder(RequestBuilder.POST, 
+					MOBILE_MEDIA_SHARE_URLS.userServletForgot(GWT.getHostPageBaseURL(), 
 					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
 					URL.encodeQueryString(email.getValue())));
 			request.setCallback(this);
@@ -79,17 +80,15 @@ public class ForgotPassword extends Composite implements ClickHandler, EntryPoin
 			} catch (final RequestException e) {
 				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorResettingPassword(e.getMessage()));
 				//redirect sto map
-				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-						//me to antistoixo locale 
-						LocaleInfo.getCurrentLocale().getLocaleName())));
+				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+						URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 			}
 		} else if (clickEvent.getSource() == reset) {
 			email.setValue(null);
 			ok.setEnabled(false);
 		} else if (clickEvent.getSource() == cancel) {
-			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-					//me to antistoixo locale 
-					LocaleInfo.getCurrentLocale().getLocaleName())));
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 		}
 	}
 	
@@ -97,9 +96,8 @@ public class ForgotPassword extends Composite implements ClickHandler, EntryPoin
 	public void onError(final Request request, final Throwable throwable) {
 		Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorResettingPassword(throwable.getMessage()));
 		//redirect sto map
-		Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-				//me to antistoixo locale 
-				LocaleInfo.getCurrentLocale().getLocaleName())));
+		Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+				URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 	}
 	
 	@Override
@@ -121,9 +119,8 @@ public class ForgotPassword extends Composite implements ClickHandler, EntryPoin
 		if (response.getStatusCode() != Response.SC_OK) {
 			Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorResettingPassword(response.getStatusText()));
 			//redirect sto map
-			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString(
-					//me to antistoixo locale 
-					LocaleInfo.getCurrentLocale().getLocaleName())));
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+					URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 			return;
 		}
 		form.getStyle().setDisplay(Style.Display.NONE);

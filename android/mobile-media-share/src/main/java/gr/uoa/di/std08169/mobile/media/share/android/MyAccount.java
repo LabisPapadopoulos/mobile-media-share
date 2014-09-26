@@ -114,7 +114,7 @@ public class MyAccount extends MobileMediaShareActivity implements View.OnClickL
         }
         try {
             final String url = String.format(getResources().getString(R.string.userServletUrl),
-                    getResources().getString(R.string.baseUrl));
+                    getResources().getString(R.string.secureBaseUrl));
             //Swma tou http post
             final HttpEntity entity = new StringEntity(String.format(ENTITY, name.getText().toString(),
                     //an to password keno den to vazei katholou sto entity

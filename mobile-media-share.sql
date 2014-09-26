@@ -24,7 +24,10 @@ $$;
 -- psql -h localhost -U 'mobile-media-share' -W (ta kanei o xrhsths mobile-media-share)
 
 -- Pinakes
--- Drop ton Media prwta epeidh exei foreign key ston Users
+-- Drop ton Download kai osous exartontai apo auton
+DROP TABLE IF EXISTS Downloads CASCADE;
+
+-- Drop ton Media epeidh exei foreign key ston Users
 DROP TABLE IF EXISTS Media CASCADE;
 
 -- Pinakas Eggegramenwn xrhstwn
@@ -59,4 +62,14 @@ CREATE TABLE Media (
 -- Prosthikh periorismou (foreign key me onoma Users_photo_fkey) apo ton Users ston Media (sto telos)
 -- H fwtografia tou xrhsth tha prepei na einai fwtografia hdh anevasmenh
 ALTER TABLE Users ADD CONSTRAINT Users_photo_fkey FOREIGN KEY (photo) REFERENCES Media (id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+CREATE TABLE Downloads (
+	token CHAR(32) NOT NULL PRIMARY KEY,
+	media CHAR(36) NOT NULL,
+	"user" VARCHAR(128) NOT NULL,
+	client CHAR(15) NOT NULL,
+	"timestamp" TIMESTAMP NOT NULL,	-- pote ftiaxtike ena download request
+	FOREIGN KEY (media) REFERENCES Media (id) ON UPDATE CASCADE ON DELETE CASCADE,
+	FOREIGN KEY ("user") REFERENCES Users (email) ON UPDATE CASCADE ON DELETE CASCADE
+);
 

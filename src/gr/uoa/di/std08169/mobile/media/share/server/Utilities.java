@@ -1,6 +1,7 @@
 package gr.uoa.di.std08169.mobile.media.share.server;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
@@ -17,6 +18,8 @@ public class Utilities {
 	 * @see http://docs.oracle.com/javase/7/docs/api/java/lang/Character.UnicodeBlock.html#COMBINING_DIACRITICAL_MARKS
 	 */
 	private static final Pattern COMBINING_DIACRITICAL_MARKS_REGEX = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+	private static final String DIGEST = "MD5";
+	private static final Charset UTF_8 = Charset.forName("UTF-8");
 
 	public static String normalize(final String string) {
 		//Spaei xarakthres me tonous se xarakthres kai tonous xexwrista (decompose me Canonical decomposition: NFD)
@@ -32,16 +35,26 @@ public class Utilities {
 		 * @see http://docs.oracle.com/javase/7/docs/api/java/security/MessageDigest.html
 		 */
 		//Upologismos MD5
-		final MessageDigest digest = MessageDigest.getInstance("MD5");
+		final MessageDigest digest = MessageDigest.getInstance(DIGEST);
 		//Desmeush buffer gia na graftei enas long (to  date) kai na diavastei san bytes
 		final ByteBuffer registrationBytes = ByteBuffer.allocate(Long.SIZE / Byte.SIZE);
 		registrationBytes.putLong(date.getTime());
 		//Me update prostithentai dedomena
 		digest.update(registrationBytes.array());
-		digest.update(email.getBytes());
+		digest.update(email.getBytes(UTF_8));
 		//me to digest vgainei to teliko apotelesma kai kodikopoieitai se 16adikh morfh (apo xuma bytes)
 		//gia na borei na stalthei ws link
 		return Hex.encodeHexString(digest.digest());
 	}
+	
+	public static String generateToken(final String media, final String user, final String client, final Date timestamp) throws NoSuchAlgorithmException {
+		final MessageDigest digest = MessageDigest.getInstance(DIGEST);
+		digest.update(media.getBytes(UTF_8));
+		digest.update(user.getBytes(UTF_8));
+		digest.update(client.getBytes(UTF_8));
+		final ByteBuffer timestampBytes = ByteBuffer.allocate(Long.SIZE / Byte.SIZE);
+		timestampBytes.putLong(timestamp.getTime());
+		digest.update(timestampBytes.array());
+		return Hex.encodeHexString(digest.digest());
+	}
 }
-//

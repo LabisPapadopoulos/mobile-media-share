@@ -21,16 +21,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.entity.StringEntity;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -152,7 +149,7 @@ public class EditMedia extends MobileMediaShareActivity implements TextWatcher, 
     private void getMedia() {
         try {
             final String url = String.format(getResources().getString(R.string.getMediaUrl),
-                    getResources().getString(R.string.baseUrl), URLEncoder.encode(id, UTF_8));
+                    getResources().getString(R.string.secureBaseUrl), URLEncoder.encode(id, UTF_8));
             final HttpResponse response = new GetAsyncTask(this, new URL(url)).execute().get();
             if (response == null) //An null, den exei diktuo
                 error(R.string.errorEditingMedia, getResources().getString(R.string.connectionError));
@@ -226,7 +223,7 @@ public class EditMedia extends MobileMediaShareActivity implements TextWatcher, 
             //Apostolh san query parameters gia na diavazontai apo to servlet ws parametroi apo to request.
             //Me tin tin entity tha eprepe na diavazotan apo to servlet san inptut stream
             final String url = String.format(getResources().getString(R.string.editMediaUrl),
-                    getResources().getString(R.string.baseUrl),
+                    getResources().getString(R.string.secureBaseUrl),
                     URLEncoder.encode(id, UTF_8),
                     URLEncoder.encode(title.getText().toString(), UTF_8),
                     URLEncoder.encode(Boolean.toString(isPublic.isChecked()), UTF_8),

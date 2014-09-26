@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="media_type">
+        <item>Οποισδήποτε τύπος</item>
+        <item>Εφαρμογή</item>
+        <item>Ήχος</item>
+        <item>Εικόνα</item>
+        <item>Κείμενο</item>
+        <item>Βίντεο</item>
+    </string-array>
+</resources>

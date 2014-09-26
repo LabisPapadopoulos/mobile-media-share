@@ -242,7 +242,7 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 			final SafeHtmlBuilder html = new SafeHtmlBuilder();
 			//* Oti einai hdh safe (me to trusted string 'h me allo builder), to vazei opws einai
 			html.append(SafeHtmlUtils.fromTrustedString("<a href=\"" +
-					MOBILE_MEDIA_SHARE_URLS.viewMedia(LocaleInfo.getCurrentLocale().getLocaleName(), media.getId()) + "\">"));
+					MOBILE_MEDIA_SHARE_URLS.viewMedia(GWT.getHostPageBaseURL(), LocaleInfo.getCurrentLocale().getLocaleName(), media.getId()) + "\">"));
 			//* Oti den einai safe, to kanei upoxrewtika escape gia na mhn exei tags, p.x. <br /> -> &lt;br /&gt;
 			html.appendEscaped(media.getTitle());
 			//Append mia aplh stathera pou elegxetai se compile time
@@ -450,9 +450,9 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 	public void onClick(final ClickEvent clickEvent) { // clicking on download, edit or delete
 		if (clickEvent.getSource() == download)
 			//Anoigei neo tab pou tha trexei tin doGet gia na katevei to arxeio
-			Window.open(MOBILE_MEDIA_SHARE_URLS.download(URL.encodeQueryString(selectionModel.getSelectedObject().getId())), "_blank", "");
+			Window.open(MOBILE_MEDIA_SHARE_URLS.download(GWT.getHostPageBaseURL(), URL.encodeQueryString(selectionModel.getSelectedObject().getId())), "_blank", "");
 		else if (clickEvent.getSource() == edit)
-			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.editMedia(URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
+			Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.editMedia(GWT.getHostPageBaseURL(), URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName()),
 					URL.encodeQueryString(selectionModel.getSelectedObject().getId())));
 		else if ((clickEvent.getSource() == delete) &&
 				Window.confirm(MOBILE_MEDIA_SHARE_CONSTANTS.areYouSureYouWantToDeleteThisMedia())) {
@@ -501,8 +501,8 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 				Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingUser(
 						MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
 				//redirect sto map
-				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString( 
-						LocaleInfo.getCurrentLocale().getLocaleName())));
+				Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(), 
+						URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 			}
 
 			@Override
@@ -511,8 +511,8 @@ public class List extends Composite implements ChangeHandler, ClickHandler, Entr
 					Window.alert(MOBILE_MEDIA_SHARE_MESSAGES.errorRetrievingUser(
 							MOBILE_MEDIA_SHARE_CONSTANTS.accessDenied()));
 					//redirect sto map
-					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(URL.encodeQueryString( 
-							LocaleInfo.getCurrentLocale().getLocaleName())));
+					Window.Location.assign(MOBILE_MEDIA_SHARE_URLS.map(GWT.getHostPageBaseURL(),
+							URL.encodeQueryString(LocaleInfo.getCurrentLocale().getLocaleName())));
 					return;
 				}
 				currentUser = user;

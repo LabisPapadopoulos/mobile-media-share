@@ -2,14 +2,11 @@ package gr.uoa.di.std08169.mobile.media.share.android;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.DownloadManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
@@ -50,9 +47,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.entity.StringEntity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,7 +55,6 @@ import org.json.JSONObject;
 import gr.uoa.di.std08169.mobile.media.share.android.http.DeleteAsyncTask;
 import gr.uoa.di.std08169.mobile.media.share.android.http.GetAsyncTask;
 import gr.uoa.di.std08169.mobile.media.share.android.http.HttpClient;
-import gr.uoa.di.std08169.mobile.media.share.android.http.PostAsyncTask;
 import gr.uoa.di.std08169.mobile.media.share.android.media.Media;
 import gr.uoa.di.std08169.mobile.media.share.android.media.MediaType;
 import gr.uoa.di.std08169.mobile.media.share.android.user.User;
@@ -70,7 +64,6 @@ import gr.uoa.di.std08169.mobile.media.share.android.user.UserStatus;
 public class Map extends MobileMediaShareActivity implements AdapterView.OnItemSelectedListener,
         DatePickerDialog.OnDateSetListener, GoogleMap.OnCameraChangeListener, GoogleMap.OnMarkerClickListener,
         TextWatcher, View.OnClickListener {
-    private static final String DOWNLOAD_ENTITY = "email=%s&id=%s";
 
     //antistoixia mediatype se eikonidia gia markers
     private java.util.Map<MediaType, BitmapDescriptor> markerImages;
@@ -143,7 +136,7 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
             alertDialogBuilder.create().show();
         } else if (view == download) {
             selectedDateField = null;
-            downloadMedia();
+            downloadMedia(selectedMedia);
         }
     }
 
@@ -387,7 +380,7 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
         final double maxLatitude = map.getProjection().getVisibleRegion().latLngBounds.northeast.latitude;
         final double maxLongitude = map.getProjection().getVisibleRegion().latLngBounds.northeast.longitude;
         final StringBuilder url = new StringBuilder(String.format(getResources().getString(R.string.getListUrl),
-                getResources().getString(R.string.baseUrl)));
+                getResources().getString(R.string.secureBaseUrl)));
         if (title != null)
             url.append("&title=").append(title);
         if (type != null)
@@ -481,7 +474,7 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
     private void deleteMedia() {
         try {
             final String url = String.format(getResources().getString(R.string.deleteMediaUrl),
-                    getResources().getString(R.string.baseUrl),
+                    getResources().getString(R.string.secureBaseUrl),
                     URLEncoder.encode(selectedMedia.getId(), UTF_8));
             final HttpResponse response = new DeleteAsyncTask(this, new URL(url)).execute().get();
             if (response == null) //An null, den exei diktuo
@@ -498,69 +491,6 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
             error(R.string.errorDeletingMedia, e.getMessage());
         } catch (final ExecutionException e) {
             error(R.string.errorDeletingMedia, e.getMessage());
-        }
-    }
-
-    private void downloadMedia() {
-        try {
-            final String requestDownloadUrl = String.format(getString(R.string.requestDownloadUrl), getString(R.string.baseUrl));
-            final HttpEntity entity = new StringEntity(String.format(DOWNLOAD_ENTITY, currentUser.getEmail(), selectedMedia.getId()));
-                                                            /*H get epistrefei to apotelesma tou AsyncTask*/
-            final HttpResponse response = new PostAsyncTask(getApplicationContext(), new URL(requestDownloadUrl),
-                    entity, APPLICATION_FORM_URL_ENCODED).execute().get();
-
-            if (response == null) //An null, den exei diktuo
-                error(R.string.errorDownloadingMedia, getResources().getString(R.string.connectionError));
-            else if ((response.getStatusLine().getStatusCode() == HttpClient.HTTP_UNAUTHORIZED) && login()) { //paei gia login
-                downloadMedia(); //kalei anadromika ton eauto ths gia na kanei to arxiko Download
-                return;
-            } else if (response.getStatusLine().getStatusCode() != HttpClient.HTTP_OK) //Den einai oute POST oute Unauthorized
-                error(R.string.errorDownloadingMedia, response.getStatusLine().getReasonPhrase());
-            else {
-                //Apantaei m' ena token
-                final StringBuilder downloadToken = new StringBuilder();
-                final BufferedReader input = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-                try {
-                    String line;
-                    while ((line = input.readLine()) != null)
-                        downloadToken.append(line);
-                } finally {
-                    input.close();
-                }
-
-                final String downloadUrl = String.format(getResources().getString(R.string.downloadUrl),
-                        getResources().getString(R.string.baseUrl),
-                        URLEncoder.encode(downloadToken.toString(), UTF_8));
-                final DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
-                //apothhkeuetai sta downloads me onoma title
-                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, selectedMedia.getTitle());
-                //ti typou arxeio einai
-                request.setMimeType(selectedMedia.getType());
-                //to download tha einai orato stin lista twn downloads kai tha eidopoihthei o xrhsths molis katevei
-                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                request.setTitle(selectedMedia.getTitle());
-                //gia na fainetai sta downloads
-                request.setVisibleInDownloadsUi(true);
-
-                final MediaType mediaType = MediaType.getMediaType(selectedMedia.getType());
-
-                if ((mediaType == MediaType.AUDIO) || (mediaType == MediaType.IMAGE) || (mediaType == MediaType.VIDEO))
-                    //gia na mathei o media scanner oti uparxei to arxeio kai na to provalei argotera
-                    request.allowScanningByMediaScanner();
-
-                final DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-
-                //Xekinaei to download vazontas to sthn oura twn downloads (enqueue)
-                final long id = downloadManager.enqueue(request);
-                final DownloadManager.Query query = new DownloadManager.Query();
-                query.setFilterById(id);
-            }
-        } catch (final IOException e){
-            error(R.string.errorDownloadingMedia, e.getMessage());
-        } catch (final InterruptedException e){
-            error(R.string.errorDownloadingMedia, e.getMessage());
-        } catch (final ExecutionException e){
-            error(R.string.errorDownloadingMedia, e.getMessage());
         }
     }
 }

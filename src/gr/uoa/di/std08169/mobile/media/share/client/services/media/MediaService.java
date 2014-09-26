@@ -13,6 +13,7 @@ import gr.uoa.di.std08169.mobile.media.share.shared.media.MediaType;
 import gr.uoa.di.std08169.mobile.media.share.shared.user.User;
 
 //Service gia diaxeirish arxeiwn
+//GWT annotation gia na to vriskei to GWT sto path .../mediaService kai ekei tha vrisketai mediaServiceServlet pou tha to ulopoiei.
 @RemoteServiceRelativePath("../mediaService")
 public interface MediaService extends RemoteService {
 	//GetMedia gia tin Lista (pinaka)
