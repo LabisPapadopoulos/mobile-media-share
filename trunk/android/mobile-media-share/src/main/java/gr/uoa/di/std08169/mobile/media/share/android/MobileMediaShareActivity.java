@@ -4,9 +4,12 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
+import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -15,6 +18,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -32,6 +37,7 @@ import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import gr.uoa.di.std08169.mobile.media.share.android.authentication.Authenticator;
@@ -44,12 +50,14 @@ import gr.uoa.di.std08169.mobile.media.share.android.user.User;
 import gr.uoa.di.std08169.mobile.media.share.android.user.UserStatus;
 
 public abstract class MobileMediaShareActivity extends ActionBarActivity {
+    public static final Locale GREEK = new Locale("el");
     protected static final String APPLICATION_FORM_URL_ENCODED = "application/x-www-form-urlencoded";
     protected static final String UTF_8 = "UTF-8";
     protected static final float GOOGLE_MAPS_ZOOM = 8.0f;
     protected static final float MARKER_ANCHOR_X = 0.5f;
     protected static final float MARKER_ANCHOR_Y = 1.0f;
     protected static final double MIN_DISTANCE = 0.000001;
+    protected static final String ID = "id";
     private static final double DEFAULT_LATITUDE = 37.968546;	//DIT lat
     private static final double DEFAULT_LONGITUDE = 23.766968;	//DIT lng
     private static final int DURATION_BASE = 60;
@@ -218,7 +226,6 @@ public abstract class MobileMediaShareActivity extends ActionBarActivity {
                 final String downloadUrl = String.format(getResources().getString(R.string.downloadUrl),
                         getResources().getString(R.string.secureBaseUrl),
                         URLEncoder.encode(downloadToken.toString(), UTF_8));
-Log.d(MobileMediaShareActivity.class.getName(), "URL: " + downloadUrl);
                 final DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
                 //apothhkeuetai sta downloads me onoma title
                 request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, media.getId());
@@ -255,7 +262,33 @@ Log.d(MobileMediaShareActivity.class.getName(), "URL: " + downloadUrl);
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //Orismos locale prin ftiaxtei to grafiko, gia tis periptwseis allaghs orientation
+        initLocale();
         currentUser = retrieveUser();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the locale; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.locale, menu);
+        //To locale to vlepei o kathe xrhsths stin glwssa tou
+        menu.findItem(R.id.en).setTitle(Locale.ENGLISH.getDisplayName(Locale.ENGLISH));
+        menu.findItem(R.id.el).setTitle(GREEK.getDisplayName(GREEK));
+        return true;
+    }
+
+    //Tin klhronomoun ola ta alla Activity, ektos twn ViewMedia, EditMedia logw bundle
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        final int itemId = item.getItemId();
+        if (itemId == R.id.el) {
+            setLocale(GREEK, this.getClass());
+            return true; //patithike gnwsto menou, opote katanalwthike to event
+        } else if (itemId == R.id.en) {
+            setLocale(Locale.ENGLISH, this.getClass());
+            return true;
+        }
+        return super.onOptionsItemSelected(item); //rwtaei gia locale tou patera tou
     }
 
     @Override
@@ -265,7 +298,6 @@ Log.d(MobileMediaShareActivity.class.getName(), "URL: " + downloadUrl);
             final String url = String.format(getResources().getString(R.string.logoutUrl),
                     getResources().getString(R.string.secureBaseUrl));
             new GetAsyncTask(this, new URL(url)).execute().get();
-            Log.d(MobileMediaShareActivity.class.getName(), "User " + currentUser + " logged out");
         } catch (final MalformedURLException e) {
             e.printStackTrace();
         } catch (final InterruptedException e) {
@@ -357,6 +389,59 @@ Log.d(MobileMediaShareActivity.class.getName(), "URL: " + downloadUrl);
                 }
             }
         }).start();
+        finish();
+    }
+
+    private void saveLocale(final Locale locale) {
+        //Apothikeush proepilegmenwn ruthmisewn xrhsth gia tin glwssa
+        final SharedPreferences.Editor editor = getSharedPreferences(MobileMediaShareActivity.class.getName(),
+                Activity.MODE_PRIVATE).edit();
+        editor.putString(Locale.class.getName(), locale.getLanguage());
+        editor.commit();
+    }
+
+    private Locale loadLocale() {
+        //epistrefei tin proepilegmenh ruthmish gia tin glwssa (to locale)
+        return new Locale(getSharedPreferences(MobileMediaShareActivity.class.getName(),
+                Activity.MODE_PRIVATE).getString(Locale.class.getName(), Locale.ENGLISH.getLanguage()));
+    }
+
+    //allagh glwssas enos Activity (othonhs)
+    private void initLocale() {
+        final Configuration configuration = getResources().getConfiguration();
+        configuration.locale = loadLocale();
+        //kanei update tis ruthmiseis me to neo locale kai xane upologizei xana tis diastaseis
+        //tis othonhs gia na ta emfanisei
+        getResources().updateConfiguration(configuration, getResources().getDisplayMetrics());
+    }
+
+    //allagh glwssas enos Activity (othonhs)
+    private void setLocale(final Locale locale, final Class<?> clazz) {
+        saveLocale(locale);
+        final Configuration configuration = getResources().getConfiguration();
+        configuration.locale = locale;
+        //kanei update tis ruthmiseis me to neo locale kai xane upologizei xana tis diastaseis
+        //tis othonhs gia na ta emfanisei
+        getResources().updateConfiguration(configuration, getResources().getDisplayMetrics());
+        final Intent intent = new Intent(this, clazz);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
+    }
+
+    //allagh glwssas enos Activity (othonhs) mazi me extra bundle gia tis EditMedia, ViewMedia
+    //gia na mhn skaei kata tin allagh tis glwssas.
+    protected void setLocale(final Locale locale, final Class<?> clazz, final String id) {
+        saveLocale(locale);
+        final Configuration configuration = getResources().getConfiguration();
+        configuration.locale = locale;
+        //kanei update tis ruthmiseis me to neo locale kai xane upologizei xana tis diastaseis
+        //tis othonhs gia na ta emfanisei
+        getResources().updateConfiguration(configuration, getResources().getDisplayMetrics());
+        final Intent intent = new Intent(this, clazz);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra(ID, id);
+        startActivity(intent);
         finish();
     }
 }

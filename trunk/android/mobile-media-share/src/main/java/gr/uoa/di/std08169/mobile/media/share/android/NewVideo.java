@@ -10,8 +10,6 @@ import android.view.SurfaceHolder;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
@@ -135,18 +133,6 @@ public class NewVideo extends MobileMediaShareActivity implements GoogleMap.OnMa
         marker.setPosition(latLng);
         this.latitude = String.valueOf(marker.getPosition().latitude);
         this.longitude = String.valueOf(marker.getPosition().longitude);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.new_video, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return (item.getItemId() == R.id.settings) || super.onOptionsItemSelected(item);
     }
 
     //OnClickListener

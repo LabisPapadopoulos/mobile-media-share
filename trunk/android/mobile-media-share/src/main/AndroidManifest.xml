@@ -21,58 +21,71 @@
 
         <activity
             android:name="gr.uoa.di.std08169.mobile.media.share.android.MainMenu"
+            android:configChanges="locale|orientation"
             android:label="@string/mobileMediaShare" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".authentication.Login"
+            android:name="gr.uoa.di.std08169.mobile.media.share.android.authentication.Login"
+            android:configChanges="locale|orientation"
             android:label="@string/welcomeToMobileMediaShare" >
         </activity>
         <activity
             android:name="gr.uoa.di.std08169.mobile.media.share.android.Map"
+            android:configChanges="locale|orientation"
             android:label="@string/map" >
         </activity>
         <activity
             android:name="gr.uoa.di.std08169.mobile.media.share.android.List"
+            android:configChanges="locale|orientation"
             android:label="@string/list" >
         </activity>
         <activity
             android:name="gr.uoa.di.std08169.mobile.media.share.android.NewPhoto"
+            android:configChanges="locale|orientation"
             android:label="@string/newPhoto" >
         </activity>
         <activity
             android:name="gr.uoa.di.std08169.mobile.media.share.android.NewVideo"
+            android:configChanges="locale|orientation"
             android:label="@string/newVideo" >
         </activity>
         <activity
             android:name="gr.uoa.di.std08169.mobile.media.share.android.Upload"
+            android:configChanges="locale|orientation"
             android:label="@string/upload" >
         </activity>
         <activity
             android:name="gr.uoa.di.std08169.mobile.media.share.android.MyAccount"
+            android:configChanges="locale|orientation"
             android:label="@string/myAccount" >
         </activity>
         <activity
-            android:name="gr.uoa.di.std08169.mobile.media.share.android.FileExplorer.FileChooser"
+            android:name="gr.uoa.di.std08169.mobile.media.share.android.file_explorer.FileChooser"
+            android:configChanges="locale|orientation"
             android:label="@string/title_activity_file_chooser"
             android:theme="@android:style/Theme.Holo" >
-            <action android:name="gr.uoa.di.std08169.mobile.media.share.android.FileExplorer.FileChooser" />
+            <action android:name="gr.uoa.di.std08169.mobile.media.share.android.file_explorer.FileChooser" />
 
             <category android:name="android.intent.category.DEFAULT" />
         </activity>
         <activity
             android:name="gr.uoa.di.std08169.mobile.media.share.android.ViewMedia"
+            android:configChanges="locale|orientation"
             android:label="@string/viewMedia" >
         </activity>
         <activity
             android:name="gr.uoa.di.std08169.mobile.media.share.android.EditMedia"
+            android:configChanges="locale|orientation"
             android:label="@string/editMedia" >
         </activity>
         <!-- Fernei authenticator otan zhteitai -->
         <service android:name="gr.uoa.di.std08169.mobile.media.share.android.authentication.AuthenticatorService" >
+
             <!-- Intents pou borei na dextei, borei na to xekinhsei o AccountAuthenticator (ektos efarmoghs) -->
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
@@ -82,13 +95,12 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
-    </application>
 
+    </application>
 
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true" />
-
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
@@ -105,4 +117,5 @@
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+
 </manifest>

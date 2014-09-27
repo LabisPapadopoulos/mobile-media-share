@@ -9,8 +9,6 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -108,13 +106,13 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
         } else if (view == this.view) {
             selectedDateField = null;
             final Intent activityIntent = new Intent(getApplicationContext(), ViewMedia.class);
-            activityIntent.putExtra("id", selectedMedia.getId());
+            activityIntent.putExtra(ID, selectedMedia.getId());
             activityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(activityIntent);
         } else if (view == edit) {
             selectedDateField = null;
             final Intent activityIntent = new Intent(getApplicationContext(), EditMedia.class);
-            activityIntent.putExtra("id", selectedMedia.getId());
+            activityIntent.putExtra(ID, selectedMedia.getId());
             activityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(activityIntent);
         } else if (view == delete) {
@@ -143,7 +141,6 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.map);
 
         markerImages = new HashMap<MediaType, BitmapDescriptor>();
@@ -234,13 +231,6 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(final Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.map, menu);
-        return true;
-    }
-
     //DatePickerDialog.OnDateSetListener
     @Override
     public void onDateSet(final DatePicker view, final int year, final int monthOfYear, final int dayOfMonth) {
@@ -314,11 +304,6 @@ public class Map extends MobileMediaShareActivity implements AdapterView.OnItemS
     @Override
     public void onNothingSelected(final AdapterView<?> adapterView) {
         updateMap();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(final MenuItem item) {
-        return (item.getItemId() == R.id.settings) || super.onOptionsItemSelected(item);
     }
 
     //EditText

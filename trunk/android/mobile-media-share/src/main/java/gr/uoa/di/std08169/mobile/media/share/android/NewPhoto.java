@@ -10,8 +10,6 @@ import android.os.Environment;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
@@ -42,7 +40,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-import gr.uoa.di.std08169.mobile.media.share.android.CapturePhoto.ShowCamera;
+import gr.uoa.di.std08169.mobile.media.share.android.capture_photo.ShowCamera;
 import gr.uoa.di.std08169.mobile.media.share.android.http.HttpClient;
 import gr.uoa.di.std08169.mobile.media.share.android.http.PostAsyncTask;
 
@@ -111,24 +109,9 @@ public class NewPhoto extends MobileMediaShareActivity implements GoogleMap.OnMa
         progress.setMessage(getResources().getString(R.string.pleaseWait));
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(final Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.new_photo, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(final MenuItem item) {
-        return  (item.getItemId() == R.id.settings) || super.onOptionsItemSelected(item);
-    }
-
     //TextChangedListener
     @Override
-    public void beforeTextChanged(final CharSequence charSequence, final int i, final int i2, final int i3) {
-
-    }
+    public void beforeTextChanged(final CharSequence charSequence, final int i, final int i2, final int i3) {}
 
     //TextChangedListener
     @Override
