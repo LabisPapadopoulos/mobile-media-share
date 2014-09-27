@@ -1,15 +1,9 @@
 package gr.uoa.di.std08169.mobile.media.share.android;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 /**
  * @see <a href="http://stackoverflow.com/questions/14117476/how-to-quit-an-application-programmatically-through-button-click">Quit application programmatically</a>
@@ -42,18 +36,6 @@ public class MainMenu extends MobileMediaShareActivity implements View.OnClickLi
         myAccount.setOnClickListener(this);
         logout = (LinearLayout) findViewById(R.id.logout);
         logout.setOnClickListener(this);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(final Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(final MenuItem item) {
-        return (item.getItemId() == R.id.settings) || super.onOptionsItemSelected(item);
     }
 
     @Override

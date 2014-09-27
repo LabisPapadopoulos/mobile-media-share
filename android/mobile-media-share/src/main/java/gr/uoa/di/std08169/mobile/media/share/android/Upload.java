@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
@@ -35,7 +33,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-import gr.uoa.di.std08169.mobile.media.share.android.FileExplorer.FileChooser;
+import gr.uoa.di.std08169.mobile.media.share.android.file_explorer.FileChooser;
 import gr.uoa.di.std08169.mobile.media.share.android.http.HttpClient;
 import gr.uoa.di.std08169.mobile.media.share.android.http.PostAsyncTask;
 
@@ -145,24 +143,12 @@ public class Upload extends MobileMediaShareActivity implements GoogleMap.OnMapC
         progress.setMessage(getResources().getString(R.string.pleaseWait));
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.upload, menu);
-        return true;
-    }
-
     //OnMapClickListener
     @Override
     public void onMapClick(final LatLng latLng) {
         latlng.setText(formatLocation(new BigDecimal(latLng.latitude), new BigDecimal(latLng.longitude)));
         marker.setPosition(latLng);
         enableOkReset();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return (item.getItemId() == R.id.settings) || super.onOptionsItemSelected(item);
     }
 
     //TextChangedListener

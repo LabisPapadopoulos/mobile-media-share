@@ -206,13 +206,6 @@ public class List extends MobileMediaShareActivity implements AdapterView.OnItem
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.list, menu);
-        return true;
-    }
-
-    @Override
     public void onDateSet(final DatePicker datePicker, final int year, final int monthOfYear, final int dayOfMonth) {
         if (selectedDateField != null) {
             final Calendar calendar = Calendar.getInstance();
@@ -237,16 +230,9 @@ public class List extends MobileMediaShareActivity implements AdapterView.OnItem
         updateList();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return (item.getItemId() == R.id.settings) || super.onOptionsItemSelected(item);
-    }
-
     //TextChangedListener
     @Override
-    public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-
-    }
+    public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) { }
 
     private void updateList() {
         mediaList.clear();

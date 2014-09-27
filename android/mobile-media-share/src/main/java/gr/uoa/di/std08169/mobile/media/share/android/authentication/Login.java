@@ -2,7 +2,10 @@ package gr.uoa.di.std08169.mobile.media.share.android.authentication;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -15,7 +18,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 import gr.uoa.di.std08169.mobile.media.share.android.MainMenu;
+import gr.uoa.di.std08169.mobile.media.share.android.Map;
+import gr.uoa.di.std08169.mobile.media.share.android.MobileMediaShareActivity;
 import gr.uoa.di.std08169.mobile.media.share.android.R;
 
 
@@ -70,9 +77,11 @@ public class Login extends ActionBarActivity implements View.OnClickListener, Te
             startActivity(intent);
         }
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        initLocale();
         setContentView(R.layout.login);
         email = (EditText) findViewById(R.id.email);
         password = (EditText) findViewById(R.id.password);
@@ -94,23 +103,62 @@ public class Login extends ActionBarActivity implements View.OnClickListener, Te
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.login, menu);
+        // Inflate the locale; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.locale, menu);
+        //To locale to vlepei o kathe xrhsths stin glwssa tou
+        menu.findItem(R.id.en).setTitle(Locale.ENGLISH.getDisplayName(Locale.ENGLISH));
+        menu.findItem(R.id.el).setTitle(MobileMediaShareActivity.GREEK.getDisplayName(MobileMediaShareActivity.GREEK));
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.settings) {
-            return true;
+        final int itemId = item.getItemId();
+        if (itemId == R.id.el) {
+            setLocale(MobileMediaShareActivity.GREEK, Login.class);
+        } else if (itemId == R.id.en) {
+            setLocale(Locale.ENGLISH, Login.class);
         }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onTextChanged(final CharSequence charSequence, final int start, final int before, final int count) {}
+
+    //allagh glwssas enos Activity (othonhs)
+    private void setLocale(final Locale locale, final Class<?> clazz) {
+        saveLocale(locale);
+        final Configuration configuration = getResources().getConfiguration();
+        configuration.locale = locale;
+        //kanei update tis ruthmiseis me to neo locale kai xane upologizei xana tis diastaseis
+        //tis othonhs gia na ta emfanisei
+        getResources().updateConfiguration(configuration, getResources().getDisplayMetrics());
+        final Intent intent = new Intent(this, clazz);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
+    }
+
+    //allagh glwssas enos Activity (othonhs)
+    private void initLocale() {
+        final Configuration configuration = getResources().getConfiguration();
+        configuration.locale = loadLocale();
+        //kanei update tis ruthmiseis me to neo locale kai xane upologizei xana tis diastaseis
+        //tis othonhs gia na ta emfanisei
+        getResources().updateConfiguration(configuration, getResources().getDisplayMetrics());
+    }
+
+    private Locale loadLocale() {
+        //epistrefei tin proepilegmenh ruthmish gia tin glwssa (to locale)
+        return new Locale(getSharedPreferences(MobileMediaShareActivity.class.getName(),
+                Activity.MODE_PRIVATE).getString(Locale.class.getName(), Locale.ENGLISH.getLanguage()));
+    }
+
+    private void saveLocale(final Locale locale) {
+        //Apothikeush proepilegmenwn ruthmisewn xrhsth gia tin glwssa
+        final SharedPreferences.Editor editor = getSharedPreferences(MobileMediaShareActivity.class.getName(),
+                Activity.MODE_PRIVATE).edit();
+        editor.putString(Locale.class.getName(), locale.getLanguage());
+        editor.commit();
+    }
 }

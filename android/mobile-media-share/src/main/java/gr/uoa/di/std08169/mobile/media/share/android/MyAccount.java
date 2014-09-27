@@ -3,8 +3,6 @@ package gr.uoa.di.std08169.mobile.media.share.android;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -61,18 +59,6 @@ public class MyAccount extends MobileMediaShareActivity implements View.OnClickL
         reset = (Button) findViewById(R.id.reset);
         reset.setEnabled(false);
         reset.setOnClickListener(this);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.my_account, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return (item.getItemId() == R.id.settings) || super.onOptionsItemSelected(item);
     }
 
     //OnClickListener

@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -34,6 +33,7 @@ import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import gr.uoa.di.std08169.mobile.media.share.android.http.DeleteAsyncTask;
@@ -66,7 +66,7 @@ public class ViewMedia extends MobileMediaShareActivity implements View.OnClickL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.view_media);
-        id = (getIntent().getExtras() == null) ? null : getIntent().getExtras().getString("id");
+        id = (getIntent().getExtras() == null) ? null : getIntent().getExtras().getString(ID);
         if (id == null) {
             error(R.string.errorRetrievingMedia, R.string.notFound);
             return;
@@ -104,23 +104,22 @@ public class ViewMedia extends MobileMediaShareActivity implements View.OnClickL
         }
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.view_media, menu);
-        return true;
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        return  (item.getItemId() == R.id.settings) || super.onOptionsItemSelected(item);
+        final int itemId = item.getItemId();
+        if (itemId == R.id.el) {            //gia to id tou media
+            setLocale(GREEK, ViewMedia.class, id);
+            return true;
+        } else if (itemId == R.id.en) {
+            setLocale(Locale.ENGLISH, ViewMedia.class, id);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onClick(View view) {
-        if (view == download) { //TODO
+        if (view == download) {
             downloadMedia(media);
         } else if (view == edit) {
             final Intent activityIntent = new Intent(getApplicationContext(), EditMedia.class);

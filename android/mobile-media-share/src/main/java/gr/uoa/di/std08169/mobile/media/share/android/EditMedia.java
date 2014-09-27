@@ -3,7 +3,6 @@ package gr.uoa.di.std08169.mobile.media.share.android;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -32,6 +31,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import gr.uoa.di.std08169.mobile.media.share.android.http.GetAsyncTask;
@@ -56,9 +56,7 @@ public class EditMedia extends MobileMediaShareActivity implements TextWatcher, 
 
     //TextChangedListener
     @Override
-    public void beforeTextChanged(final CharSequence charSequence, final int start, final int count, final int after) {
-
-    }
+    public void beforeTextChanged(final CharSequence charSequence, final int start, final int count, final int after) {}
 
     //TextChangedListener
     @Override
@@ -92,7 +90,7 @@ public class EditMedia extends MobileMediaShareActivity implements TextWatcher, 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.edit_media);
         final Bundle bundle = getIntent().getExtras();
-        id = bundle.getString("id");
+        id = bundle.getString(ID);
         if (id == null)
             finish();
         title = (EditText) findViewById(R.id.title);
@@ -117,21 +115,17 @@ public class EditMedia extends MobileMediaShareActivity implements TextWatcher, 
         getMedia();
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.edit_media, menu);
-        return true;
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return (item.getItemId() == R.id.settings) || super.onOptionsItemSelected(item);
+        final int itemId = item.getItemId();
+        if (itemId == R.id.el) {
+            setLocale(GREEK, EditMedia.class, id);
+            return true;
+        } else if (itemId == R.id.en) {
+            setLocale(Locale.ENGLISH, EditMedia.class, id);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     //TextChangedListener
