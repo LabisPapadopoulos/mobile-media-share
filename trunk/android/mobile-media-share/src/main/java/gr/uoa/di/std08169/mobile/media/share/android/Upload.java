@@ -169,9 +169,12 @@ public class Upload extends MobileMediaShareActivity implements GoogleMap.OnMapC
             final BigDecimal latitude = new BigDecimal(marker.getPosition().latitude);
             final BigDecimal longitude = new BigDecimal(marker.getPosition().longitude);
             final String url = String.format(getResources().getString(R.string.uploadMediaUrl), getResources().getString(R.string.secureBaseUrl));
+            //Euresh tupou tou media (p.x text/plain) me anazhthsh apo tin katalhxh tou arxeiou (.txt) apo
+            //to URL tou URI tou arxeiou mesw enos MimeType Map (Singleton Klash tou android san to Tika)
             final ContentType type = ContentType.create(
                     MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                            MimeTypeMap.getFileExtensionFromUrl(file.toURI().toURL().toString())));
+                            MimeTypeMap.getFileExtensionFromUrl(file.toURI().toURL().toString()))); //.txt
+            //Fortwsh tou entity gia post sto servlet
             final HttpEntity httpEntity = MultipartEntityBuilder.create().setCharset(Charset.forName(UTF_8)).
                     setStrictMode().
                     addBinaryBody("file", file, type, file.getName()).

@@ -72,7 +72,6 @@ public class ViewMedia extends MobileMediaShareActivity implements View.OnClickL
             return;
         }
         mediaImage = (ImageView) findViewById(R.id.mediaImage);
-        mediaImage.setOnClickListener(this);
         download = (Button) findViewById(R.id.download);
         download.setOnClickListener(this);
         edit = (Button) findViewById(R.id.edit);
@@ -142,30 +141,6 @@ public class ViewMedia extends MobileMediaShareActivity implements View.OnClickL
                 }
             });
             alertDialogBuilder.create().show();
-        } else if (view == mediaImage) { //TODO
-//Android media player
-//            final StringBuilder uri = new StringBuilder(String.format(getResources().getString(R.string.getMediaUrl),
-//                    getResources().getString(R.string.secureBaseUrl)));
-//            uri.append("?action=").append("downloadMedia");
-//            uri.append("&id=").append(id);
-//            final String url = uri.toString();
-//
-//            MediaPlayer mPlayer = new MediaPlayer();
-//            mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-//            try {
-//                mPlayer.setDataSource(url);
-//                mPlayer.prepare();
-//                mPlayer.start();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//----------------------------------------------------
-//--> Default android media player
-//            String extension = MimeTypeMap.getFileExtensionFromUrl(url);
-//            String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-//            Intent mediaIntent = new Intent(Intent.ACTION_VIEW);
-//            mediaIntent.setDataAndType(Uri.parse(url), mimeType);
-//            startActivity(mediaIntent);
         }
     }
 

@@ -14,6 +14,7 @@
     <string name="createdTo">Created To</string>
     <string name="dateFormat">dd/MM/yy</string>
     <string name="delete">Delete</string>
+    <string name="desc_list_item_icon">Item Icon</string>
     <string name="download">Download</string>
     <string name="duration">Duration</string>
     <string name="durationFormatHours">%1$d h %2$d m %3$d s</string>
@@ -27,6 +28,7 @@
     <string name="email">Email</string>
     <string name="emailFormat">%1$s@...</string>
     <string name="errorCapturingPhoto">Error capturing photo: %s</string>
+    <string name="errorCapturingVideo">Error capturing video: %s</string>
     <string name="errorRetrievingMedia">Error retrieving media: %s</string>
     <string name="errorRetrievingUser">error retrieving user</string>
     <string name="errorDeletingMedia">Error deleting media: %s</string>
@@ -46,6 +48,7 @@
     <string name="longitudeFormatEast">%1$d° %2$d′ %3$d″ E</string>
     <string name="longitudeFormatWest">%1$d° %2$d′ %3$d″ W</string>
     <string name="map">Map</string>
+    <string name="menu">Menu</string>
     <string name="mobileMediaShare">Mobile Media Share</string>
     <string name="myAccount">My Account</string>
     <string name="name">Name</string>
@@ -78,6 +81,7 @@
     <string name="viewMedia">View Media</string>
     <string name="view">View</string>
     <string name="welcomeToMobileMediaShare">Welcome to Mobile Media Share</string>
+
     <string name="downloadUrl">%1$sdownloadServlet?token=%2$s</string>
     <string name="deleteMediaUrl">%1$smediaServlet?id=%2$s</string>
     <string name="editMediaUrl">%1$smediaServlet?id=%2$s&amp;title=%3$s&amp;public=%4$s&amp;latitude=%5$s&amp;longitude=%6$s</string>
@@ -94,7 +98,7 @@
     <string name="uploadMediaUrl">%1$smediaServlet</string>
     <string name="title_activity_file_explorer">FileExplorerActivity</string>
     <string name="title_activity_file_chooser">FileChooser</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_slider_menu">SliderMenuActivity</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 

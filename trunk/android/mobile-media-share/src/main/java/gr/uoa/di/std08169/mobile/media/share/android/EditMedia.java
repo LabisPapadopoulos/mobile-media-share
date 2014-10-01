@@ -42,9 +42,6 @@ import gr.uoa.di.std08169.mobile.media.share.android.user.User;
 import gr.uoa.di.std08169.mobile.media.share.android.user.UserStatus;
 
 public class EditMedia extends MobileMediaShareActivity implements TextWatcher, View.OnClickListener, GoogleMap.OnMapClickListener {
-    //auta pou theloume na steiloume gia edit
-    private static final String EDIT_ENTITY = "id=%s&title=%s&public=%s&latitude=%s&longitude=%s";
-
     private EditText title;
     private CheckBox isPublic;
     private TextView latlng;

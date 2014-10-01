@@ -66,6 +66,17 @@ public class NewPhoto extends MobileMediaShareActivity implements GoogleMap.OnMa
     private ProgressDialog progress;
     private Marker marker;
 
+    //TextChangedListener
+    @Override
+    public void afterTextChanged(final Editable editable) {
+        enableOkReset();
+    }
+
+
+    //TextChangedListener
+    @Override
+    public void beforeTextChanged(final CharSequence charSequence, final int i, final int i2, final int i3) {}
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,29 +120,6 @@ public class NewPhoto extends MobileMediaShareActivity implements GoogleMap.OnMa
         progress.setMessage(getResources().getString(R.string.pleaseWait));
     }
 
-    //TextChangedListener
-    @Override
-    public void beforeTextChanged(final CharSequence charSequence, final int i, final int i2, final int i3) {}
-
-    //TextChangedListener
-    @Override
-    public void onTextChanged(final CharSequence charSequence, final int i, final int i2, final int i3) {
-
-    }
-
-    //TextChangedListener
-    @Override
-    public void afterTextChanged(final Editable editable) {
-        enableOkReset();
-    }
-
-    //OnMapClickListener
-    @Override
-    public void onMapClick(final LatLng latLng) {
-        latlng.setText(formatLocation(new BigDecimal(latLng.latitude), new BigDecimal(latLng.longitude)));
-        marker.setPosition(latLng);
-    }
-
     //ClickListener
     @Override
     public void onClick(final View view) {
@@ -147,6 +135,48 @@ public class NewPhoto extends MobileMediaShareActivity implements GoogleMap.OnMa
         } else if (view == ok) {
             upload();
         }
+    }
+
+    //OnMapClickListener
+    @Override
+    public void onMapClick(final LatLng latLng) {
+        latlng.setText(formatLocation(new BigDecimal(latLng.latitude), new BigDecimal(latLng.longitude)));
+        marker.setPosition(latLng);
+    }
+
+    //PictureCallback
+    @Override
+    public void onPictureTaken(byte[] data, final Camera camera) {
+        bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+        camera.release();
+        capture.setEnabled(false);
+        enableOkReset();
+    }
+
+    //TextChangedListener
+    @Override
+    public void onTextChanged(final CharSequence charSequence, final int i, final int i2, final int i3) {
+
+    }
+
+    private void enableOkReset() {
+        final boolean enabled = (bitmap != null) && (!title.getText().toString().isEmpty());
+        ok.setEnabled(enabled);
+        reset.setEnabled(enabled);
+    }
+
+    private void initializeCamera() {
+        try {
+            camera = Camera.open();
+        } catch (final Exception e) {
+            error(R.string.errorCapturingPhoto, e.getMessage());
+        }
+        final Point size = new Point();
+        getWindowManager().getDefaultDisplay().getSize(size);
+        if (size.x < size.y)
+            camera.setDisplayOrientation(ROTATION); //peristrofh 90 moires gia Portrait (katakorufo) mode
+        photo.addView(new ShowCamera(this, camera));
+        bitmap = null;
     }
 
     private void upload() {
@@ -197,34 +227,5 @@ public class NewPhoto extends MobileMediaShareActivity implements GoogleMap.OnMa
         } catch (final IOException e) {
             error(R.string.errorUploadingMedia, e.getMessage());
         }
-    }
-
-    //PictureCallback
-    @Override
-    public void onPictureTaken(byte[] data, final Camera camera) {
-        bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-        camera.release();
-        capture.setEnabled(false);
-        enableOkReset();
-    }
-
-    private void enableOkReset() {
-        final boolean enabled = (bitmap != null) && (!title.getText().toString().isEmpty());
-        ok.setEnabled(enabled);
-        reset.setEnabled(enabled);
-    }
-
-    private void initializeCamera() {
-        try {
-            camera = Camera.open();
-        } catch (final Exception e) {
-            error(R.string.errorCapturingPhoto, e.getMessage());
-        }
-        final Point size = new Point();
-        getWindowManager().getDefaultDisplay().getSize(size);
-        if (size.x < size.y)
-            camera.setDisplayOrientation(ROTATION); //peristrofh 90 moires gia Portrait (katakorufo) mode
-        photo.addView(new ShowCamera(this, camera));
-        bitmap = null;
     }
 }

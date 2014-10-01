@@ -91,7 +91,7 @@ public class DownloadServiceImpl implements DownloadService {
 												new Date(resultSet.getTimestamp("timestamp").getTime())) : null;
 								deleteDownload.executeUpdate();
 								connection.commit();
-								LOGGER.info((download == null) ? ("Donwload " + token + " not found") : ("Retrieved download " + token)); 
+								LOGGER.info((download == null) ? ("Download " + token + " not found") : ("Retrieved download " + token)); 
 								return download;
 							} finally {
 								resultSet.close();
