@@ -16,6 +16,7 @@ import org.apache.http.entity.StringEntity;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.concurrent.ExecutionException;
 
 import gr.uoa.di.std08169.mobile.media.share.android.http.HttpClient;
@@ -102,10 +103,11 @@ public class MyAccount extends MobileMediaShareActivity implements View.OnClickL
             final String url = String.format(getResources().getString(R.string.userServletUrl),
                     getResources().getString(R.string.secureBaseUrl));
             //Swma tou http post
-            final HttpEntity entity = new StringEntity(String.format(ENTITY, name.getText().toString(),
+            final HttpEntity entity = new StringEntity(String.format(ENTITY,
+                    URLEncoder.encode(name.getText().toString(), UTF_8),
                     //an to password keno den to vazei katholou sto entity
                     password.getText().toString().isEmpty() ? "" :
-                            String.format(PASSWORD, password.getText().toString())));
+                            String.format(PASSWORD, password.getText().toString())), UTF_8);
             final HttpResponse response = new PostAsyncTask(this,new URL(url), entity,
                     APPLICATION_FORM_URL_ENCODED).execute().get();
             if (response == null) {

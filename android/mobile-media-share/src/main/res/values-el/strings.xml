@@ -26,6 +26,7 @@
     <string name="email">Email</string>
     <string name="emailFormat">%1$s@...</string>
     <string name="errorCapturingPhoto">Σφάλμα κατά τη λήψη της φωτογραφίας: %s</string>
+    <string name="errorCapturingVideo">Σφάλμα κατά τη λήψη τη βίντεο: %s</string>
     <string name="errorRetrievingMedia">σφάλμα κατά την αναζήτηση του αρχείου: %s</string>
     <string name="errorRetrievingUser">σφάλμα κατά την αναζήτηση του χρήστη</string>
     <string name="errorDeletingMedia">Σφάλμα κατά τη διαγραφή του αρχείου: %s</string>
@@ -45,8 +46,9 @@
     <string name="longitudeFormatEast">%1$d° %2$d′ %3$d″ Α</string>
     <string name="longitudeFormatWest">%1$d° %2$d′ %3$d″ Δ</string>
     <string name="map">Χάρτης</string>
+    <string name="menu">Μενού</string>
     <string name="mobileMediaShare">Mobile Media Share</string>
-    <string name="myAccount">Ο Λογαριασμός μου</string>
+    <string name="myAccount">Λογαριασμός</string>
     <string name="name">Όνομα</string>
     <string name="newPhoto">Νέα Φωτογραφία</string>
     <string name="newToMobileMediaShareCreateAnAccountNow">Είστε νέος χρήστης στο Mobile Media Share? Δημιουργήστε τώρα ένα λογαριασμό!</string>

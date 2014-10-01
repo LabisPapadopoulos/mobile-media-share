@@ -58,24 +58,25 @@
 		<!-- Me to pou xekinaei paei sto map.jsp -->
 		<welcome-file>map.jsp</welcome-file>
 	</welcome-file-list>
-	<!-- Gia GET sto /downloadServlet den exei kanena periorismo (user-data-constraint) -->
+	<!-- Gia POST sto /downloadServlet apaiteitai https -->
+	<!-- Gia GET sto /downloadServlet den exei kanena periorismo https (user-data-constraint) -->
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>Download Media</web-resource-name>
 			<http-method>GET</http-method>
-			<url-pattern>/downloadServlet*</url-pattern>
+			<url-pattern>/downloadServlet</url-pattern>
 		</web-resource-collection>
 	</security-constraint>
 	<!-- Tha zhtaei h efarmogh na mhlaei MONO me https gia ola ta alla -->
 	<security-constraint>
-		<!-- Ti theloume na prostatepsoume -->
+		<!-- Ti theloume na prostatepsoume me https -->
 		<web-resource-collection>
 			<web-resource-name>Mobile Media Share</web-resource-name>
-			<!-- poia url tha einai kleidwmena (ta panta) -->
+			<!-- poia url tha einai kleidwmena (ta panta). -->
 			<url-pattern>/*</url-pattern>
 		</web-resource-collection>
 		<!-- Periorismos sto pws tha phgenoerthontai ta dedomena 
-			me tous xrhstes (clients) gia tin panw perioxh -->
+			me tous xrhstes (clients) gia tin panw perioxh (xrhsh https) -->
 		<user-data-constraint>
 			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
 		</user-data-constraint>

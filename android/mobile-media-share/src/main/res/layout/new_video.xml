@@ -111,7 +111,7 @@
                     android:layout_gravity="center_horizontal" />
                 <Button
                     android:id="@+id/reset"
-                    android:text="Reset"
+                    android:text="@string/reset"
                     android:layout_width="@dimen/buttonWidth"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal" />
