@@ -22,6 +22,12 @@ public interface MobileMediaShareUrls extends Messages {
 	@DefaultMessage("sensor=true&language={0}")
 	public String googleMapsOptions(final String locale);
 	
+	@DefaultMessage("https://play.google.com/store/apps/details?id=gr.uoa.di.std08169.mobile.media.share.android")
+	public String googlePlay();
+	
+	@DefaultMessage("http://www.w3.org/html/logo/")
+	public String html5LogoAnchor();
+	
 	@DefaultMessage("{0}images/locales/{1}.png")
 	public String localeImage(final String baseUrl, final String locale);
 

@@ -12,6 +12,7 @@
 	<g:HTMLPanel><!-- header -->
 	    <div class="footer">
 		    <p><ui:text from="{constants.copyright}" /> &copy; 2014, <a ui:field="administrator" target="_blank" title="labis" ><ui:text from="{constants.admin}" /></a>&nbsp;<ui:text from="{constants.allRightsReserved}" /></p>
+		    <p><a ui:field="html5Anchor" target="_blank" ><img src="./images/html5-badge-h-css3-multimedia-semantics.png" width="197" height="64" class="html5Img" alt="{constants.html5PoweredWithCss3}" title="{constants.html5PoweredWithCss3}" /></a></p>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>

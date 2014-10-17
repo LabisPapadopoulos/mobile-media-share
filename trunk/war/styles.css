@@ -212,10 +212,24 @@ a.locale_en:hover {
 }
 
 /*login page*/
+.loginMenu {
+	width: 290px;
+	position: relative;
+	left: 335px;
+	padding-right: 20px;
+	padding-left: 20px;
+	text-align: center;
+	background-color: #e9eaed;
+	border-radius: 30px;
+	margin-bottom: 10px;
+}
+
+
 .loginForm {
 	width: 290px;
 	position: relative;
-	left: 356px;
+	border-bottom: 1px solid #dfdfdf;
+	margin-bottom: 10px;
 }
 
 .loginForm input {
@@ -241,6 +255,12 @@ p.newUserBtn {
 	position: relative;
 	left: 188px;
 	margin-top: 10px;
+}
+
+img.googlePlayImg {
+	text-align: center;
+	width: 170px;
+	margin-bottom: 10px;
 }
 
 /*forgotPassword page*/

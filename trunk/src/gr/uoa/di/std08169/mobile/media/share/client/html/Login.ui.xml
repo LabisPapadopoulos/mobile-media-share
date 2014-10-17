@@ -11,32 +11,35 @@
 			    <h2><ui:text from="{constants.welcomeToMobileMediaShare}" /></h2>
 			    <p><ui:text from="{constants.pleaseLoginToContinue}" /></p>
 			</div>
-			<form action="./userServlet" enctype="application/x-www-form-urlencoded" method="post" target="_self" class="loginForm"><!-- controls -->
-			    <!-- deixnei oti thelei na kanei login kai oxi forgot -->
-				<input type="hidden" name="action" value="login" />
-				<!-- xwris times gia na orisei to gwt times kai na ta steilei -->
-				<g:Hidden ui:field="url" name="url" />
-				<g:Hidden ui:field="locale" name="locale" />
-				<p>
-					<span class="label"><ui:text from="{constants.email}" /></span>
-					<!-- To g einai Google Element kai den borei na tou prostethei klash -->
-					<g:TextBox ui:field="email" name="email" /><!-- To email einai tupou TextBox (exei ginei include panw sto g:...) -->
-				</p>
-				<p>
-					<span class="label"><ui:text from="{constants.password}" /></span>
-					<!-- To password einai tupou PasswordTextBox (exei ginei include panw sto g:...) -->
-					<g:PasswordTextBox ui:field="password" name="password" />
-				</p>
-				<p class="loginBtn">
-					<g:SubmitButton ui:field="login" text="{constants.login}" />
-				</p>
-				<p class="newUserBtn">
-					<g:Button ui:field="newUser" text="{constants.newUser}" />
-				</p>
-				<p class="forgotPasswordLink">
-					<a ui:field="forgotPassword" class="forgotPassword"><ui:text from="{constants.forgotPassword_}" /></a>
-				</p>
-			</form><!-- controls -->
+			<div class="loginMenu">
+				<form action="./userServlet" enctype="application/x-www-form-urlencoded" method="post" target="_self" class="loginForm"><!-- controls -->
+				    <!-- deixnei oti thelei na kanei login kai oxi forgot -->
+					<input type="hidden" name="action" value="login" />
+					<!-- xwris times gia na orisei to gwt times kai na ta steilei -->
+					<g:Hidden ui:field="url" name="url" />
+					<g:Hidden ui:field="locale" name="locale" />
+					<p>
+						<span class="label"><ui:text from="{constants.email}" /></span>
+						<!-- To g einai Google Element kai den borei na tou prostethei klash -->
+						<g:TextBox ui:field="email" name="email" /><!-- To email einai tupou TextBox (exei ginei include panw sto g:...) -->
+					</p>
+					<p>
+						<span class="label"><ui:text from="{constants.password}" /></span>
+						<!-- To password einai tupou PasswordTextBox (exei ginei include panw sto g:...) -->
+						<g:PasswordTextBox ui:field="password" name="password" />
+					</p>
+					<p class="loginBtn">
+						<g:SubmitButton ui:field="login" text="{constants.login}" />
+					</p>
+					<p class="newUserBtn">
+						<g:Button ui:field="newUser" text="{constants.newUser}" />
+					</p>
+					<p class="forgotPasswordLink">
+						<a ui:field="forgotPassword" class="forgotPassword"><ui:text from="{constants.forgotPassword_}" /></a>
+					</p>
+				</form><!-- controls -->
+				<a ui:field="playstore" target="_blank" title="{constants.mobileMediaShareAndroidApplication}"><img src="./images/playstore.png" class="googlePlayImg" alt="{constants.availableOnThePlayStore}" /></a>
+			</div>
 		</div>
 		<mms:Footer />
 	</g:HTMLPanel>

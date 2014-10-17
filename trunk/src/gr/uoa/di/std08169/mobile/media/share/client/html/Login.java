@@ -47,6 +47,8 @@ public class Login extends Composite implements ClickHandler, EntryPoint, KeyUpH
 	protected Button newUser;
 	@UiField
 	protected AnchorElement forgotPassword; //<a></a>
+	@UiField
+	protected AnchorElement playstore;
 	
 	public Login() {
 		//Arxikopoihsh tou grafikou me ton Ui Binder
@@ -57,6 +59,7 @@ public class Login extends Composite implements ClickHandler, EntryPoint, KeyUpH
 		password.addKeyUpHandler(this);
 		newUser.addClickHandler(this);
 		forgotPassword.setHref(MOBILE_MEDIA_SHARE_URLS.forgotPassword(GWT.getHostPageBaseURL(), LocaleInfo.getCurrentLocale().getLocaleName()));
+		playstore.setHref(MOBILE_MEDIA_SHARE_URLS.googlePlay());
 	}
 	
 	@Override

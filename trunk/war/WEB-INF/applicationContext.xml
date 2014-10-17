@@ -74,22 +74,30 @@
 		<constructor-arg ref="userService" />
 	</bean>
 	
+	<!-- static final gr.uoa.di.std08169.mobile.media.share.server.proxies.MediaServiceProxy mediaService = new 
+	gr.uoa.di.std08169.mobile.media.share.server.proxies.MediaServiceProxy(${media.service}); --> 
+	<bean id="mediaService" class="gr.uoa.di.std08169.mobile.media.share.server.proxies.MediaServiceProxy" scope="singleton">
+	    <constructor-arg ref="${media.service}" />
+    </bean>
+	
 	<bean id="jdbcDownloadService" class="gr.uoa.di.std08169.mobile.media.share.server.jdbc.DownloadServiceImpl" scope="singleton" init-method="init" destroy-method="shutdown">
 		<!-- San orisma tha parei bean me id to ref (etoimo dataSource) -->
 		<constructor-arg ref="dataSource" /> <!-- deikths se object -->
 		<constructor-arg value="${download.service.timeout}" />
 	</bean>
 	
+	<bean id="gcdDownloadService" class="gr.uoa.di.std08169.mobile.media.share.server.gcd.DownloadServiceImpl" scope="singleton" init-method="init" destroy-method="shutdown">
+		<!-- Orismata gia ton constuctor tou bean, pou ta travaei apo to applicationContext.properties me ta ${...} -->
+		<constructor-arg value="${google.cloud.dataset}" />
+		<constructor-arg value="${google.cloud.account}" />
+		<constructor-arg value="${google.cloud.key.file}" />
+		<constructor-arg value="${download.service.timeout}" />
+	</bean>
+	
 	<bean id="downloadService" class="gr.uoa.di.std08169.mobile.media.share.server.proxies.DownloadServiceProxy" scope="singleton">
 	    <constructor-arg ref="${download.service}" /> <!-- diavazei apo property to user service -->
 	</bean>
-		
-	<!-- static final gr.uoa.di.std08169.mobile.media.share.server.proxies.MediaServiceProxy mediaService = new 
-	gr.uoa.di.std08169.mobile.media.share.server.proxies.MediaServiceProxy(${media.service}); --> 
-	<bean id="mediaService" class="gr.uoa.di.std08169.mobile.media.share.server.proxies.MediaServiceProxy" scope="singleton">
-	    <constructor-arg ref="${media.service}" />
-    </bean>
-
+	
 	<!-- smtpHost: typou string kai singleton gia xrhsh panta tou idiou -->
 	<bean id="smtpHost" class="java.lang.String" scope="singleton">
 	    <constructor-arg value="${smtp.host}" />

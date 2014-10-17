@@ -8,6 +8,7 @@
     <string name="capturePhoto">Λήψη Φωτογραφίας</string>
     <string name="confirmPassword">Επιβεβαίωση συνθηματικού</string>
     <string name="connectionError">σφάλμα σύνδεσης</string>
+    <string name="copyright">Πνευματική Ιδιοκτησία © 2014, Λάμπης Παπαδόπουλος. Με επιφύλαξη κάθε δικαιώματος</string>
     <string name="created">Δημιουργία</string>
     <string name="createdFrom">Δημιουργία Από</string>
     <string name="createdTo">Δημιουργία Εώς</string>
