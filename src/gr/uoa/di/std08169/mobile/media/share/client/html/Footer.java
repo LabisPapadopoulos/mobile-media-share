@@ -16,6 +16,8 @@ public class Footer extends Composite {
 
 	@UiField
 	protected AnchorElement administrator; //<a></a>
+	@UiField
+	protected AnchorElement html5Anchor;
 	
 	protected Footer() {
 		//sto this fernei to header (to div) pou molis eftiaxe
@@ -23,5 +25,6 @@ public class Footer extends Composite {
 		//Gia pragmata pou theloun periexomeno
 		//redirect sto map kai krataei kai tin glwssa
 		administrator.setHref(MOBILE_MEDIA_SHARE_URLS.personalWebSite());
+		html5Anchor.setHref(MOBILE_MEDIA_SHARE_URLS.html5LogoAnchor());
 	}
 }

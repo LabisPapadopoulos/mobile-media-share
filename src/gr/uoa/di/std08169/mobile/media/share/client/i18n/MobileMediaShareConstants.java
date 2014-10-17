@@ -25,6 +25,9 @@ public interface MobileMediaShareConstants extends Constants {
 	@DefaultStringValue("Are you sure you want to delete this media?")
 	public String areYouSureYouWantToDeleteThisMedia();
 	
+	@DefaultStringValue("Available on the Play Store")
+	public String availableOnThePlayStore();
+	
 	@DefaultStringValue("Cancel")
 	public String cancel();
 	
@@ -100,6 +103,9 @@ public interface MobileMediaShareConstants extends Constants {
 	@DefaultStringValue("Forgot Password?")
 	public String forgotPassword_(); //logw periergou xarakthra (?)
 	
+	@DefaultStringValue("HTML5 Powered with CSS3 / Styling, Multimedia, and Semantics")
+	public String html5PoweredWithCss3();
+	
 	@DefaultStringValue("⇥")
 	public String last();
 	
@@ -132,6 +138,9 @@ public interface MobileMediaShareConstants extends Constants {
 	
 	@DefaultStringValue("Mobile Media Share")
 	public String mobileMediaShare();
+	
+	@DefaultStringValue("Mobile Media Share Android Application")
+	public String mobileMediaShareAndroidApplication();
 	
 	@DefaultStringValue("My Account")
 	public String myAccount();

@@ -4,16 +4,12 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.content.res.TypedArray;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -24,11 +20,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.webkit.MimeTypeMap;
-import android.widget.AdapterView;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -46,7 +38,6 @@ import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
@@ -56,12 +47,10 @@ import gr.uoa.di.std08169.mobile.media.share.android.http.HttpClient;
 import gr.uoa.di.std08169.mobile.media.share.android.http.PostAsyncTask;
 import gr.uoa.di.std08169.mobile.media.share.android.media.Media;
 import gr.uoa.di.std08169.mobile.media.share.android.media.MediaType;
-import gr.uoa.di.std08169.mobile.media.share.android.slider_menu.ActionBarItem;
-import gr.uoa.di.std08169.mobile.media.share.android.slider_menu.ActionBarListAdapter;
 import gr.uoa.di.std08169.mobile.media.share.android.user.User;
 import gr.uoa.di.std08169.mobile.media.share.android.user.UserStatus;
 
-public abstract class MobileMediaShareActivity extends ActionBarActivity /* implements AdapterView.OnItemSelectedListener */ {
+public abstract class MobileMediaShareActivity extends ActionBarActivity {
     public static final Locale GREEK = new Locale("el");
     protected static final String APPLICATION_FORM_URL_ENCODED = "application/x-www-form-urlencoded";
     protected static final String UTF_8 = "UTF-8";
@@ -278,7 +267,6 @@ public abstract class MobileMediaShareActivity extends ActionBarActivity /* impl
         super.onCreate(savedInstanceState);
         //Orismos locale prin ftiaxtei to grafiko, gia tis periptwseis allaghs orientation
         initLocale();
-//        initActionBar();
         currentUser = retrieveUser();
     }
 
@@ -459,122 +447,4 @@ public abstract class MobileMediaShareActivity extends ActionBarActivity /* impl
         startActivity(intent);
         finish();
     }
-
-//    // slide menu items
-//    private String[] actionBarMenuTitles;
-//    private ActionBar actionBar;
-//    private TypedArray navMenuIcons;
-//    private ArrayList<ActionBarItem> actionBarItems;
-//    private ActionBarListAdapter adapter;
-//    protected Spinner spinner;
-//
-//    private void initActionBar() {
-//        actionBar = getActionBar();
-//        actionBar.setCustomView(R.layout.actionbar_item);
-//        actionBar.setDisplayShowTitleEnabled(false);
-//        actionBar.setDisplayShowCustomEnabled(true);
-//        actionBar.setDisplayUseLogoEnabled(false);
-//        actionBar.setDisplayShowHomeEnabled(false);
-//        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#303030")));
-//        ((TextView) findViewById(R.id.actionBarTitle)).setText(getResources().getString(getActionBarTitle(this.getClass().getName())));
-//
-//        // load slide menu items
-//        actionBarMenuTitles = getResources().getStringArray(R.array.action_bar_items);
-//        // nav drawer icons from resources
-//        navMenuIcons = getResources().obtainTypedArray(R.array.action_bar_icons);
-//
-//        actionBarItems = new ArrayList<ActionBarItem>();
-//        // adding nav drawer items to array
-//        actionBarItems.add(new ActionBarItem(actionBarMenuTitles[0], navMenuIcons.getResourceId(0, -1)));
-//        // Map
-//        actionBarItems.add(new ActionBarItem(actionBarMenuTitles[1], navMenuIcons.getResourceId(1, -1)));
-//        // List
-//        actionBarItems.add(new ActionBarItem(actionBarMenuTitles[2], navMenuIcons.getResourceId(2, -1)));
-//        // New Photo
-//        actionBarItems.add(new ActionBarItem(actionBarMenuTitles[3], navMenuIcons.getResourceId(3, -1)));
-//        // New Video
-//        actionBarItems.add(new ActionBarItem(actionBarMenuTitles[4], navMenuIcons.getResourceId(4, -1)));
-//        // Upload
-//        actionBarItems.add(new ActionBarItem(actionBarMenuTitles[5], navMenuIcons.getResourceId(5, -1)));
-//        // MyAccount
-//        actionBarItems.add(new ActionBarItem(actionBarMenuTitles[6], navMenuIcons.getResourceId(6, -1)));
-//        // Logout
-//        actionBarItems.add(new ActionBarItem(actionBarMenuTitles[7], navMenuIcons.getResourceId(7, -1)));
-//
-//        // Recycle the typed array
-//        navMenuIcons.recycle();
-//
-//        adapter = new ActionBarListAdapter(getApplicationContext(), actionBarItems);
-//        spinner = (Spinner) findViewById(R.id.spinner);
-//        spinner.setAdapter(adapter);
-//        spinner.setOnItemSelectedListener(this);
-//    }
-//
-//    private int getActionBarTitle(final String className) {
-//        if (className.equals(EditMedia.class.getName())) {
-//            return R.string.editMedia;
-//        } else if (className.equals(List.class.getName())) {
-//            return R.string.list;
-//        } else if (className.equals(MainMenu.class.getName())) {
-//            return R.string.menu;
-//        } else if (className.equals(Map.class.getName())) {
-//            return R.string.map;
-//        } else if (className.equals(MyAccount.class.getName())) {
-//            return R.string.myAccount;
-//        } else if (className.equals(NewPhoto.class.getName())) {
-//            return R.string.newPhoto;
-//        } else if (className.equals(NewVideo.class.getName())) {
-//            return R.string.newVideo;
-//        } else if (className.equals(Upload.class.getName())) {
-//            return R.string.upload;
-//        } else if (className.equals(ViewMedia.class.getName())) {
-//            return R.string.viewMedia;
-//        }
-//        return 0;
-//    }
-//
-//    //OnItemSelectedListener
-//    @Override
-//    public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-//        Toast.makeText(this, "Selected " + position, Toast.LENGTH_SHORT).show();
-//        if(position != 0)
-//            displayView(position);
-//    }
-//
-//    //OnItemSelectedListener
-//    @Override
-//    public void onNothingSelected(AdapterView<?> adapterView) {}
-//
-//
-//    private void displayView(int position) {
-//        Class<?> clazz = null;
-//        switch (position) {
-//            case 1: //Map
-//                clazz = Map.class;
-//                break;
-//            case 2: //List
-//                clazz = List.class;
-//                break;
-//            case 3: //New Photo
-//                clazz = NewPhoto.class;
-//                break;
-//            case 4: //New Video
-//                clazz = NewVideo.class;
-//                break;
-//            case 5: //Upload
-//                clazz = Upload.class;
-//                break;
-//            case 6: //MyAccount
-//                clazz = MyAccount.class;
-//                break;
-//            default:
-//                finish();
-//                break;
-//        }
-//        if (clazz != null) {
-//            final Intent activityIntent = new Intent(getApplicationContext(), clazz);
-//            activityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//            startActivity(activityIntent);
-//        }
-//    }
 }

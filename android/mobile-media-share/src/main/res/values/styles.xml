@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <style name="mobileMediaShare" parent="Theme.AppCompat.Light.DarkActionBar"></style>
+    <color name="selectedListItem">#ff00ddff</color> <!-- #ff33b5e5,  #DFF2FF -->
 </resources>

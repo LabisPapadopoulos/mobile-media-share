@@ -34,6 +34,7 @@ public class Login extends ActionBarActivity implements View.OnClickListener, Te
     private Button cancel;
     private TextView newUser;
     private TextView forgotPassword;
+    private TextView copyright;
 
     @Override
     public void afterTextChanged(final Editable editable) {
@@ -75,6 +76,10 @@ public class Login extends ActionBarActivity implements View.OnClickListener, Te
             intent.setData(Uri.parse(String.format(getResources().getString(R.string.forgotPasswordUrl),
                     getResources().getString(R.string.secureBaseUrl))));
             startActivity(intent);
+        } else if (view == copyright) {
+            final Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(getResources().getString(R.string.copyrightUrl)));
+            startActivity(intent);
         }
     }
 
@@ -90,6 +95,7 @@ public class Login extends ActionBarActivity implements View.OnClickListener, Te
         cancel = (Button) findViewById(R.id.cancel);
         newUser = (TextView) findViewById(R.id.newUser);
         forgotPassword = (TextView) findViewById(R.id.forgotPassword);
+        copyright = (TextView) findViewById(R.id.copyright);
         email.addTextChangedListener(this);
         password.addTextChangedListener(this);
         ok.setOnClickListener(this);
@@ -97,6 +103,7 @@ public class Login extends ActionBarActivity implements View.OnClickListener, Te
         cancel.setOnClickListener(this);
         newUser.setOnClickListener(this);
         forgotPassword.setOnClickListener(this);
+        copyright.setOnClickListener(this);
         ok.setEnabled(false);
         reset.setEnabled(false);
     }
